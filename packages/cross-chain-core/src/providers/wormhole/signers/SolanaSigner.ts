@@ -23,9 +23,9 @@ import {
 
 import { Connection } from "@solana/web3.js";
 import { Network } from "@wormhole-foundation/sdk";
-import { AdapterWallet } from "@aptos-labs/wallet-adapter-core";
+import { AdapterWallet } from "@movement-labs/wallet-adapter-core";
 import { CrossChainCore } from "../../../CrossChainCore";
-import { SolanaDerivedWallet } from "@aptos-labs/derived-wallet-solana";
+import { SolanaDerivedWallet } from "@movement-labs/derived-wallet-solana";
 
 export type SolanaRpcProvider = "triton" | "helius" | "ankr" | "unknown";
 

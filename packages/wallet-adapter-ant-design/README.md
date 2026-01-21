@@ -1,4 +1,4 @@
-# Aptos Wallet Adapter Selector Ant Design
+# Movement Wallet Adapter Selector Ant Design
 
 Package for wallet selector modal using [Ant Design](https://ant.design/). Includes a `wallet connect` button when clicked, opens up a `wallet select modal`.
 
@@ -6,10 +6,10 @@ If wallet is already connected, the button would display the connected account a
 
 ### Usage
 
-Make sure you have [@aptos-labs/wallet-adapter-react](../wallet-adapter-react/README.md) installed
+Make sure you have [@movement-labs/wallet-adapter-react](../wallet-adapter-react/README.md) installed
 
 ```
-npm install @aptos-labs/wallet-adapter-ant-design
+npm install @movement-labs/wallet-adapter-ant-design
 ```
 
 on `index.tsx` / `_app.tsx` import the `ant-design` package `.css` file as
@@ -18,13 +18,13 @@ on `index.tsx` / `_app.tsx` import the `ant-design` package `.css` file as
 // If you use a local css file in your app, import it before the package's file as order matters
 import "./my-style-file.css";
 
-import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
+import "@movement-labs/wallet-adapter-ant-design/dist/index.css";
 ```
 
 On the page you want to include the `wallet connect` button, import the `WalletSelector` module.
 
 ```
-import { WalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
+import { WalletSelector } from "@movement-labs/wallet-adapter-ant-design";
 ...
 return (
   <WalletSelector />

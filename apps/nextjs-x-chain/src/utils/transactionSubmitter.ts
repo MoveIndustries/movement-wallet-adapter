@@ -1,8 +1,8 @@
 import {
   GasStationClient,
   GasStationTransactionSubmitter,
-} from "@aptos-labs/gas-station-client";
-import { Network } from "@aptos-labs/ts-sdk";
+} from "@movement-labs/gas-station-client";
+import { Network } from "@movement-labs/ts-sdk";
 
 const network = Network.TESTNET;
 const gasStationClient = new GasStationTransactionSubmitter(

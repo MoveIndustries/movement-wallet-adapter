@@ -3,9 +3,9 @@ import {
   mapUserResponse,
   StructuredMessage,
   StructuredMessageInput,
-} from "@aptos-labs/derived-wallet-base";
-import { Ed25519Signature } from "@aptos-labs/ts-sdk";
-import { AptosSignMessageOutput } from "@aptos-labs/wallet-standard";
+} from "@movement-labs/derived-wallet-base";
+import { Ed25519Signature } from "@movement-labs/ts-sdk";
+import { MovementSignMessageOutput } from "@movement-labs/wallet-standard";
 import { StandardWalletAdapter as SolanaWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base";
 import { wrapSolanaUserResponse } from "./shared";
 import { SolanaDerivedPublicKey } from "./SolanaDerivedPublicKey";
@@ -15,15 +15,15 @@ export interface StructuredMessageInputWithChainId
   chainId?: number;
 }
 
-export interface SignAptosMessageWithSolanaInput {
+export interface SignMovementMessageWithSolanaInput {
   solanaWallet: SolanaWalletAdapter;
   authenticationFunction: string;
   messageInput: StructuredMessageInputWithChainId;
   domain: string;
 }
 
-export async function signAptosMessageWithSolana(
-  input: SignAptosMessageWithSolanaInput,
+export async function signMovementMessageWithSolana(
+  input: SignMovementMessageWithSolanaInput,
 ) {
   const { solanaWallet, authenticationFunction, messageInput, domain } = input;
 
@@ -36,7 +36,7 @@ export async function signAptosMessageWithSolana(
     throw new Error("Account not connected");
   }
 
-  const aptosPublicKey = new SolanaDerivedPublicKey({
+  const movementPublicKey = new SolanaDerivedPublicKey({
     domain,
     solanaPublicKey,
     authenticationFunction,
@@ -44,13 +44,13 @@ export async function signAptosMessageWithSolana(
 
   const { message, nonce, chainId, ...flags } = messageInput;
 
-  const aptosAddress = flags.address
-    ? aptosPublicKey.authKey().derivedAddress()
+  const movementAddress = flags.address
+    ? movementPublicKey.authKey().derivedAddress()
     : undefined;
 
   const application = flags.application ? window.location.origin : undefined;
   const structuredMessage: StructuredMessage = {
-    address: aptosAddress?.toString(),
+    address: movementAddress?.toString(),
     application,
     chainId,
     message,
@@ -63,13 +63,13 @@ export async function signAptosMessageWithSolana(
     solanaWallet.signMessage(signingMessage),
   );
 
-  return mapUserResponse(response, (output): AptosSignMessageOutput => {
+  return mapUserResponse(response, (output): MovementSignMessageOutput => {
     // Solana signMessage standard always returns a Ed25519 signature type
     const signature = new Ed25519Signature(output);
     const fullMessage = new TextDecoder().decode(signingMessage);
 
     return {
-      prefix: "APTOS",
+      prefix: "MOVEMENT",
       fullMessage,
       message,
       nonce,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AdapterWallet } from "@aptos-labs/wallet-adapter-core";
+import { AdapterWallet } from "@movement-labs/wallet-adapter-core";
 interface WalletItemProps {
   name: AdapterWallet["name"];
 }

@@ -1,10 +1,10 @@
 import {
   AccountAddressInput,
   Aptos,
-  AptosConfig,
+  MovementConfig,
   InputViewFunctionJsonData,
   Network,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 import { queryOptions } from "@tanstack/react-query";
 
 export function getAptBalanceQueryOptions({
@@ -23,7 +23,7 @@ export function getAptBalanceQueryOptions({
       "aptBalance",
     ],
     queryFn: async () => {
-      const aptos = new Aptos(new AptosConfig({ network: network }));
+      const aptos = new Aptos(new MovementConfig({ network: network }));
 
       const payload: InputViewFunctionJsonData = {
         function: "0x1::coin::balance",

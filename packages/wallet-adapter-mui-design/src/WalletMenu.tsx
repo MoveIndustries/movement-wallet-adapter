@@ -1,4 +1,4 @@
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@movement-labs/wallet-adapter-react";
 import {
   List,
   ListItem,

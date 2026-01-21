@@ -1,14 +1,14 @@
-import { AnyPublicKey as AptosAnyPublicKey } from "@aptos-labs/wallet-adapter-core";
-import { AccountAddress } from "@aptos-labs/ts-sdk";
+import { AnyPublicKey as AptosAnyPublicKey } from "@movement-labs/wallet-adapter-core";
+import { AccountAddress } from "@movement-labs/ts-sdk";
 
-import { AccountInfo } from "@aptos-labs/wallet-adapter-core";
+import { AccountInfo } from "@movement-labs/wallet-adapter-core";
 
-import { EIP1193DerivedWallet } from "@aptos-labs/derived-wallet-ethereum";
+import { EIP1193DerivedWallet } from "@movement-labs/derived-wallet-ethereum";
 import {
   SolanaDerivedWallet,
   SolanaPublicKey,
-} from "@aptos-labs/derived-wallet-solana";
-import { AdapterWallet } from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/derived-wallet-solana";
+import { AdapterWallet } from "@movement-labs/wallet-adapter-react";
 
 // Define the type for the origin wallet details
 export type OriginWalletDetails =

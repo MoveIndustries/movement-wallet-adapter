@@ -1,8 +1,8 @@
 "use client";
 
-import { CrossChainCore } from "@aptos-labs/cross-chain-core";
-import { Chain } from "@aptos-labs/cross-chain-core";
-import { Network } from "@aptos-labs/ts-sdk";
+import { CrossChainCore } from "@movement-labs/cross-chain-core";
+import { Chain } from "@movement-labs/cross-chain-core";
+import { Network } from "@movement-labs/ts-sdk";
 import {
   createContext,
   useContext,
@@ -40,7 +40,7 @@ export function USDCBalanceProvider({
 }: USDCBalanceProviderProps) {
   // Initialize crossChainCore with the prop
   const crossChainCore = new CrossChainCore({
-    dappConfig: { aptosNetwork: dappNetwork },
+    dappConfig: { movementNetwork: dappNetwork },
   });
 
   const [aptosBalance, setAptosBalance] = useState<string | undefined>(
@@ -74,7 +74,7 @@ export function USDCBalanceProvider({
     try {
       const balance = await crossChainCore.getWalletUSDCBalance(
         address,
-        "Aptos",
+        "Movement",
       );
       setAptosBalance(balance);
     } catch (error) {
@@ -142,7 +142,7 @@ export function USDCBalanceProvider({
             try {
               const balance = await crossChainCore.getWalletUSDCBalance(
                 lastAptosAddress,
-                "Aptos",
+                "Movement",
               );
 
               // Check if balance actually changed (indicating transaction was processed)

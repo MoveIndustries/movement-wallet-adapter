@@ -1,7 +1,7 @@
 import {
   DerivableAbstractPublicKey,
   mapUserResponse,
-} from "@aptos-labs/derived-wallet-base";
+} from "@movement-labs/derived-wallet-base";
 import {
   AbstractedAccount,
   AccountAuthenticator,
@@ -10,10 +10,10 @@ import {
   generateSigningMessageForTransaction,
   hashValues,
   Serializer,
-} from "@aptos-labs/ts-sdk";
-import { UserResponse } from "@aptos-labs/wallet-standard";
+} from "@movement-labs/ts-sdk";
+import { UserResponse } from "@movement-labs/wallet-standard";
 import { BrowserProvider, Eip1193Provider } from "ethers";
-import { createSiweEnvelopeForAptosTransaction } from "./createSiweEnvelope";
+import { createSiweEnvelopeForMovementTransaction } from "./createSiweEnvelope";
 import { EIP1193SiweSignature } from "./EIP1193DerivedSignature";
 import { EthereumAddress, wrapEthersUserResponse } from "./shared";
 
@@ -23,15 +23,15 @@ import { EthereumAddress, wrapEthersUserResponse } from "./shared";
  * changes in the future if needed.
  */
 export const SIGNATURE_TYPE = 1;
-export interface SignAptosTransactionWithEthereumInput {
+export interface SignMovementTransactionWithEthereumInput {
   eip1193Provider: Eip1193Provider | BrowserProvider;
   ethereumAddress?: EthereumAddress;
   authenticationFunction: string;
   rawTransaction: AnyRawTransaction;
 }
 
-export async function signAptosTransactionWithEthereum(
-  input: SignAptosTransactionWithEthereumInput,
+export async function signMovementTransactionWithEthereum(
+  input: SignMovementTransactionWithEthereumInput,
 ): Promise<UserResponse<AccountAuthenticator>> {
   const { authenticationFunction, rawTransaction } = input;
   const eip1193Provider =
@@ -60,7 +60,7 @@ export async function signAptosTransactionWithEthereum(
   // We need to provide `issuedAt` externally so that we can match it with the signature
   const issuedAt = new Date();
 
-  const siweMessage = createSiweEnvelopeForAptosTransaction({
+  const siweMessage = createSiweEnvelopeForMovementTransaction({
     ethereumAddress,
     chainId,
     rawTransaction,

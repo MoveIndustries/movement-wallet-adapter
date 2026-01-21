@@ -1,4 +1,4 @@
-import { NetworkInfo, isAptosNetwork } from "@aptos-labs/wallet-adapter-core";
+import { NetworkInfo, isMovementNetwork } from "@movement-labs/wallet-adapter-core";
 
 export interface TransactionHashProps {
   hash: string;
@@ -6,8 +6,8 @@ export interface TransactionHashProps {
 }
 
 export function TransactionHash({ hash, network }: TransactionHashProps) {
-  if (isAptosNetwork(network)) {
-    const explorerLink = `https://explorer.aptoslabs.com/txn/${hash}${network?.name ? `?network=${network.name}` : ""}`;
+  if (isMovementNetwork(network)) {
+    const explorerLink = `https://explorer.movementlabs.xyz/txn/${hash}${network?.name ? `?network=${network.name}` : ""}`;
     return (
       <>
         View on Explorer:{" "}

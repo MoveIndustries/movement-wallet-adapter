@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  AptosWalletAdapterProvider,
+  MovementWalletAdapterProvider,
   DappConfig,
-} from "@aptos-labs/wallet-adapter-react";
-import { setupAutomaticEthereumWalletDerivation } from "@aptos-labs/derived-wallet-ethereum";
-import { setupAutomaticSolanaWalletDerivation } from "@aptos-labs/derived-wallet-solana";
+} from "@movement-labs/wallet-adapter-react";
+import { setupAutomaticEthereumWalletDerivation } from "@movement-labs/derived-wallet-ethereum";
+import { setupAutomaticSolanaWalletDerivation } from "@movement-labs/derived-wallet-solana";
 import { PropsWithChildren } from "react";
-import { Network } from "@aptos-labs/ts-sdk";
+import { Network } from "@movement-labs/ts-sdk";
 import { useClaimSecretKey } from "@/hooks/useClaimSecretKey";
 import { useAutoConnect } from "./AutoConnectProvider";
 import { useToast } from "./ui/use-toast";
@@ -41,11 +41,11 @@ export const WalletProvider = ({ children }: PropsWithChildren) => {
 
   const dappConfig: DappConfig = {
     network: Network.TESTNET,
-    aptosApiKeys: {
-      testnet: process.env.NEXT_PUBLIC_APTOS_API_KEY_TESNET,
-      devnet: process.env.NEXT_PUBLIC_APTOS_API_KEY_DEVNET,
+    movementApiKeys: {
+      testnet: process.env.NEXT_PUBLIC_MOVEMENT_API_KEY_TESNET,
+      devnet: process.env.NEXT_PUBLIC_MOVEMENT_API_KEY_DEVNET,
     },
-    aptosConnect: {
+    movementConnect: {
       claimSecretKey,
       dappId: "57fa42a9-29c6-4f1e-939c-4eefa36d9ff5",
       dappImageURI,
@@ -56,7 +56,7 @@ export const WalletProvider = ({ children }: PropsWithChildren) => {
   };
 
   return (
-    <AptosWalletAdapterProvider
+    <MovementWalletAdapterProvider
       key={useCustomSubmitter ? "custom" : "default"}
       autoConnect={autoConnect}
       dappConfig={dappConfig}
@@ -69,6 +69,6 @@ export const WalletProvider = ({ children }: PropsWithChildren) => {
       }}
     >
       {children}
-    </AptosWalletAdapterProvider>
+    </MovementWalletAdapterProvider>
   );
 };

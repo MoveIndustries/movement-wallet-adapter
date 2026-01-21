@@ -3,26 +3,26 @@ import {
   mapUserResponse,
   StructuredMessage,
   StructuredMessageInput,
-} from "@aptos-labs/derived-wallet-base";
+} from "@movement-labs/derived-wallet-base";
 import {
-  AptosSignMessageOutput,
+  MovementSignMessageOutput,
   UserResponse,
-} from "@aptos-labs/wallet-standard";
+} from "@movement-labs/wallet-standard";
 import { BrowserProvider, Eip1193Provider } from "ethers";
 import { EIP1193DerivedPublicKey } from "./EIP1193DerivedPublicKey";
 import { EIP1193PersonalSignature } from "./EIP1193DerivedSignature";
 import { EthereumAddress, wrapEthersUserResponse } from "./shared";
 
-export interface SignAptosMessageWithEthereumInput {
+export interface SignMovementMessageWithEthereumInput {
   eip1193Provider: Eip1193Provider | BrowserProvider;
   ethereumAddress?: EthereumAddress;
   authenticationFunction: string;
   messageInput: StructuredMessageInput;
 }
 
-export async function signAptosMessageWithEthereum(
-  input: SignAptosMessageWithEthereumInput,
-): Promise<UserResponse<AptosSignMessageOutput>> {
+export async function signMovementMessageWithEthereum(
+  input: SignMovementMessageWithEthereumInput,
+): Promise<UserResponse<MovementSignMessageOutput>> {
   const { authenticationFunction, messageInput } = input;
   const eip1193Provider =
     input.eip1193Provider instanceof BrowserProvider
@@ -38,19 +38,19 @@ export async function signAptosMessageWithEthereum(
   }
   const ethereumAddress = ethereumAccount.address as EthereumAddress;
 
-  const aptosPublicKey = new EIP1193DerivedPublicKey({
+  const movementPublicKey = new EIP1193DerivedPublicKey({
     domain: window.location.origin,
     ethereumAddress,
     authenticationFunction,
   });
 
   const { message, nonce, chainId, ...flags } = messageInput;
-  const aptosAddress = flags.address
-    ? aptosPublicKey.authKey().derivedAddress()
+  const movementAddress = flags.address
+    ? movementPublicKey.authKey().derivedAddress()
     : undefined;
   const application = flags.application ? window.location.origin : undefined;
   const structuredMessage: StructuredMessage = {
-    address: aptosAddress?.toString(),
+    address: movementAddress?.toString(),
     application,
     chainId,
     message,
@@ -67,7 +67,7 @@ export async function signAptosMessageWithEthereum(
     const signature = new EIP1193PersonalSignature(siweSignature);
     const fullMessage = new TextDecoder().decode(signingMessage);
     return {
-      prefix: "APTOS",
+      prefix: "MOVEMENT",
       fullMessage,
       message,
       nonce,

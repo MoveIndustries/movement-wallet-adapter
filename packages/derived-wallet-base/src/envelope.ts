@@ -3,7 +3,7 @@ import {
   NetworkToChainId,
   TransactionPayload,
   TransactionPayloadEntryFunction,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 import { StructuredMessage } from "./StructuredMessage";
 
 /**
@@ -34,7 +34,7 @@ export function getEntryFunctionName(payload: TransactionPayload) {
 }
 
 /**
- * Create a human-readable statement for the specified Aptos message,
+ * Create a human-readable statement for the specified Movement message,
  * suitable to be included into a "Sign in with ..." envelope
  */
 export function createStructuredMessageStatement({
@@ -44,14 +44,14 @@ export function createStructuredMessageStatement({
   // `statement` does not allow newlines, so we escape them
   const escapedMessage = message.replaceAll("\n", "\\n");
 
-  const onAptosChainSuffix = chainId ? ` (${getChainName(chainId)})` : "";
-  const onAptosChain = ` on Aptos blockchain${onAptosChainSuffix}`;
+  const onMovementChainSuffix = chainId ? ` (${getChainName(chainId)})` : "";
+  const onMovementChain = ` on Movement blockchain${onMovementChainSuffix}`;
 
-  return `To sign the following message${onAptosChain}: ${escapedMessage}`;
+  return `To sign the following message${onMovementChain}: ${escapedMessage}`;
 }
 
 /**
- * Create a human-readable statement for the specified Aptos transaction,
+ * Create a human-readable statement for the specified Movement transaction,
  * suitable to be included into a "Sign in with ..." envelope.
  */
 export function createTransactionStatement(rawTransaction: AnyRawTransaction) {
@@ -64,7 +64,7 @@ export function createTransactionStatement(rawTransaction: AnyRawTransaction) {
 
   const chainId = rawTransaction.rawTransaction.chain_id.chainId;
   const chainName = getChainName(chainId);
-  const onAptosChain = ` on Aptos blockchain (${chainName})`;
+  const onMovementChain = ` on Movement blockchain (${chainName})`;
 
-  return `Please confirm you explicitly initiated this request from ${window.location.host}. You are approving to execute transaction${humanReadableEntryFunction}${onAptosChain}.`;
+  return `Please confirm you explicitly initiated this request from ${window.location.host}. You are approving to execute transaction${humanReadableEntryFunction}${onMovementChain}.`;
 }

@@ -1,5 +1,5 @@
 import { WalletReadyState } from "./constants";
-import { AptosStandardSupportedWallet } from "./utils/types";
+import { MovementStandardSupportedWallet } from "./utils/types";
 
 /**
  * Registry of AIP-62 wallet standard supported wallets.
@@ -15,7 +15,7 @@ import { AptosStandardSupportedWallet } from "./utils/types";
  * @param deeplinkProvider optional - An optional deeplink provider for the wallet. If the wallet is not installed, we can redirect the user to the wallet's deeplink provider
  * @example "https://myWallet.app/explore?link="
  */
-export const aptosStandardSupportedWalletList: Array<AptosStandardSupportedWallet> =
+export const movementStandardSupportedWalletList: Array<MovementStandardSupportedWallet> =
   [
     {
       name: "OKX Wallet",
@@ -78,7 +78,7 @@ export const aptosStandardSupportedWalletList: Array<AptosStandardSupportedWalle
     },
   ];
 
-export const crossChainStandardSupportedWalletList: Array<AptosStandardSupportedWallet> =
+export const crossChainStandardSupportedWalletList: Array<MovementStandardSupportedWallet> =
   [
     {
       name: "Phantom (Solana)",

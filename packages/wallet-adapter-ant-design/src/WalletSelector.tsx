@@ -5,18 +5,18 @@ import {
   DisconnectOutlined,
 } from "@ant-design/icons";
 import {
-  AboutAptosConnect,
-  AboutAptosConnectEducationScreen,
+  AboutMovementConnect,
+  AboutMovementConnectEducationScreen,
   AdapterNotDetectedWallet,
   AdapterWallet,
-  AptosPrivacyPolicy,
+  MovementPrivacyPolicy,
   WalletItem,
   WalletSortingOptions,
   groupAndSortWallets,
   isInstallRequired,
   truncateAddress,
   useWallet,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/wallet-adapter-react";
 import {
   Button,
   Collapse,
@@ -62,13 +62,13 @@ export function WalletSelector({
     notDetectedWallets = [],
   } = useWallet();
 
-  const { aptosConnectWallets, availableWallets, installableWallets } =
+  const { movementConnectWallets, availableWallets, installableWallets } =
     groupAndSortWallets(
       [...wallets, ...notDetectedWallets],
       walletSortingOptions,
     );
 
-  const hasAptosConnectWallets = !!aptosConnectWallets.length;
+  const hasMovementConnectWallets = !!movementConnectWallets.length;
 
   const onWalletButtonClick = () => {
     if (connected) {
@@ -125,12 +125,12 @@ export function WalletSelector({
     className: "wallet-selector-modal",
   };
 
-  const renderEducationScreens = (screen: AboutAptosConnectEducationScreen) => (
+  const renderEducationScreens = (screen: AboutMovementConnectEducationScreen) => (
     <Modal
       {...modalProps}
       afterClose={screen.cancel}
       title={
-        <div className="about-aptos-connect-header">
+        <div className="about-movement-connect-header">
           <Button
             type="text"
             icon={<ArrowLeftOutlined />}
@@ -140,14 +140,14 @@ export function WalletSelector({
         </div>
       }
     >
-      <div className="about-aptos-connect-graphic-wrapper">
+      <div className="about-movement-connect-graphic-wrapper">
         <screen.Graphic />
       </div>
-      <div className="about-aptos-connect-text-wrapper">
-        <screen.Title className="about-aptos-connect-title" />
-        <screen.Description className="about-aptos-connect-description" />
+      <div className="about-movement-connect-text-wrapper">
+        <screen.Title className="about-movement-connect-title" />
+        <screen.Description className="about-movement-connect-description" />
       </div>
-      <div className="about-aptos-connect-footer-wrapper">
+      <div className="about-movement-connect-footer-wrapper">
         <Button
           type="text"
           style={{ justifySelf: "start" }}
@@ -155,11 +155,11 @@ export function WalletSelector({
         >
           Back
         </Button>
-        <div className="about-aptos-connect-screen-indicators-wrapper">
+        <div className="about-movement-connect-screen-indicators-wrapper">
           {screen.screenIndicators.map((ScreenIndicator, i) => (
             <ScreenIndicator
               key={i}
-              className="about-aptos-connect-screen-indicator"
+              className="about-movement-connect-screen-indicator"
             >
               <div />
             </ScreenIndicator>
@@ -189,12 +189,12 @@ export function WalletSelector({
           Connect Wallet
         </Button>
       )}
-      <AboutAptosConnect renderEducationScreen={renderEducationScreens}>
+      <AboutMovementConnect renderEducationScreen={renderEducationScreens}>
         <Modal
           {...modalProps}
           title={
             <div className="wallet-modal-title">
-              {hasAptosConnectWallets ? (
+              {hasMovementConnectWallets ? (
                 <>
                   <span>Log in or sign up</span>
                   <span>with Social + Petra Web</span>
@@ -207,30 +207,30 @@ export function WalletSelector({
         >
           {!connected && (
             <>
-              {hasAptosConnectWallets && (
+              {hasMovementConnectWallets && (
                 <Flex vertical gap={12}>
-                  {aptosConnectWallets.map((wallet) => (
-                    <AptosConnectWalletRow
+                  {movementConnectWallets.map((wallet) => (
+                    <MovementConnectWalletRow
                       key={wallet.name}
                       wallet={wallet}
                       onConnect={closeModal}
                     />
                   ))}
-                  <p className="about-aptos-connect-trigger-wrapper">
+                  <p className="about-movement-connect-trigger-wrapper">
                     Learn more about{" "}
-                    <AboutAptosConnect.Trigger className="about-aptos-connect-trigger">
+                    <AboutMovementConnect.Trigger className="about-movement-connect-trigger">
                       Petra Web
                       <ArrowRightOutlined />
-                    </AboutAptosConnect.Trigger>
+                    </AboutMovementConnect.Trigger>
                   </p>
-                  <AptosPrivacyPolicy className="aptos-connect-privacy-policy-wrapper">
-                    <p className="aptos-connect-privacy-policy-text">
-                      <AptosPrivacyPolicy.Disclaimer />{" "}
-                      <AptosPrivacyPolicy.Link className="aptos-connect-privacy-policy-link" />
+                  <MovementPrivacyPolicy className="movement-connect-privacy-policy-wrapper">
+                    <p className="movement-connect-privacy-policy-text">
+                      <MovementPrivacyPolicy.Disclaimer />{" "}
+                      <MovementPrivacyPolicy.Link className="movement-connect-privacy-policy-link" />
                       <span>.</span>
                     </p>
-                    <AptosPrivacyPolicy.PoweredBy className="aptos-connect-powered-by" />
-                  </AptosPrivacyPolicy>
+                    <MovementPrivacyPolicy.PoweredBy className="movement-connect-powered-by" />
+                  </MovementPrivacyPolicy>
                   <Divider>Or</Divider>
                 </Flex>
               )}
@@ -269,7 +269,7 @@ export function WalletSelector({
             </>
           )}
         </Modal>
-      </AboutAptosConnect>
+      </AboutMovementConnect>
     </>
   );
 }
@@ -301,11 +301,11 @@ function WalletRow({ wallet, onConnect }: WalletRowProps) {
   );
 }
 
-function AptosConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
+function MovementConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
   return (
     <WalletItem wallet={wallet} onConnect={onConnect} asChild>
       <WalletItem.ConnectButton asChild>
-        <Button size="large" className="aptos-connect-button">
+        <Button size="large" className="movement-connect-button">
           <WalletItem.Icon className="wallet-selector-icon" />
           <WalletItem.Name />
         </Button>

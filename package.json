@@ -1,5 +1,5 @@
 {
-  "name": "@aptos-labs/wallet-adapter",
+  "name": "@movement-labs/wallet-adapter",
   "version": "0.0.0",
   "private": true,
   "license": "Apache-2.0",
@@ -29,7 +29,7 @@
     "vue-example:build": "pnpm run --filter {apps/nuxt-example} build"
   },
   "devDependencies": {
-    "@aptos-labs/eslint-config-adapter": "workspace:*",
+    "@movement-labs/eslint-config-adapter": "workspace:*",
     "@changesets/cli": "^2.29.7",
     "prettier": "latest",
     "turbo": "latest"

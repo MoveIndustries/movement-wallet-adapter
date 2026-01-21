@@ -1,4 +1,4 @@
-import { aptosClient, isSendableNetwork } from "@/utils";
+import { movementClient, isSendableNetwork } from "@/utils";
 import {
   Account,
   AccountAddress,
@@ -7,8 +7,8 @@ import {
   Ed25519Account,
   parseTypeTag,
   U64,
-} from "@aptos-labs/ts-sdk";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/ts-sdk";
+import { useWallet } from "@movement-labs/wallet-adapter-react";
 import { useState } from "react";
 import { TransactionHash } from "../TransactionHash";
 import { Button } from "../ui/button";
@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "../ui/use-toast";
 import { LabelValueGrid } from "../LabelValueGrid";
 
-const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 /*
 script {
     fun main(signer_1: &signer, _signer_2: &signer, to: address, amount: u64){
@@ -54,7 +54,7 @@ export function MultiAgent() {
     const secondarySigner = Account.generate();
     setSecondarySignerAccount(secondarySigner);
 
-    const transactionToSign = await aptosClient(
+    const transactionToSign = await movementClient(
       network,
     ).transaction.build.multiAgent({
       sender: account.address,
@@ -92,7 +92,7 @@ export function MultiAgent() {
       if (!secondarySignerAccount) {
         throw new Error("No secondarySignerAccount");
       }
-      const authenticator = aptosClient(network).sign({
+      const authenticator = movementClient(network).sign({
         signer: secondarySignerAccount,
         transaction: transactionToSubmit,
       });

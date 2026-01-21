@@ -2,17 +2,17 @@ import {
   Account,
   AccountAddress,
   Aptos,
-  AptosConfig,
+  MovementConfig,
   Ed25519PrivateKey,
   Network,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo } from "react";
 
 const claimSecretKeyStorageKey = "@wallet-adapter-example-dapp/claimSecretKey";
 
-const config = new AptosConfig({ network: Network.TESTNET });
+const config = new MovementConfig({ network: Network.TESTNET });
 const aptos = new Aptos(config);
 
 function getPersistedClaimSecretKey() {

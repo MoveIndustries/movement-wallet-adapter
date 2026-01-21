@@ -2,15 +2,15 @@
 
 # Wallet Adapter React Provider
 
-A react provider wrapper for the Aptos Wallet Adapter
+A react provider wrapper for the Movement Wallet Adapter
 
 Dapps that want to use the adapter should install this package and other supported wallet packages.
 
 ### Support
 
-The React provider follows the [wallet standard](https://github.com/aptos-labs/wallet-standard/tree/main) and supports the following required functions
+The React provider follows the [wallet standard](https://github.com/movement-labs/wallet-standard/tree/main) and supports the following required functions
 
-##### [Standard required functions](https://github.com/aptos-labs/wallet-standard/blob/main/src/detect.ts#L16)
+##### [Standard required functions](https://github.com/movement-labs/wallet-standard/blob/main/src/detect.ts#L16)
 
 ```
 account
@@ -36,34 +36,34 @@ submitTransaction
 #### Install Dependencies
 
 Install wallet dependencies you want to include in your app.
-To do that, you can look at our [supported wallets list](https://github.com/aptos-labs/aptos-wallet-adapter#supported-wallet-packages). Each wallet is a link to npm package where you can install it from.
+To do that, you can look at our [supported wallets list](https://github.com/movement-labs/movement-wallet-adapter#supported-wallet-packages). Each wallet is a link to npm package where you can install it from.
 
-Next, install the `@aptos-labs/wallet-adapter-react`
+Next, install the `@movement-labs/wallet-adapter-react`
 
 ```cli
-pnpm i @aptos-labs/wallet-adapter-react
+pnpm i @movement-labs/wallet-adapter-react
 ```
 
 using npm
 
 ```cli
-npm i @aptos-labs/wallet-adapter-react
+npm i @movement-labs/wallet-adapter-react
 ```
 
 #### Import dependencies
 
-Import the `AptosWalletAdapterProvider`.
+Import the `MovementWalletAdapterProvider`.
 
 ```tsx
-import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
+import { MovementWalletAdapterProvider } from "@movement-labs/wallet-adapter-react";
 ```
 
 Wrap your app with the Provider, pass it the relevant props.
 
 ```tsx
-import { Network } from "@aptos-labs/ts-sdk";
+import { Network } from "@movement-labs/ts-sdk";
 
-<AptosWalletAdapterProvider
+<MovementWalletAdapterProvider
   autoConnect={true}
   dappConfig={{ network: Network.MAINNET, aptosApiKey: "my-generated-api-key" }}
   onError={(error) => {
@@ -71,7 +71,7 @@ import { Network } from "@aptos-labs/ts-sdk";
   }}
 >
   <App />
-</AptosWalletAdapterProvider>;
+</MovementWalletAdapterProvider>;
 ```
 
 #### Available Provider Props
@@ -84,33 +84,33 @@ import { Network } from "@aptos-labs/ts-sdk";
 - `optInWallets` - the adapter detects and adds AIP-62 standard wallets by default, sometimes you might want to opt-in with specific wallets. This props lets you define the AIP-62 standard wallets you want to support in your dapp.
 
 ```tsx
-<AptosWalletAdapterProvider
+<MovementWalletAdapterProvider
   ...
   optInWallets={["Petra"]}
   ...
 >
   <App />
-</AptosWalletAdapterProvider>
+</MovementWalletAdapterProvider>
 ```
 
 - `disableTelemetry` - A boolean flag to disable the adapter telemetry tool, false by default
 
 ```tsx
-<AptosWalletAdapterProvider
+<MovementWalletAdapterProvider
   ...
   disableTelemetry={true}
   ...
 >
   <App />
-</AptosWalletAdapterProvider>
+</MovementWalletAdapterProvider>
 ```
 
 #### Use Wallet
 
-On any page you want to use the wallet props, import `useWallet` from `@aptos-labs/wallet-adapter-react`
+On any page you want to use the wallet props, import `useWallet` from `@movement-labs/wallet-adapter-react`
 
 ```tsx
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@movement-labs/wallet-adapter-react";
 ```
 
 Then you can use the exported properties
@@ -235,7 +235,7 @@ const onSignAndSubmitBCSTransaction = async () => {
 ```tsx
 const onSignMessage = async () => {
   const payload = {
-    message: "Hello from Aptos Wallet Adapter",
+    message: "Hello from Movement Wallet Adapter",
     nonce: "random_string",
   };
   const response = await signMessage(payload);
@@ -285,7 +285,7 @@ const onSignRawTransaction = async () => {
 ```tsx
 const onSignMessageAndVerify = async () => {
   const payload = {
-    message: "Hello from Aptos Wallet Adapter",
+    message: "Hello from Movement Wallet Adapter",
     nonce: "random_string",
   };
   const response = await signMessageAndVerify(payload);
@@ -303,4 +303,4 @@ The available UI Packages are
 - [shadcn/ui](../../apps/nextjs-example/README.md#use-shadcnui-wallet-selector-for-your-own-app)
 - [MUI](../wallet-adapter-mui-design/)
 
-If you want to create your own wallet selector UI from existing components and styles in your app, `@aptos-labs/wallet-adapter-react` provides a series of headless components and utilities to simplify this process so that you can focus on writing CSS instead of implementing business logic. For more information, check out the [Building Your Own Wallet Selector](./docs/BYO-wallet-selector.md) document.
+If you want to create your own wallet selector UI from existing components and styles in your app, `@movement-labs/wallet-adapter-react` provides a series of headless components and utilities to simplify this process so that you can focus on writing CSS instead of implementing business logic. For more information, check out the [Building Your Own Wallet Selector](./docs/BYO-wallet-selector.md) document.

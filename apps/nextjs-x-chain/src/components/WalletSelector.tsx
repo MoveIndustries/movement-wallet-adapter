@@ -1,20 +1,20 @@
 "use client";
 
 import {
-  APTOS_CONNECT_ACCOUNT_URL,
-  AboutAptosConnect,
-  AboutAptosConnectEducationScreen,
+  MOVEMENT_CONNECT_ACCOUNT_URL,
+  AboutMovementConnect,
+  AboutMovementConnectEducationScreen,
   AdapterNotDetectedWallet,
   AdapterWallet,
-  AptosPrivacyPolicy,
+  MovementPrivacyPolicy,
   WalletItem,
   WalletSortingOptions,
   groupAndSortWallets,
-  isAptosConnectWallet,
+  isMovementConnectWallet,
   isInstallRequired,
   truncateAddress,
   useWallet,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/wallet-adapter-react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -84,10 +84,10 @@ export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
         <DropdownMenuItem onSelect={copyAddress} className="gap-2">
           <Copy className="h-4 w-4" /> Copy address
         </DropdownMenuItem>
-        {wallet && isAptosConnectWallet(wallet) && (
+        {wallet && isMovementConnectWallet(wallet) && (
           <DropdownMenuItem asChild>
             <a
-              href={APTOS_CONNECT_ACCOUNT_URL}
+              href={MOVEMENT_CONNECT_ACCOUNT_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex gap-2"
@@ -121,18 +121,18 @@ function ConnectWalletDialog({
 }: ConnectWalletDialogProps) {
   const { wallets = [], notDetectedWallets = [] } = useWallet();
 
-  const { aptosConnectWallets, availableWallets, installableWallets } =
+  const { movementConnectWallets, availableWallets, installableWallets } =
     groupAndSortWallets(
       [...wallets, ...notDetectedWallets],
       walletSortingOptions,
     );
 
-  const hasAptosConnectWallets = !!aptosConnectWallets.length;
+  const hasMovementConnectWallets = !!movementConnectWallets.length;
 
-  const { evmWallets, solanaWallets, aptosWallets } = availableWallets.reduce<{
+  const { evmWallets, solanaWallets, movementWallets } = availableWallets.reduce<{
     evmWallets: AdapterWallet[];
     solanaWallets: AdapterWallet[];
-    aptosWallets: AdapterWallet[];
+    movementWallets: AdapterWallet[];
   }>(
     (acc, wallet) => {
       if (wallet.name.includes("Ethereum")) {
@@ -140,21 +140,21 @@ function ConnectWalletDialog({
       } else if (wallet.name.includes("Solana")) {
         acc.solanaWallets.push(wallet);
       } else {
-        acc.aptosWallets.push(wallet);
+        acc.movementWallets.push(wallet);
       }
       return acc;
     },
-    { evmWallets: [], solanaWallets: [], aptosWallets: [] },
+    { evmWallets: [], solanaWallets: [], movementWallets: [] },
   );
 
   const {
     evmInstallableWallets,
     solanaInstallableWallets,
-    aptosInstallableWallets,
+    movementInstallableWallets,
   } = installableWallets.reduce<{
     evmInstallableWallets: AdapterNotDetectedWallet[];
     solanaInstallableWallets: AdapterNotDetectedWallet[];
-    aptosInstallableWallets: AdapterNotDetectedWallet[];
+    movementInstallableWallets: AdapterNotDetectedWallet[];
   }>(
     (acc, wallet) => {
       if (wallet.name.includes("Ethereum")) {
@@ -162,23 +162,23 @@ function ConnectWalletDialog({
       } else if (wallet.name.includes("Solana")) {
         acc.solanaInstallableWallets.push(wallet);
       } else {
-        acc.aptosInstallableWallets.push(wallet);
+        acc.movementInstallableWallets.push(wallet);
       }
       return acc;
     },
     {
       evmInstallableWallets: [],
       solanaInstallableWallets: [],
-      aptosInstallableWallets: [],
+      movementInstallableWallets: [],
     },
   );
 
   return (
     <DialogContent className="max-h-screen overflow-auto">
-      <AboutAptosConnect renderEducationScreen={renderEducationScreen}>
+      <AboutMovementConnect renderEducationScreen={renderEducationScreen}>
         <DialogHeader>
           <DialogTitle className="flex flex-col text-center leading-snug">
-            {hasAptosConnectWallets ? (
+            {hasMovementConnectWallets ? (
               <>
                 <span>Log in or sign up</span>
                 <span>with Social + Petra Web</span>
@@ -189,10 +189,10 @@ function ConnectWalletDialog({
           </DialogTitle>
         </DialogHeader>
 
-        {hasAptosConnectWallets && (
+        {hasMovementConnectWallets && (
           <div className="flex flex-col gap-2 pt-3">
-            {aptosConnectWallets.map((wallet) => (
-              <AptosConnectWalletRow
+            {movementConnectWallets.map((wallet) => (
+              <MovementConnectWalletRow
                 key={wallet.name}
                 wallet={wallet}
                 onConnect={close}
@@ -200,18 +200,18 @@ function ConnectWalletDialog({
             ))}
             <p className="flex gap-1 justify-center items-center text-muted-foreground text-sm">
               Learn more about{" "}
-              <AboutAptosConnect.Trigger className="flex gap-1 py-3 items-center text-foreground">
+              <AboutMovementConnect.Trigger className="flex gap-1 py-3 items-center text-foreground">
                 Petra Web <ArrowRight size={16} />
-              </AboutAptosConnect.Trigger>
+              </AboutMovementConnect.Trigger>
             </p>
-            <AptosPrivacyPolicy className="flex flex-col items-center py-1">
+            <MovementPrivacyPolicy className="flex flex-col items-center py-1">
               <p className="text-xs leading-5">
-                <AptosPrivacyPolicy.Disclaimer />{" "}
-                <AptosPrivacyPolicy.Link className="text-muted-foreground underline underline-offset-4" />
+                <MovementPrivacyPolicy.Disclaimer />{" "}
+                <MovementPrivacyPolicy.Link className="text-muted-foreground underline underline-offset-4" />
                 <span className="text-muted-foreground">.</span>
               </p>
-              <AptosPrivacyPolicy.PoweredBy className="flex gap-1.5 items-center text-xs leading-5 text-muted-foreground" />
-            </AptosPrivacyPolicy>
+              <MovementPrivacyPolicy.PoweredBy className="flex gap-1.5 items-center text-xs leading-5 text-muted-foreground" />
+            </MovementPrivacyPolicy>
             <div className="flex items-center gap-3 pt-4 text-muted-foreground">
               <div className="h-px w-full bg-secondary" />
               Or
@@ -229,14 +229,14 @@ function ConnectWalletDialog({
               <TabsTrigger value="ethereum">Ethereum</TabsTrigger>
             </TabsList>
             <TabsContent value="aptos">
-              {aptosWallets.map((wallet) => (
+              {movementWallets.map((wallet) => (
                 <WalletRow
                   key={wallet.name}
                   wallet={wallet}
                   onConnect={close}
                 />
               ))}
-              {!!aptosInstallableWallets.length && (
+              {!!movementInstallableWallets.length && (
                 <Collapsible className="flex flex-col gap-3 pt-3">
                   <CollapsibleTrigger asChild>
                     <Button size="sm" variant="ghost" className="gap-2">
@@ -244,7 +244,7 @@ function ConnectWalletDialog({
                     </Button>
                   </CollapsibleTrigger>
                   <CollapsibleContent className="flex flex-col gap-3">
-                    {aptosInstallableWallets.map((wallet) => (
+                    {movementInstallableWallets.map((wallet) => (
                       <WalletRow
                         key={wallet.name}
                         wallet={wallet}
@@ -313,7 +313,7 @@ function ConnectWalletDialog({
             </TabsContent>
           </Tabs>
         </div>
-      </AboutAptosConnect>
+      </AboutMovementConnect>
     </DialogContent>
   );
 }
@@ -347,7 +347,7 @@ function WalletRow({ wallet, onConnect }: WalletRowProps) {
   );
 }
 
-function AptosConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
+function MovementConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
   return (
     <WalletItem wallet={wallet} onConnect={onConnect}>
       <WalletItem.ConnectButton asChild>
@@ -360,7 +360,7 @@ function AptosConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
   );
 }
 
-function renderEducationScreen(screen: AboutAptosConnectEducationScreen) {
+function renderEducationScreen(screen: AboutMovementConnectEducationScreen) {
   return (
     <>
       <DialogHeader className="grid grid-cols-[1fr_4fr_1fr] items-center space-y-0">

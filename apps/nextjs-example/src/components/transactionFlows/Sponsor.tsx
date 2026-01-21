@@ -1,11 +1,11 @@
-import { aptosClient, isSendableNetwork } from "@/utils";
+import { movementClient, isSendableNetwork } from "@/utils";
 import {
   Account,
   AccountAddress,
   AccountAuthenticator,
   AnyRawTransaction,
-} from "@aptos-labs/ts-sdk";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/ts-sdk";
+import { useWallet } from "@movement-labs/wallet-adapter-react";
 import { useState } from "react";
 import { TransactionHash } from "../TransactionHash";
 import { Button } from "../ui/button";
@@ -35,7 +35,7 @@ export function Sponsor() {
     if (!account) {
       throw new Error("no account");
     }
-    const transactionToSign = await aptosClient(
+    const transactionToSign = await movementClient(
       network,
     ).transaction.build.simple({
       sender: sender.accountAddress,
@@ -61,7 +61,7 @@ export function Sponsor() {
     setTransactionToSubmit(transaction);
 
     try {
-      const authenticator = aptosClient(network).transaction.sign({
+      const authenticator = movementClient(network).transaction.sign({
         signer: sender,
         transaction: transaction,
       });
