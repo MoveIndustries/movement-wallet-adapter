@@ -1,7 +1,7 @@
 import { WalletInfo } from "./types";
 import { AdapterNotDetectedWallet, AdapterWallet } from "../WalletCore";
 import {
-  APTOS_CONNECT_BASE_URL,
+  MOVEMENT_CONNECT_BASE_URL,
   PETRA_WEB_BASE_URL,
   WalletReadyState,
 } from "../constants";
@@ -56,11 +56,11 @@ export function truncateAddress(address: string | undefined) {
 }
 
 /**
- * Returns `true` if the provided wallet is an Aptos Connect wallet.
+ * Returns `true` if the provided wallet is an Movement Connect wallet.
  *
  * @deprecated Use {@link isPetraWebWallet} instead.
  */
-export function isAptosConnectWallet(wallet: WalletInfo | AdapterWallet) {
+export function isMovementConnectWallet(wallet: WalletInfo | AdapterWallet) {
   return isPetraWebWallet(wallet);
 }
 
@@ -68,25 +68,25 @@ export function isAptosConnectWallet(wallet: WalletInfo | AdapterWallet) {
 export function isPetraWebWallet(wallet: WalletInfo | AdapterWallet) {
   if (!wallet.url) return false;
   return (
-    wallet.url.startsWith(APTOS_CONNECT_BASE_URL) ||
+    wallet.url.startsWith(MOVEMENT_CONNECT_BASE_URL) ||
     wallet.url.startsWith(PETRA_WEB_BASE_URL)
   );
 }
 
 /**
- * Partitions the `wallets` array so that Aptos Connect wallets are grouped separately from the rest.
+ * Partitions the `wallets` array so that Movement Connect wallets are grouped separately from the rest.
  * Petra Web is a web wallet that uses social login to create accounts on the blockchain.
  *
  * @deprecated Use {@link getPetraWebWallets} instead.
  */
-export function getAptosConnectWallets(
+export function getMovementConnectWallets(
   wallets: ReadonlyArray<AdapterWallet | AdapterNotDetectedWallet>,
 ) {
   const { defaultWallets, moreWallets } = partitionWallets(
     wallets,
-    isAptosConnectWallet,
+    isMovementConnectWallet,
   );
-  return { aptosConnectWallets: defaultWallets, otherWallets: moreWallets };
+  return { movementConnectWallets: defaultWallets, otherWallets: moreWallets };
 }
 
 /**
@@ -105,11 +105,11 @@ export function getPetraWebWallets(
 
 export interface WalletSortingOptions {
   /**
-   * An optional function for sorting Aptos Connect wallets.
+   * An optional function for sorting Movement Connect wallets.
    *
    * @deprecated Use {@link sortPetraWebWallets} instead.
    */
-  sortAptosConnectWallets?: (a: AdapterWallet, b: AdapterWallet) => number;
+  sortMovementConnectWallets?: (a: AdapterWallet, b: AdapterWallet) => number;
   /** An optional function for sorting Petra Web wallets. */
   sortPetraWebWallets?: (a: AdapterWallet, b: AdapterWallet) => number;
   /** An optional function for sorting wallets that are currently installed or loadable. */
@@ -127,7 +127,7 @@ export interface WalletSortingOptions {
 /**
  * Partitions the `wallets` array into three distinct groups:
  *
- * `aptosConnectWallets` - Use {@link petraWebWallets} instead.
+ * `movementConnectWallets` - Use {@link petraWebWallets} instead.
  *
  * `petraWebWallets` - Wallets that use social login to create accounts on
  * the blockchain via Petra Web.
@@ -143,12 +143,12 @@ export function groupAndSortWallets(
   wallets: ReadonlyArray<AdapterWallet | AdapterNotDetectedWallet>,
   options?: WalletSortingOptions,
 ) {
-  const { aptosConnectWallets } = getAptosConnectWallets(wallets);
+  const { movementConnectWallets } = getMovementConnectWallets(wallets);
   const { otherWallets, petraWebWallets } = getPetraWebWallets(wallets);
   const { defaultWallets, moreWallets } = partitionWallets(otherWallets);
 
-  if (options?.sortAptosConnectWallets) {
-    aptosConnectWallets.sort(options.sortAptosConnectWallets);
+  if (options?.sortMovementConnectWallets) {
+    movementConnectWallets.sort(options.sortMovementConnectWallets);
   }
   if (options?.sortPetraWebWallets) {
     petraWebWallets.sort(options.sortPetraWebWallets);
@@ -162,7 +162,7 @@ export function groupAndSortWallets(
 
   return {
     /** @deprecated Use {@link petraWebWallets} instead. */
-    aptosConnectWallets,
+    movementConnectWallets,
     /** Wallets that use social login to create an account on the blockchain */
     petraWebWallets,
     /** Wallets that are currently installed or loadable. */

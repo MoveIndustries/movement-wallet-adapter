@@ -1,4 +1,4 @@
-import { WalletSortingOptions } from "@aptos-labs/wallet-adapter-react";
+import { WalletSortingOptions } from "@movement-labs/wallet-adapter-react";
 import { Breakpoint } from "@mui/material";
 
 export interface WalletConnectorProps extends WalletSortingOptions {

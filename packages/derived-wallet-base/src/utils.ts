@@ -1,5 +1,5 @@
-import { AccountPublicKey, Aptos } from "@aptos-labs/ts-sdk";
-import { AccountInfo } from "@aptos-labs/wallet-standard";
+import { AccountPublicKey, Aptos } from "@movement-labs/ts-sdk";
+import { AccountInfo } from "@movement-labs/wallet-standard";
 
 export function accountInfoFromPublicKey(publicKey: AccountPublicKey) {
   return new AccountInfo({

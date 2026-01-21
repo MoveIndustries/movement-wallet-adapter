@@ -6,7 +6,7 @@ import {
   isValidFunctionInfo,
   Serializable,
   Serializer,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 
 /**
  * The domain separator used to calculate the DAA account address.

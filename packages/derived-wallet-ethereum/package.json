@@ -1,5 +1,5 @@
 {
-  "name": "@aptos-labs/derived-wallet-ethereum",
+  "name": "@movement-labs/derived-wallet-ethereum",
   "version": "0.8.1",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -10,7 +10,7 @@
     "require": "./dist/index.js",
     "import": "./dist/index.mjs"
   },
-  "author": "aptoslabs.com",
+  "author": "movementlabs.xyz",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:declarations",
     "build:bundle": "tsup --sourcemap",
@@ -29,20 +29,20 @@
     ]
   },
   "dependencies": {
-    "@aptos-labs/derived-wallet-base": "workspace:^",
+    "@movement-labs/derived-wallet-base": "workspace:^",
     "@aptos-labs/siwa": "^0.4.0",
-    "@aptos-labs/wallet-standard": "^0.5.2",
+    "@movement-labs/wallet-standard": "^0.5.2",
     "@wallet-standard/app": "^1.1.0",
     "ethers": "^6.13.5",
     "mipd": "^0.0.7",
     "viem": "^2.23.12"
   },
   "peerDependencies": {
-    "@aptos-labs/ts-sdk": "^5.1.1"
+    "@movement-labs/ts-sdk": "^5.1.1"
   },
   "devDependencies": {
-    "@aptos-labs/eslint-config-adapter": "workspace:*",
-    "@aptos-labs/wallet-adapter-tsconfig": "workspace:*",
+    "@movement-labs/eslint-config-adapter": "workspace:*",
+    "@movement-labs/wallet-adapter-tsconfig": "workspace:*",
     "@types/jest": "^29.2.4",
     "@types/node": "^20.10.4",
     "eslint": "^8.57.1",

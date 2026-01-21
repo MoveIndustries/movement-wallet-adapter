@@ -1,11 +1,11 @@
 import {
   computeDerivableAuthenticationKey,
   encodeStructuredMessage,
-  parseAptosSigningMessage,
-} from "@aptos-labs/derived-wallet-base";
+  parseMovementSigningMessage,
+} from "@movement-labs/derived-wallet-base";
 import {
   AccountPublicKey,
-  AptosConfig,
+  MovementConfig,
   AuthenticationKey,
   Deserializer,
   Ed25519PublicKey,
@@ -15,10 +15,10 @@ import {
   Serializer,
   Signature,
   VerifySignatureArgs,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 import { createSignInMessage as createSolanaSignInMessage } from "@solana/wallet-standard-util";
 import { PublicKey as SolanaPublicKey } from "@solana/web3.js";
-import { createSiwsEnvelopeForAptosTransaction } from "./createSiwsEnvelope";
+import { createSiwsEnvelopeForMovementTransaction } from "./createSiwsEnvelope";
 
 export interface SolanaDerivedPublicKeyParams {
   domain: string;
@@ -52,7 +52,7 @@ export class SolanaDerivedPublicKey extends AccountPublicKey {
   }
 
   verifySignature({ message, signature }: VerifySignatureArgs): boolean {
-    const parsedSigningMessage = parseAptosSigningMessage(message);
+    const parsedSigningMessage = parseMovementSigningMessage(message);
     if (!parsedSigningMessage || !(signature instanceof Ed25519Signature)) {
       return false;
     }
@@ -63,14 +63,14 @@ export class SolanaDerivedPublicKey extends AccountPublicKey {
     };
 
     let messageBytes: Uint8Array;
-    // Handle structured message, i.e. a message signed with AptosSignMessageInput
+    // Handle structured message, i.e. a message signed with MovementSignMessageInput
     if (parsedSigningMessage.type === "structuredMessage") {
       messageBytes = encodeStructuredMessage(
         parsedSigningMessage.structuredMessage,
       );
     } else {
       // Handle transaction message
-      const siwsEnvelopeInput = createSiwsEnvelopeForAptosTransaction({
+      const siwsEnvelopeInput = createSiwsEnvelopeForMovementTransaction({
         ...parsedSigningMessage,
         ...commonInput,
         domain: this.domain,
@@ -96,7 +96,7 @@ export class SolanaDerivedPublicKey extends AccountPublicKey {
   }
 
   async verifySignatureAsync(args: {
-    aptosConfig: AptosConfig;
+    movementConfig: MovementConfig;
     message: HexInput;
     signature: Signature;
   }): Promise<boolean> {

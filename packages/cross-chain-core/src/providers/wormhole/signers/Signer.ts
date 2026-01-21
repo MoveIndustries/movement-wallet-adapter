@@ -6,7 +6,7 @@ import {
   SignAndSendSigner,
 } from "@wormhole-foundation/sdk";
 import { SolanaUnsignedTransaction } from "@wormhole-foundation/sdk-solana";
-import { AdapterWallet } from "@aptos-labs/wallet-adapter-core";
+import { AdapterWallet } from "@movement-labs/wallet-adapter-core";
 import {
   EvmUnsignedTransaction,
   EvmChains,
@@ -14,7 +14,7 @@ import {
 
 import * as solanaSigner from "./SolanaSigner";
 import * as ethereumSigner from "./EthereumSigner";
-import * as aptosSigner from "./AptosSigner";
+import * as aptosSigner from "./MovementSigner";
 // import {
 //   SuiChains,
 //   SuiUnsignedTransaction,
@@ -26,7 +26,7 @@ import { CrossChainCore } from "../../../CrossChainCore";
 import { AptosChains } from "@wormhole-foundation/sdk-aptos/dist/cjs/types";
 import { AptosUnsignedTransaction } from "@wormhole-foundation/sdk-aptos/dist/cjs/unsignedTransaction";
 import { GasStationApiKey } from "../types";
-import { Account } from "@aptos-labs/ts-sdk";
+import { Account } from "@movement-labs/ts-sdk";
 export class Signer<N extends Network, C extends Chain>
   implements SignAndSendSigner<N, C>
 {
@@ -113,7 +113,7 @@ export const signAndSendTransaction = async (
       options,
     );
     return tx;
-  } else if (chain.context === "Aptos") {
+  } else if (chain.context === "Movement") {
     const tx = await aptosSigner.signAndSendTransaction(
       request as AptosUnsignedTransaction<Network, AptosChains>,
       wallet,

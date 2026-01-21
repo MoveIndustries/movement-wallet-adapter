@@ -4,8 +4,8 @@ import WalletConnectButton from "./components/base/WalletConnectButton.vue";
 import WalletIcon from "./components/base/WalletIcon.vue";
 import WalletName from "./components/base/WalletName.vue";
 import WalletInstallLink from "./components/base/WalletInstallLink.vue";
-import AptosLogo from "./components/icons/AptosLogo.vue";
-import AptosPrivacyPolicy from "./components/pp/AptosPrivacyPolicy.vue";
+import MovementLogo from "./components/icons/MovementLogo.vue";
+import MovementPrivacyPolicy from "./components/pp/MovementPrivacyPolicy.vue";
 import Disclaimer from "./components/pp/Disclaimer.vue";
 import Link from "./components/pp/Link.vue";
 import PoweredBy from "./components/pp/PoweredBy.vue";
@@ -17,8 +17,8 @@ export default {
     app.component("WalletIcon", WalletIcon);
     app.component("WalletName", WalletName);
     app.component("WalletInstallLink", WalletInstallLink);
-    app.component("AptosLogo", AptosLogo);
-    app.component("AptosPrivacyPolicy", AptosPrivacyPolicy);
+    app.component("MovementLogo", MovementLogo);
+    app.component("MovementPrivacyPolicy", MovementPrivacyPolicy);
     app.component("Disclaimer", Disclaimer);
     app.component("Link", Link);
     app.component("PoweredBy", PoweredBy);
@@ -31,8 +31,8 @@ export {
   WalletIcon,
   WalletName,
   WalletInstallLink,
-  AptosLogo,
-  AptosPrivacyPolicy,
+  MovementLogo,
+  MovementPrivacyPolicy,
   Disclaimer,
   Link,
   PoweredBy,

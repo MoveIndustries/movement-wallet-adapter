@@ -2,11 +2,11 @@ import {
   AccountAddressInput,
   InputGenerateTransactionOptions,
   InputTransactionPluginData,
-} from "@aptos-labs/ts-sdk";
-import { InputGenerateTransactionPayloadData } from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
+import { InputGenerateTransactionPayloadData } from "@movement-labs/ts-sdk";
 import { WalletReadyState } from "../constants";
 
-export interface AptosStandardSupportedWallet {
+export interface MovementStandardSupportedWallet {
   // The name of your wallet cast to WalletName (Ex. "Petra" as WalletName<"Petra">)
   name: string;
   // The link to your chrome extension or main website where new users can create an account with your wallet.
@@ -16,14 +16,14 @@ export interface AptosStandardSupportedWallet {
   // NOTE: Copy these two fields exactly when creating a new instance of this interface
   // What state the Wallet is in currently. Defaults to NotDetected.
   readyState: WalletReadyState.NotDetected;
-  // A flag to indicate that this AptosStandardSupportedWallet implements the AIP-62 Wallet Standard.
+  // A flag to indicate that this MovementStandardSupportedWallet implements the AIP-62 Wallet Standard.
   // See https://github.com/aptos-foundation/AIPs/blob/main/aips/aip-62.md for more details.
   isAIP62Standard: true;
   // An optional deeplink provider for the wallet. If the wallet is not installed, we can redirect the user to the wallet's deeplink provider
   // @example "https://myWallet.app/explore?link="
   deeplinkProvider?: string;
-  // A flag to indicate that this AptosStandardSupportedWallet is an Aptos native wallet.
-  isAptosNativeWallet?: boolean;
+  // A flag to indicate that this MovementStandardSupportedWallet is an Movement native wallet.
+  isMovementNativeWallet?: boolean;
 }
 
 // Update this with the name of your wallet when you create a new wallet plugin.

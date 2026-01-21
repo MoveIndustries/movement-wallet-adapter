@@ -41,7 +41,7 @@ const educationScreens = [
     }),
     Description: createHeadlessComponent("EducationScreen.Description", "p", {
       children:
-        "Petra Web is a web3 wallet that uses a Social Login to create accounts on the Aptos blockchain.",
+        "Petra Web is a web3 wallet that uses a Social Login to create accounts on the Movement blockchain.",
     }),
   },
   {

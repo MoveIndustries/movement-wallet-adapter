@@ -7,7 +7,7 @@ import {
   PlatformLoader,
   TransferState,
 } from "@wormhole-foundation/sdk";
-import { Network, sleep } from "@aptos-labs/ts-sdk";
+import { Network, sleep } from "@movement-labs/ts-sdk";
 import aptos from "@wormhole-foundation/sdk/aptos";
 import solana from "@wormhole-foundation/sdk/solana";
 import evm from "@wormhole-foundation/sdk/evm";
@@ -18,7 +18,7 @@ import {
   CrossChainCore,
 } from "../../CrossChainCore";
 import { logger } from "../../utils/logger";
-import { AptosLocalSigner } from "./signers/AptosLocalSigner";
+import { MovementLocalSigner } from "./signers/MovementLocalSigner";
 import { Signer } from "./signers/Signer";
 import { ChainConfig } from "../../config";
 import {
@@ -34,8 +34,8 @@ import {
   WormholeWithdrawRequest,
   WormholeWithdrawResponse,
 } from "./types";
-import { SolanaDerivedWallet } from "@aptos-labs/derived-wallet-solana";
-import { EIP1193DerivedWallet } from "@aptos-labs/derived-wallet-ethereum";
+import { SolanaDerivedWallet } from "@movement-labs/derived-wallet-solana";
+import { EIP1193DerivedWallet } from "@movement-labs/derived-wallet-ethereum";
 
 export class WormholeProvider
   implements
@@ -65,7 +65,7 @@ export class WormholeProvider
   }
 
   private async setWormholeContext(sourceChain: Chain) {
-    const dappNetwork = this.crossChainCore._dappConfig?.aptosNetwork;
+    const dappNetwork = this.crossChainCore._dappConfig?.movementNetwork;
     if (dappNetwork === Network.DEVNET) {
       throw new Error("Devnet is not supported on Wormhole");
     }
@@ -140,8 +140,8 @@ export class WormholeProvider
     logger.log("type", type);
     // If the type of the transaction is "transfer", we want to transfer from a x-chain wallet to the Aptos wallet
     // If the type of the transaction is "withdraw", we want to transfer from the Aptos wallet to a x-chain wallet
-    const sourceChain = type === "transfer" ? originChain : "Aptos";
-    const destinationChain = type === "transfer" ? "Aptos" : originChain;
+    const sourceChain = type === "transfer" ? originChain : "Movement";
+    const destinationChain = type === "transfer" ? "Movement" : originChain;
 
     const { route, request } = await this.getRoute(
       sourceChain,
@@ -217,7 +217,7 @@ export class WormholeProvider
       this.wormholeRequest,
       signer,
       this.wormholeQuote,
-      Wormhole.chainAddress("Aptos", destinationAddress.toString()),
+      Wormhole.chainAddress("Movement", destinationAddress.toString()),
     );
 
     const originChainTxnId =
@@ -249,8 +249,8 @@ export class WormholeProvider
             logger.log("Receipt is on track ", receipt);
 
             try {
-              const signer = new AptosLocalSigner(
-                "Aptos",
+              const signer = new MovementLocalSigner(
+                "Movement",
                 {},
                 mainSigner, // the account that signs the "claim" transaction
                 sponsorAccount ? sponsorAccount : undefined, // the fee payer account
@@ -294,7 +294,7 @@ export class WormholeProvider
   async transfer(
     input: WormholeTransferRequest,
   ): Promise<WormholeTransferResponse> {
-    if (this.crossChainCore._dappConfig?.aptosNetwork === Network.DEVNET) {
+    if (this.crossChainCore._dappConfig?.movementNetwork === Network.DEVNET) {
       throw new Error("Devnet is not supported on Wormhole");
     }
     // if amount is provided, it is expected to get the quote internally
@@ -337,9 +337,9 @@ export class WormholeProvider
     }
 
     const signer = new Signer(
-      this.getChainConfig("Aptos"),
+      this.getChainConfig("Movement"),
       (
-        await input.wallet.features["aptos:account"].account()
+        await input.wallet.features["movement:account"].account()
       ).address.toString(),
       {},
       input.wallet,

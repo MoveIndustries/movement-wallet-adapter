@@ -1,15 +1,15 @@
 import {
-  AboutAptosConnect,
-  AboutAptosConnectEducationScreen,
+  AboutMovementConnect,
+  AboutMovementConnectEducationScreen,
   AdapterNotDetectedWallet,
   AdapterWallet,
-  AptosPrivacyPolicy,
+  MovementPrivacyPolicy,
   WalletItem,
   WalletSortingOptions,
   groupAndSortWallets,
   isInstallRequired,
   useWallet,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/wallet-adapter-react";
 import {
   Box,
   Button,
@@ -25,7 +25,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { grey } from "./aptosColorPalette";
+import { grey } from "./movementColorPalette";
 // reported bug with loading mui icons with esm, therefore need to import like this https://github.com/mui/material-ui/issues/35233
 import {
   ArrowBack,
@@ -67,24 +67,24 @@ export default function WalletsModal({
 
   const { wallets = [], notDetectedWallets = [] } = useWallet();
 
-  const { aptosConnectWallets, availableWallets, installableWallets } =
+  const { movementConnectWallets, availableWallets, installableWallets } =
     groupAndSortWallets(
       [...wallets, ...notDetectedWallets],
       walletSortingOptions,
     );
 
-  const hasAptosConnectWallets = !!aptosConnectWallets.length;
+  const hasMovementConnectWallets = !!movementConnectWallets.length;
 
   // Determine if we should show tabs (cross-chain mode)
   const crossChainMode =
     crossChainWallets && (crossChainWallets.evm || crossChainWallets.solana);
 
   // Group wallets by chain if in cross-chain mode
-  const { evmWallets, solanaWallets, aptosWallets } = crossChainMode
+  const { evmWallets, solanaWallets, movementWallets } = crossChainMode
     ? availableWallets.reduce<{
         evmWallets: AdapterWallet[];
         solanaWallets: AdapterWallet[];
-        aptosWallets: AdapterWallet[];
+        movementWallets: AdapterWallet[];
       }>(
         (acc, wallet) => {
           if (wallet.name.includes("Ethereum")) {
@@ -92,23 +92,23 @@ export default function WalletsModal({
           } else if (wallet.name.includes("Solana")) {
             acc.solanaWallets.push(wallet);
           } else {
-            acc.aptosWallets.push(wallet);
+            acc.movementWallets.push(wallet);
           }
           return acc;
         },
-        { evmWallets: [], solanaWallets: [], aptosWallets: [] },
+        { evmWallets: [], solanaWallets: [], movementWallets: [] },
       )
-    : { evmWallets: [], solanaWallets: [], aptosWallets: availableWallets };
+    : { evmWallets: [], solanaWallets: [], movementWallets: availableWallets };
 
   const {
     evmInstallableWallets,
     solanaInstallableWallets,
-    aptosInstallableWallets,
+    movementInstallableWallets,
   } = crossChainMode
     ? installableWallets.reduce<{
         evmInstallableWallets: AdapterNotDetectedWallet[];
         solanaInstallableWallets: AdapterNotDetectedWallet[];
-        aptosInstallableWallets: AdapterNotDetectedWallet[];
+        movementInstallableWallets: AdapterNotDetectedWallet[];
       }>(
         (acc, wallet) => {
           if (wallet.name.includes("Ethereum")) {
@@ -116,26 +116,26 @@ export default function WalletsModal({
           } else if (wallet.name.includes("Solana")) {
             acc.solanaInstallableWallets.push(wallet);
           } else {
-            acc.aptosInstallableWallets.push(wallet);
+            acc.movementInstallableWallets.push(wallet);
           }
           return acc;
         },
         {
           evmInstallableWallets: [],
           solanaInstallableWallets: [],
-          aptosInstallableWallets: [],
+          movementInstallableWallets: [],
         },
       )
     : {
         evmInstallableWallets: [],
         solanaInstallableWallets: [],
-        aptosInstallableWallets: installableWallets,
+        movementInstallableWallets: installableWallets,
       };
 
   // Calculate dynamic indices for tabs
   const tabsConfig = crossChainMode
     ? [
-        { key: "aptos", label: "Aptos", enabled: true },
+        { key: "movement", label: "Movement", enabled: true },
         { key: "solana", label: "Solana", enabled: crossChainWallets!.solana },
         { key: "evm", label: "Ethereum", enabled: crossChainWallets!.evm },
       ].filter((tab) => tab.enabled)
@@ -210,7 +210,7 @@ export default function WalletsModal({
           <CloseIcon />
         </IconButton>
 
-        <AboutAptosConnect renderEducationScreen={renderEducationScreen}>
+        <AboutMovementConnect renderEducationScreen={renderEducationScreen}>
           <Typography
             align="center"
             variant="h5"
@@ -221,7 +221,7 @@ export default function WalletsModal({
               flexDirection: "column",
             }}
           >
-            {hasAptosConnectWallets ? (
+            {hasMovementConnectWallets ? (
               <>
                 <span>Log in or sign up</span>
                 <span>with Social + Petra Web</span>
@@ -259,10 +259,10 @@ export default function WalletsModal({
             </Box>
           )}
 
-          {hasAptosConnectWallets && (
+          {hasMovementConnectWallets && (
             <Stack gap={1}>
-              {aptosConnectWallets.map((wallet) => (
-                <AptosConnectWalletRow
+              {movementConnectWallets.map((wallet) => (
+                <MovementConnectWalletRow
                   key={wallet.name}
                   wallet={wallet}
                   onConnect={handleClose}
@@ -281,7 +281,7 @@ export default function WalletsModal({
               >
                 Learn more about{" "}
                 <Box
-                  component={AboutAptosConnect.Trigger}
+                  component={AboutMovementConnect.Trigger}
                   sx={{
                     background: "none",
                     border: "none",
@@ -302,14 +302,14 @@ export default function WalletsModal({
               </Typography>
 
               <Stack
-                component={AptosPrivacyPolicy}
+                component={MovementPrivacyPolicy}
                 alignItems="center"
                 py={0.5}
               >
                 <Typography component="p" fontSize="12px" lineHeight="20px">
-                  <AptosPrivacyPolicy.Disclaimer />{" "}
+                  <MovementPrivacyPolicy.Disclaimer />{" "}
                   <Box
-                    component={AptosPrivacyPolicy.Link}
+                    component={MovementPrivacyPolicy.Link}
                     sx={{
                       color: grey[400],
                       textDecoration: "underline",
@@ -319,7 +319,7 @@ export default function WalletsModal({
                   <span>.</span>
                 </Typography>
                 <Box
-                  component={AptosPrivacyPolicy.PoweredBy}
+                  component={MovementPrivacyPolicy.PoweredBy}
                   sx={{
                     display: "flex",
                     alignItems: "center",
@@ -351,7 +351,7 @@ export default function WalletsModal({
               </Tabs>
 
               <TabPanel value={tabValue} index={getTabIndex("aptos")}>
-                {renderWalletList(aptosWallets, aptosInstallableWallets)}
+                {renderWalletList(movementWallets, movementInstallableWallets)}
               </TabPanel>
 
               {crossChainWallets!.solana && (
@@ -372,7 +372,7 @@ export default function WalletsModal({
               {renderWalletList(availableWallets, installableWallets)}
             </Stack>
           )}
-        </AboutAptosConnect>
+        </AboutMovementConnect>
       </Stack>
     </Dialog>
   );
@@ -433,7 +433,7 @@ function WalletRow({ wallet, onConnect }: WalletRowProps) {
   );
 }
 
-function AptosConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
+function MovementConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
   return (
     <WalletItem wallet={wallet} onConnect={onConnect} asChild>
       <WalletItem.ConnectButton asChild>
@@ -450,7 +450,7 @@ function AptosConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
   );
 }
 
-function renderEducationScreen(screen: AboutAptosConnectEducationScreen) {
+function renderEducationScreen(screen: AboutMovementConnectEducationScreen) {
   return (
     <>
       <Box

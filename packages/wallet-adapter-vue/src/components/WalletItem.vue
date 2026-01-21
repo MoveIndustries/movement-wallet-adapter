@@ -6,7 +6,7 @@ import {
   isRedirectable,
   isInstallRequired,
   AdapterNotDetectedWallet,
-} from "@aptos-labs/wallet-adapter-core";
+} from "@movement-labs/wallet-adapter-core";
 import WalletIcon from "./base/WalletIcon.vue";
 import WalletName from "./base/WalletName.vue";
 import WalletConnectButton from "./base/WalletConnectButton.vue";

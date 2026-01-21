@@ -1,4 +1,4 @@
 module.exports = {
   root: true,
-  extends: ["@aptos-labs/eslint-config-adapter"],
+  extends: ["@movement-labs/eslint-config-adapter"],
 };

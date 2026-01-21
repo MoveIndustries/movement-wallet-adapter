@@ -1,5 +1,5 @@
 {
-  "name": "@aptos-labs/eslint-config-adapter",
+  "name": "@movement-labs/eslint-config-adapter",
   "version": "0.0.2",
   "main": "index.js",
   "private": true,

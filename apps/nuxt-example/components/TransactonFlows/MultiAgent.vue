@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { computed, h } from "vue";
-import { aptosClient, isSendableNetwork } from "@/utils";
+import { movementClient, isSendableNetwork } from "@/utils";
 import {
   Account,
   AccountAuthenticator,
   AnyRawTransaction,
   Ed25519Account,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 import TransactionHash from "~/components/TransactionHash.vue";
 import { toast } from "~/components/ui/toast";
 
@@ -22,7 +22,7 @@ const {
   submitTransaction,
 } = $walletAdapter;
 
-const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 
 const secondarySignerAccount = ref<Ed25519Account>();
 const transactionToSubmit = ref<AnyRawTransaction>();
@@ -43,20 +43,20 @@ const generateTransaction = async (): Promise<AnyRawTransaction> => {
 
   const secondarySigner = Account.generate();
   // TODO: support custom network
-  await aptosClient(network.value).fundAccount({
+  await movementClient(network.value).fundAccount({
     accountAddress: secondarySigner.accountAddress.toString(),
     amount: 100_000_000,
   });
   secondarySignerAccount.value = secondarySigner;
 
-  const transactionToSign = await aptosClient(
+  const transactionToSign = await movementClient(
     network.value,
   ).transaction.build.multiAgent({
     sender: account.address,
     secondarySignerAddresses: [secondarySigner.accountAddress],
     data: {
       function: "0x1::coin::transfer",
-      typeArguments: [APTOS_COIN],
+      typeArguments: [MOVEMENT_COIN],
       functionArguments: [account.value?.address.toString(), 1], // 1 is in Octas
     },
   });

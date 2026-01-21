@@ -20,24 +20,24 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { isMainnet } from "@/utils";
-import { Network } from "@aptos-labs/ts-sdk";
-import { WalletSelector as AntdWalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
-import { WalletConnector as MuiWalletSelector } from "@aptos-labs/wallet-adapter-mui-design";
+import { Network } from "@movement-labs/ts-sdk";
+import { WalletSelector as AntdWalletSelector } from "@movement-labs/wallet-adapter-ant-design";
+import { WalletConnector as MuiWalletSelector } from "@movement-labs/wallet-adapter-mui-design";
 import {
   AccountInfo,
   AdapterWallet,
-  AptosChangeNetworkOutput,
+  MovementChangeNetworkOutput,
   NetworkInfo,
-  isAptosNetwork,
+  isMovementNetwork,
   useWallet,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/wallet-adapter-react";
 import { init as initTelegram } from "@telegram-apps/sdk";
 import { AlertCircle } from "lucide-react";
 import Image from "next/image";
 
 // Imports for registering a browser extension wallet plugin on page load
 import { MyWallet } from "@/utils/standardWallet";
-import { registerWallet } from "@aptos-labs/wallet-standard";
+import { registerWallet } from "@movement-labs/wallet-standard";
 import { TransactionSubmitterToggle } from "@/components/TransactionSubmitterToggle";
 
 // Example of how to register a browser extension wallet plugin.
@@ -64,11 +64,11 @@ export default function Home() {
       <div className="flex justify-between gap-6 pb-10">
         <div className="flex flex-col gap-2 md:gap-3">
           <h1 className="text-xl sm:text-3xl font-semibold tracking-tight">
-            Aptos Wallet Adapter Tester
+            Movement Wallet Adapter Tester
             {network?.name ? ` — ${network.name}` : ""}
           </h1>
           <a
-            href="https://github.com/aptos-labs/aptos-wallet-adapter/tree/main/apps/nextjs-example"
+            href="https://github.com/movement-labs/movement-wallet-adapter/tree/main/apps/nextjs-example"
             target="_blank"
             rel="noreferrer"
             className="text-sm text-muted-foreground underline underline-offset-2 font-medium leading-none"
@@ -156,7 +156,7 @@ interface WalletConnectionProps {
   account: AccountInfo | null;
   network: NetworkInfo | null;
   wallet: AdapterWallet | null;
-  changeNetwork: (network: Network) => Promise<AptosChangeNetworkOutput>;
+  changeNetwork: (network: Network) => Promise<MovementChangeNetworkOutput>;
 }
 
 function WalletConnection({
@@ -166,7 +166,7 @@ function WalletConnection({
   changeNetwork,
 }: WalletConnectionProps) {
   const isValidNetworkName = () => {
-    if (isAptosNetwork(network)) {
+    if (isMovementNetwork(network)) {
       return Object.values<string | undefined>(Network).includes(network?.name);
     }
     // If the configured network is not an Aptos network, i.e is a custom network
@@ -180,7 +180,7 @@ function WalletConnection({
   };
 
   const isNetworkChangeSupported =
-    wallet?.features["aptos:changeNetwork"] !== undefined;
+    wallet?.features["movement:changeNetwork"] !== undefined;
 
   return (
     <Card>

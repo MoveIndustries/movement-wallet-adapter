@@ -13,11 +13,11 @@ const { network, connected, account, wallet, changeNetwork } =
     <div class="flex justify-between gap-6 pb-10">
       <div class="flex flex-col gap-2 md:gap-3">
         <h1 class="text-xl sm:text-3xl font-semibold tracking-tight">
-          Aptos Wallet Adapter Tester
+          Movement Wallet Adapter Tester
           {{ network?.name ? ` — ${network.name}` : "" }}
         </h1>
         <a
-          href="https://github.com/aptos-labs/aptos-wallet-adapter/tree/main/apps/nuxt-example"
+          href="https://github.com/movement-labs/movement-wallet-adapter/tree/main/apps/nuxt-example"
           target="_blank"
           rel="noreferrer"
           class="text-sm text-muted-foreground underline underline-offset-2 font-medium leading-none"

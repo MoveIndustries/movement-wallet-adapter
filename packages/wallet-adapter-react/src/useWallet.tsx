@@ -4,19 +4,19 @@ import {
   AccountInfo,
   AdapterWallet,
   AnyRawTransaction,
-  AptosSignAndSubmitTransactionOutput,
+  MovementSignAndSubmitTransactionOutput,
   InputTransactionData,
   NetworkInfo,
-  AptosSignMessageInput,
-  AptosSignMessageOutput,
+  MovementSignMessageInput,
+  MovementSignMessageOutput,
   AdapterNotDetectedWallet,
   Network,
-  AptosChangeNetworkOutput,
+  MovementChangeNetworkOutput,
   PendingTransactionResponse,
   InputSubmitTransactionData,
-  AptosSignInInput,
-  AptosSignInOutput,
-} from "@aptos-labs/wallet-adapter-core";
+  MovementSignInInput,
+  MovementSignInOutput,
+} from "@movement-labs/wallet-adapter-core";
 
 export interface WalletContextState {
   connected: boolean;
@@ -26,11 +26,11 @@ export interface WalletContextState {
   connect(walletName: string): void;
   signIn(args: {
     walletName: string;
-    input: AptosSignInInput;
-  }): Promise<AptosSignInOutput | void>;
+    input: MovementSignInInput;
+  }): Promise<MovementSignInOutput | void>;
   signAndSubmitTransaction(
     transaction: InputTransactionData,
-  ): Promise<AptosSignAndSubmitTransactionOutput>;
+  ): Promise<MovementSignAndSubmitTransactionOutput>;
   signTransaction(args: {
     transactionOrPayload: AnyRawTransaction | InputTransactionData;
     asFeePayer?: boolean;
@@ -38,10 +38,10 @@ export interface WalletContextState {
     authenticator: AccountAuthenticator;
     rawTransaction: Uint8Array;
   }>;
-  signMessage(message: AptosSignMessageInput): Promise<AptosSignMessageOutput>;
-  signMessageAndVerify(message: AptosSignMessageInput): Promise<boolean>;
+  signMessage(message: MovementSignMessageInput): Promise<MovementSignMessageOutput>;
+  signMessageAndVerify(message: MovementSignMessageInput): Promise<boolean>;
   disconnect(): void;
-  changeNetwork(network: Network): Promise<AptosChangeNetworkOutput>;
+  changeNetwork(network: Network): Promise<MovementChangeNetworkOutput>;
   submitTransaction(
     transaction: InputSubmitTransactionData,
   ): Promise<PendingTransactionResponse>;

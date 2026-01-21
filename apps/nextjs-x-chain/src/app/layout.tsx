@@ -1,4 +1,4 @@
-import "@aptos-labs/wallet-adapter-ant-design/dist/index.css";
+import "@movement-labs/wallet-adapter-ant-design/dist/index.css";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -11,7 +11,7 @@ import { PropsWithChildren } from "react";
 import { AutoConnectProvider } from "@/components/AutoConnectProvider";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
 import { USDCBalanceProvider } from "@/contexts/USDCBalanceContext";
-import { Network } from "@aptos-labs/ts-sdk";
+import { Network } from "@movement-labs/ts-sdk";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -22,9 +22,9 @@ const fontSans = FontSans({
 const dappNetwork: Network.MAINNET | Network.TESTNET = Network.TESTNET;
 
 export const metadata: Metadata = {
-  title: "Aptos Cross Chain Wallet Adapter Example",
+  title: "Movement Cross Chain Wallet Adapter Example",
   description:
-    "An example of how to use Aptos Cross Chain Wallet Adapter with React and Next.js.",
+    "An example of how to use Movement Cross Chain Wallet Adapter with React and Next.js.",
 };
 
 export default function RootLayout({ children }: PropsWithChildren) {

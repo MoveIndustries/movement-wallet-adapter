@@ -4,7 +4,7 @@ import {
   HexInput,
   Serializer,
   Signature,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 
 /**
  * A classs representing a signature of a message signed with EIP1193

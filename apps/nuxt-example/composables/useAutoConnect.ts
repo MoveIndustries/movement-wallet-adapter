@@ -1,6 +1,6 @@
 import { onMounted, watch, Ref } from "vue";
 
-const AUTO_CONNECT_LOCAL_STORAGE_KEY = "AptosWalletAutoConnect";
+const AUTO_CONNECT_LOCAL_STORAGE_KEY = "MovementWalletAutoConnect";
 
 export function useAutoConnect(walletAutoConnect: Ref<boolean>) {
   const setAutoConnect = (value: boolean) => {

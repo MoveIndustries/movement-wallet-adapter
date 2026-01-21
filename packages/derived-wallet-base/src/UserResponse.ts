@@ -3,7 +3,7 @@ import {
   UserRejection,
   UserResponse,
   UserResponseStatus,
-} from "@aptos-labs/wallet-standard";
+} from "@movement-labs/wallet-standard";
 
 export function makeUserApproval<T>(args: T): UserApproval<T> {
   return {

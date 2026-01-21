@@ -11,9 +11,9 @@ import {
   Network,
   PrivateKey,
   PrivateKeyVariants,
-} from "@aptos-labs/ts-sdk";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
-import { registerWallet } from "@aptos-labs/wallet-standard";
+} from "@movement-labs/ts-sdk";
+import { useWallet } from "@movement-labs/wallet-adapter-react";
+import { registerWallet } from "@movement-labs/wallet-standard";
 import { init as initTelegram } from "@telegram-apps/sdk";
 import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -29,7 +29,7 @@ import {
   OriginWalletDetails,
 } from "@/utils/derivedWallet";
 import { CCTPWithdraw } from "./components/CCTPWithdraw";
-import { CrossChainCore } from "@aptos-labs/cross-chain-core";
+import { CrossChainCore } from "@movement-labs/cross-chain-core";
 
 // Example of how to register a browser extension wallet plugin.
 // Browser extension wallets should call registerWallet once on page load.
@@ -52,7 +52,7 @@ const dappNetwork: Network.MAINNET | Network.TESTNET = Network.TESTNET;
 
 // Initialize cross-chain core and provider
 const crossChainCore = new CrossChainCore({
-  dappConfig: { aptosNetwork: dappNetwork },
+  dappConfig: { movementNetwork: dappNetwork },
 });
 const provider = crossChainCore.getProvider("Wormhole");
 
@@ -100,11 +100,11 @@ export default function Home() {
       <div className="flex justify-between gap-6 pb-10">
         <div className="flex flex-col gap-2 md:gap-3">
           <h1 className="text-xl sm:text-3xl font-semibold tracking-tight">
-            Aptos X-Chain Wallet Adapter Tester
+            Movement X-Chain Wallet Adapter Tester
             {network?.name ? ` — ${network.name}` : ""}
           </h1>
           <a
-            href="https://github.com/aptos-labs/aptos-wallet-adapter/tree/main/apps/nextjs-x-chain"
+            href="https://github.com/movement-labs/movement-wallet-adapter/tree/main/apps/nextjs-x-chain"
             target="_blank"
             rel="noreferrer"
             className="text-sm text-muted-foreground underline underline-offset-2 font-medium leading-none"
@@ -166,7 +166,7 @@ export default function Home() {
           {network?.name === Network.DEVNET && (
             <>
               {/* Fund + balance account is enabled for non-Aptos wallets */}
-              {!wallet.isAptosNativeWallet && (
+              {!wallet.isMovementNativeWallet && (
                 <AccountBalance
                   account={account}
                   network={network}
@@ -179,7 +179,7 @@ export default function Home() {
           {network?.name === Network.LOCAL && (
             <>
               {/* Fund + balance account is enabled for non-Aptos wallets */}
-              {!wallet.isAptosNativeWallet && (
+              {!wallet.isMovementNativeWallet && (
                 <AccountBalance
                   account={account}
                   network={network}

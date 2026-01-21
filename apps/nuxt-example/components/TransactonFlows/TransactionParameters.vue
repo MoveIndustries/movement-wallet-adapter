@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { aptosClient, isSendableNetwork } from "@/utils";
-import { InputTransactionData } from "@aptos-labs/wallet-adapter-vue";
+import { movementClient, isSendableNetwork } from "@/utils";
+import { InputTransactionData } from "@movement-labs/wallet-adapter-vue";
 import { useToast } from "~/components/ui/toast";
 const { toast } = useToast();
 const { $walletAdapter } = useNuxtApp();
 const { network, connected, account, wallet, signAndSubmitTransaction } =
   $walletAdapter || {};
 
-const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 const MaxGasAMount = 10000;
 
 const isSendable = computed(() =>
@@ -19,14 +19,14 @@ const onSignAndSubmitTransaction = async () => {
   const transaction: InputTransactionData = {
     data: {
       function: "0x1::coin::transfer",
-      typeArguments: [APTOS_COIN],
+      typeArguments: [MOVEMENT_COIN],
       functionArguments: [account.value?.address.toString(), 1], // 1 is in Octas
     },
     options: { maxGasAmount: MaxGasAMount },
   };
   try {
     const commitedTransaction = await signAndSubmitTransaction(transaction);
-    const executedTransaction = await aptosClient(
+    const executedTransaction = await movementClient(
       network.value,
     ).waitForTransaction({
       transactionHash: commitedTransaction.hash,

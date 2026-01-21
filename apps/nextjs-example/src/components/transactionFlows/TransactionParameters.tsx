@@ -1,13 +1,13 @@
-import { aptosClient, isSendableNetwork } from "@/utils";
+import { movementClient, isSendableNetwork } from "@/utils";
 import {
   InputTransactionData,
   useWallet,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/wallet-adapter-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "../ui/use-toast";
 
-const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 const MaxGasAMount = 10000;
 
 export function TransactionParameters() {
@@ -21,14 +21,14 @@ export function TransactionParameters() {
     const transaction: InputTransactionData = {
       data: {
         function: "0x1::coin::transfer",
-        typeArguments: [APTOS_COIN],
+        typeArguments: [MOVEMENT_COIN],
         functionArguments: [account.address, 1], // 1 is in Octas
       },
       options: { maxGasAmount: MaxGasAMount },
     };
     try {
       const commitedTransaction = await signAndSubmitTransaction(transaction);
-      const executedTransaction = await aptosClient(network).waitForTransaction(
+      const executedTransaction = await movementClient(network).waitForTransaction(
         {
           transactionHash: commitedTransaction.hash,
         },

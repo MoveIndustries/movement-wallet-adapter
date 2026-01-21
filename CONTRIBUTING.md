@@ -1,10 +1,10 @@
-# Contributing to Aptos Wallet Adapter
+# Contributing to Movement Wallet Adapter
 
 ---
 
 ### Understand the Repo
 
-Aptos Wallet Adapter is a monorepo built with [turbo](https://turbo.build/repo/docs) and follows its file structure convention. The repo has 2 workspaces `apps` and `packages`
+Movement Wallet Adapter is a monorepo built with [turbo](https://turbo.build/repo/docs) and follows its file structure convention. The repo has 2 workspaces `apps` and `packages`
 
 #### Apps Workspace
 
@@ -24,7 +24,7 @@ You are welcome to add packages (vue-provider/UI frameworks/etc) in this workspa
 
 You would need `pnpm@7.14.2` in order to bootstrap and test a local copy of this repo.
 
-1. Clone the repo with `git clone https://github.com/aptos-labs/aptos-wallet-adapter.git`
+1. Clone the repo with `git clone https://github.com/movement-labs/movement-wallet-adapter.git`
 2. On the `root` folder, run `pnpm install` and `pnpm turbo run build`
 3. On the `root` folder, run `pnpm turbo run dev` - that would spin up a local server (`localhost:3000`) with the `nextjs` demoapp
 

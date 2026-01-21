@@ -2,7 +2,7 @@
 
 # Wallet Adapter React Provider
 
-A react provider wrapper for the Aptos Wallet Adapter
+A react provider wrapper for the Movement Wallet Adapter
 
 Dapps that want to use the adapter should install this package and other supported wallet packages.
 
@@ -35,18 +35,18 @@ signAndSubmitBCSTransaction
 #### Install Dependencies
 
 Install wallet dependencies you want to include in your app.
-To do that, you can look at our [supported wallets list](https://github.com/aptos-labs/aptos-wallet-adapter#supported-wallet-packages). Each wallet is a link to npm package where you can install it from.
+To do that, you can look at our [supported wallets list](https://github.com/movement-labs/movement-wallet-adapter#supported-wallet-packages). Each wallet is a link to npm package where you can install it from.
 
-Next, install the `@aptos-labs/wallet-adapter-react`
+Next, install the `@movement-labs/wallet-adapter-react`
 
 ```
-pnpm i @aptos-labs/wallet-adapter-react
+pnpm i @movement-labs/wallet-adapter-react
 ```
 
 using npm
 
 ```
-npm i @aptos-labs/wallet-adapter-react
+npm i @movement-labs/wallet-adapter-react
 ```
 
 #### Import dependencies
@@ -56,21 +56,21 @@ On the `App.jsx` file,
 Import the installed wallets.
 
 ```js
-import { SomeAptosWallet } from "some-aptos-wallet-package";
+import { SomeMovementWallet } from "some-aptos-wallet-package";
 ```
 
-Import the `AptosWalletAdapterProvider`.
+Import the `MovementWalletAdapterProvider`.
 
 ```js
-import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
+import { MovementWalletAdapterProvider } from "@movement-labs/wallet-adapter-react";
 ```
 
 Wrap your app with the Provider, pass it the `plugins (wallets)` you want to have on your app as an array and a `autoConnect` option (set to false by default)
 
 ```js
-const wallets = [new AptosWallet()];
+const wallets = [new MovementWallet()];
 
-<AptosWalletAdapterProvider
+<MovementWalletAdapterProvider
   plugins={wallets}
   autoConnect={true}
   onError={(error) => {
@@ -78,15 +78,15 @@ const wallets = [new AptosWallet()];
   }}
 >
   <App />
-</AptosWalletAdapterProvider>;
+</MovementWalletAdapterProvider>;
 ```
 
 #### Use Wallet
 
-On any page you want to use the wallet props, import `useWallet` from `@aptos-labs/wallet-adapter-react`
+On any page you want to use the wallet props, import `useWallet` from `@movement-labs/wallet-adapter-react`
 
 ```js
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@movement-labs/wallet-adapter-react";
 ```
 
 Then you can use the exported properties
@@ -196,7 +196,7 @@ const onConnect = async (walletName) => {
 ```js
 const onSignMessage = async () => {
   const payload = {
-    message: "Hello from Aptos Wallet Adapter",
+    message: "Hello from Movement Wallet Adapter",
     nonce: "random_string",
   };
   const response = await signMessage(payload);
@@ -257,7 +257,7 @@ const onSignMessage = async () => {
 ```js
 const onSignMessageAndVerify = async () => {
   const payload = {
-    message: "Hello from Aptos Wallet Adapter",
+    message: "Hello from Movement Wallet Adapter",
     nonce: "random_string",
   };
   const response = await signMessageAndVerify(payload);

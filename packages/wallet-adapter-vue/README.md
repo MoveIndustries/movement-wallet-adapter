@@ -2,7 +2,7 @@
 
 # Wallet Adapter Vue
 
-A vue provider wrapper for the Aptos Wallet Adapter
+A vue provider wrapper for the Movement Wallet Adapter
 
 Dapps that want to use the adapter should install this package and other supported wallet packages.
 
@@ -35,18 +35,18 @@ signAndSubmitBCSTransaction
 #### Install Dependencies
 
 Install wallet dependencies you want to include in your app.
-To do that, you can look at our [supported wallets list](https://github.com/aptos-labs/aptos-wallet-adapter#supported-wallet-packages). Each wallet is a link to npm package where you can install it from.
+To do that, you can look at our [supported wallets list](https://github.com/movement-labs/movement-wallet-adapter#supported-wallet-packages). Each wallet is a link to npm package where you can install it from.
 
-Next, install the `@aptos-labs/wallet-adapter-vue`
+Next, install the `@movement-labs/wallet-adapter-vue`
 
 ```
-pnpm i @aptos-labs/wallet-adapter-vue
+pnpm i @movement-labs/wallet-adapter-vue
 ```
 
 using npm
 
 ```
-npm i @aptos-labs/wallet-adapter-vue
+npm i @movement-labs/wallet-adapter-vue
 ```
 
 #### Usage
@@ -56,11 +56,11 @@ npm i @aptos-labs/wallet-adapter-vue
 To use Wallet Adapter for Vue in a Nuxt 3 project, you need to create client-side plugin for it (e.g., `plugins/wallet.client.ts`)
 
 ```js
-import { SomeAptosWallet } from "some-aptos-wallet-package";
-import { useWallet } from "@aptos-labs/wallet-adapter-vue";
+import { SomeMovementWallet } from "some-aptos-wallet-package";
+import { useWallet } from "@movement-labs/wallet-adapter-vue";
 
 export default defineNuxtPlugin({
-    const wallets = [new SomeAptosWallet()];
+    const wallets = [new SomeMovementWallet()];
 
     return {
         provide: {
@@ -107,12 +107,12 @@ const {
 Create plugin for it (e.g., `plugins/wallet.ts`)
 
 ```js
-import { SomeAptosWallet } from "some-aptos-wallet-package";
-import { useWallet } from "@aptos-labs/wallet-adapter-vue";
+import { SomeMovementWallet } from "some-aptos-wallet-package";
+import { useWallet } from "@movement-labs/wallet-adapter-vue";
 
 export default {
   install(app: App) {
-  const wallets = [new SomeAptosWallet()];
+  const wallets = [new SomeMovementWallet()];
 
     const wallet = useWallet({
       plugins: wallets,
@@ -244,7 +244,7 @@ const onConnect = async (walletName) => {
 ```js
 const onSignMessage = async () => {
   const payload = {
-    message: "Hello from Aptos Wallet Adapter",
+    message: "Hello from Movement Wallet Adapter",
     nonce: "random_string",
   };
   const response = await signMessage(payload);
@@ -303,7 +303,7 @@ const onSignMessage = async () => {
 ```js
 const onSignMessageAndVerify = async () => {
     const payload = {
-        message: "Hello from Aptos Wallet Adapter",
+        message: "Hello from Movement Wallet Adapter",
         nonce: "random_string",
     };
     const response = await signMessageAndVerify(payload);

@@ -2,7 +2,7 @@ import { createSignInMessage } from "@solana/wallet-standard-util";
 import {
   mapUserResponse,
   DerivableAbstractPublicKey,
-} from "@aptos-labs/derived-wallet-base";
+} from "@movement-labs/derived-wallet-base";
 import {
   AccountAuthenticator,
   AccountAuthenticatorAbstraction,
@@ -12,10 +12,10 @@ import {
   hashValues,
   Serializer,
   AbstractedAccount,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 import { PublicKey as SolanaPublicKey } from "@solana/web3.js";
 import { StandardWalletAdapter as SolanaWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base";
-import { createSiwsEnvelopeForAptosTransaction } from "./createSiwsEnvelope";
+import { createSiwsEnvelopeForMovementTransaction } from "./createSiwsEnvelope";
 import { wrapSolanaUserResponse } from "./shared";
 
 /**
@@ -24,15 +24,15 @@ import { wrapSolanaUserResponse } from "./shared";
  * changes in the future if needed.
  */
 export const SIGNATURE_TYPE = 0;
-export interface SignAptosTransactionWithSolanaInput {
+export interface SignMovementTransactionWithSolanaInput {
   solanaWallet: SolanaWalletAdapter;
   authenticationFunction: string;
   rawTransaction: AnyRawTransaction;
   domain: string;
 }
 
-export async function signAptosTransactionWithSolana(
-  input: SignAptosTransactionWithSolanaInput,
+export async function signMovementTransactionWithSolana(
+  input: SignMovementTransactionWithSolanaInput,
 ) {
   const { solanaWallet, authenticationFunction, rawTransaction, domain } =
     input;
@@ -50,7 +50,7 @@ export async function signAptosTransactionWithSolana(
 
   const signingMessageDigest = hashValues([message]);
 
-  const siwsInput = createSiwsEnvelopeForAptosTransaction({
+  const siwsInput = createSiwsEnvelopeForMovementTransaction({
     solanaPublicKey,
     rawTransaction,
     signingMessageDigest,

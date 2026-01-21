@@ -1,9 +1,9 @@
 export class GA4 {
-  readonly aptosGAID: string | undefined = process.env.GAID;
+  readonly movementGAID: string | undefined = process.env.GAID;
 
   constructor() {
-    // Inject Aptos Google Analytics 4 script
-    this.injectGA(this.aptosGAID);
+    // Inject Movement Google Analytics 4 script
+    this.injectGA(this.movementGAID);
   }
 
   gtag(a: string, b: string | object, c?: object) {

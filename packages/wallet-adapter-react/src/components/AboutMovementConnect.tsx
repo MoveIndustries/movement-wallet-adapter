@@ -18,17 +18,17 @@ import { HeadlessComponentProps, createHeadlessComponent } from "./utils";
 const EXPLORE_ECOSYSTEM_URL =
   "https://aptosnetwork.com/ecosystem/directory/category/defi";
 
-const AboutAptosConnectContext = createContext<{
+const AboutMovementConnectContext = createContext<{
   screenIndex: number;
   setScreenIndex: Dispatch<SetStateAction<number>>;
 } | null>(null);
 
-function useAboutAptosConnectContext(displayName: string) {
-  const context = useContext(AboutAptosConnectContext);
+function useAboutMovementConnectContext(displayName: string) {
+  const context = useContext(AboutMovementConnectContext);
 
   if (!context) {
     throw new Error(
-      `\`${displayName}\` must be used within \`AboutAptosConnect\``,
+      `\`${displayName}\` must be used within \`AboutMovementConnect\``,
     );
   }
 
@@ -43,7 +43,7 @@ const educationScreens = [
     }),
     Description: createHeadlessComponent("EducationScreen.Description", "p", {
       children:
-        "Petra Web is a web3 wallet that uses a Social Login to create accounts on the Aptos blockchain.",
+        "Petra Web is a web3 wallet that uses a Social Login to create accounts on the Movement blockchain.",
     }),
   },
   {
@@ -84,10 +84,10 @@ const educationScreenIndicators = Array(educationScreens.length)
   .fill(null)
   .map((_, index) =>
     createHeadlessComponent(
-      "AboutAptosConnect.ScreenIndicator",
+      "AboutMovementConnect.ScreenIndicator",
       "button",
       (displayName) => {
-        const context = useAboutAptosConnectContext(displayName);
+        const context = useAboutMovementConnectContext(displayName);
         const isActive = context.screenIndex - 1 === index;
 
         return {
@@ -103,7 +103,7 @@ const educationScreenIndicators = Array(educationScreens.length)
   );
 
 /** @deprecated Use {@link AboutPetraWebEducationScreen} instead. */
-export interface AboutAptosConnectEducationScreen {
+export interface AboutMovementConnectEducationScreen {
   /** A component that renders an SVG to illustrate the idea of the current screen. */
   Graphic: ForwardRefExoticComponent<
     Omit<SVGProps<SVGSVGElement>, "ref"> & RefAttributes<SVGSVGElement>
@@ -142,26 +142,26 @@ export interface AboutAptosConnectEducationScreen {
 }
 
 /** @deprecated Use {@link AboutPetraWebProps} instead. */
-export interface AboutAptosConnectProps {
+export interface AboutMovementConnectProps {
   /**
    * A function for defining how each education screen should be rendered.
    * Each screen is modeled as a uniform set of headless components and utilities
    * that allow you to construct your UI and apply your own styles.
    */
   renderEducationScreen: (
-    screen: AboutAptosConnectEducationScreen,
+    screen: AboutMovementConnectEducationScreen,
   ) => ReactNode;
   /**
    * The initial wallet selection UI that will be replaced by the education
-   * screens when `AboutAptosConnect.Trigger` is clicked.
+   * screens when `AboutMovementConnect.Trigger` is clicked.
    */
   children?: ReactNode;
 }
 
-const Root = ({ renderEducationScreen, children }: AboutAptosConnectProps) => {
+const Root = ({ renderEducationScreen, children }: AboutMovementConnectProps) => {
   const [screenIndex, setScreenIndex] = useState(0);
 
-  const currentEducationScreen: AboutAptosConnectEducationScreen = useMemo(
+  const currentEducationScreen: AboutMovementConnectEducationScreen = useMemo(
     () =>
       educationScreens.map((screen, i) => ({
         ...screen,
@@ -184,20 +184,20 @@ const Root = ({ renderEducationScreen, children }: AboutAptosConnectProps) => {
   );
 
   return (
-    <AboutAptosConnectContext.Provider value={{ screenIndex, setScreenIndex }}>
+    <AboutMovementConnectContext.Provider value={{ screenIndex, setScreenIndex }}>
       {screenIndex === 0
         ? children
         : renderEducationScreen(currentEducationScreen)}
-    </AboutAptosConnectContext.Provider>
+    </AboutMovementConnectContext.Provider>
   );
 };
-Root.displayName = "AboutAptosConnect";
+Root.displayName = "AboutMovementConnect";
 
 const Trigger = createHeadlessComponent(
-  "AboutAptosConnect.Trigger",
+  "AboutMovementConnect.Trigger",
   "button",
   (displayName) => {
-    const context = useAboutAptosConnectContext(displayName);
+    const context = useAboutMovementConnectContext(displayName);
 
     return {
       onClick: () => {
@@ -209,10 +209,10 @@ const Trigger = createHeadlessComponent(
 
 /**
  * A headless component for rendering education screens that explain the basics
- * of Aptos Connect and web3 wallets.
+ * of Movement Connect and web3 wallets.
  *
  * @deprecated Use {@link AboutPetraWeb} instead.
  */
-export const AboutAptosConnect = Object.assign(Root, {
+export const AboutMovementConnect = Object.assign(Root, {
   Trigger,
 });
