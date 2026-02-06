@@ -13,24 +13,24 @@ import {
   EthereumChainIdToTestnetChain,
   CrossChainCore,
   EthereumChainIdToMainnetChain,
-} from "@movement-labs/cross-chain-core";
+} from "@moveindustries/cross-chain-core";
 import {
   Account,
   Ed25519PrivateKey,
   Network,
   PrivateKey,
   PrivateKeyVariants,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   Chain,
   WormholeTransferResponse,
   WormholeQuoteResponse,
-} from "@movement-labs/cross-chain-core";
-import { AdapterWallet } from "@movement-labs/wallet-adapter-core";
+} from "@moveindustries/cross-chain-core";
+import { AdapterWallet } from "@moveindustries/wallet-adapter-core";
 import { Loader2, MoveDown } from "lucide-react";
 import USDC from "@/app/icons/USDC";
 import { chainToIcon } from "@/app/icons";
-import { useWallet } from "@movement-labs/wallet-adapter-react";
+import { useWallet } from "@moveindustries/wallet-adapter-react";
 import {
   isEIP1193DerivedWallet,
   OriginWalletDetails,

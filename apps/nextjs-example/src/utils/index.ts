@@ -1,5 +1,5 @@
-import { Aptos, MovementConfig, Network } from "@movement-labs/ts-sdk";
-import { NetworkInfo } from "@movement-labs/wallet-adapter-core";
+import { Movement, MovementConfig, Network } from "@moveindustries/ts-sdk";
+import { NetworkInfo } from "@moveindustries/wallet-adapter-react";
 
 export const movementClient = (network?: NetworkInfo | null) => {
   if (network?.name === Network.DEVNET) {
@@ -13,7 +13,7 @@ export const movementClient = (network?: NetworkInfo | null) => {
       network: Network.CUSTOM,
       fullnode: network?.url,
     });
-    return new Aptos(CUSTOM_CONFIG);
+    return new Movement(CUSTOM_CONFIG);
   }
 };
 
@@ -21,11 +21,11 @@ export const movementClient = (network?: NetworkInfo | null) => {
 export const DEVNET_CONFIG = new MovementConfig({
   network: Network.DEVNET,
 });
-export const DEVNET_CLIENT = new Aptos(DEVNET_CONFIG);
+export const DEVNET_CLIENT = new Movement(DEVNET_CONFIG);
 
 // Testnet client
 export const TESTNET_CONFIG = new MovementConfig({ network: Network.TESTNET });
-export const TESTNET_CLIENT = new Aptos(TESTNET_CONFIG);
+export const TESTNET_CLIENT = new Movement(TESTNET_CONFIG);
 
 export const isSendableNetwork = (
   connected: boolean,

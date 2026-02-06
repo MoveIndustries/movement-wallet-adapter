@@ -3,13 +3,13 @@ import {
   AccountAddress,
   AccountAuthenticator,
   AnyRawTransaction,
-  Aptos,
+  Movement,
   InputSubmitTransactionData,
   Network,
   NetworkToChainId,
   PendingTransactionResponse,
   TransactionSubmitter,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   MovementWallet,
   getMovementWallets,
@@ -28,8 +28,9 @@ import {
   MovementChangeNetworkOutput,
   MovementSignInInput,
   MovementSignInOutput,
-} from "@movement-labs/wallet-standard";
-import { MovementConnectWalletConfig } from "@movement-connect/wallet-adapter-plugin";
+} from "@moveindustries/wallet-standard";
+// TODO: Re-enable when Movement supports social sign-in
+// import { AptosConnectWalletConfig as MovementConnectWalletConfig } from "@aptos-connect/wallet-adapter-plugin";
 
 export type {
   NetworkInfo,
@@ -39,7 +40,7 @@ export type {
   MovementSignMessageInput,
   MovementSignMessageOutput,
   MovementChangeNetworkOutput,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 export type {
   AccountAuthenticator,
   AnyRawTransaction,
@@ -50,7 +51,7 @@ export type {
   AnyPublicKey,
   AccountAddress,
   TransactionSubmitter,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 
 import { GA4 } from "./ga";
 import {
@@ -109,6 +110,19 @@ export type AdapterNotDetectedWallet = Omit<
   readyState: WalletReadyState.NotDetected;
 };
 
+/**
+ * Helper to get wallet feature with fallback to aptos namespace.
+ * Since Movement is a fork of Aptos, we support both namespaces for backwards compatibility.
+ */
+function getWalletFeature<T>(
+  wallet: AdapterWallet,
+  movementFeature: string,
+  aptosFeature: string
+): T | undefined {
+  const features = wallet.features as Record<string, unknown>;
+  return (features[movementFeature] ?? features[aptosFeature]) as T | undefined;
+}
+
 export interface DappConfig {
   network: Network;
   /**
@@ -117,8 +131,9 @@ export interface DappConfig {
    */
   transactionSubmitter?: TransactionSubmitter;
   movementApiKeys?: Partial<Record<Network, string>>;
-  movementConnectDappId?: string;
-  movementConnect?: Omit<MovementConnectWalletConfig, "network">;
+  // TODO: Re-enable when Movement supports social sign-in
+  // movementConnectDappId?: string;
+  // movementConnect?: Omit<MovementConnectWalletConfig, "network">;
   /**
    * @deprecated will be removed in a future version
    */
@@ -409,7 +424,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       }
 
       const movementConfig = getMovementConfig(this._network, this._dappConfig);
-      const aptos = new Aptos(movementConfig);
+      const aptos = new Movement(movementConfig);
       try {
         const name = await aptos.ans.getPrimaryName({
           address: this._account.address.toString(),
@@ -580,7 +595,15 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
     }
 
     await this.connectWallet(selectedWallet, async () => {
-      const response = await selectedWallet.features["movement:connect"].connect();
+      const connectFeature = getWalletFeature<{ connect: () => Promise<any> }>(
+        selectedWallet,
+        "movement:connect",
+        "aptos:connect"
+      );
+      if (!connectFeature) {
+        throw new WalletConnectionError("Wallet does not support connect feature").message;
+      }
+      const response = await connectFeature.connect();
       if (response.status === UserResponseStatus.REJECTED) {
         throw new WalletConnectionError("User has rejected the request")
           .message;
@@ -615,21 +638,30 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       throw new WalletNotFoundError(`Wallet ${walletName} not found`).message;
     }
 
-    if (!selectedWallet.features["movement:signIn"]) {
+    const signInFeature = getWalletFeature<{ signIn: (input: MovementSignInInput) => Promise<any> }>(
+      selectedWallet,
+      "movement:signIn",
+      "aptos:signIn"
+    );
+    if (!signInFeature) {
       throw new WalletNotSupportedMethod(
-        `aptos:signIn is not supported by ${walletName}`,
+        `signIn is not supported by ${walletName}`,
       ).message;
     }
 
     return await this.connectWallet(selectedWallet, async () => {
-      if (!selectedWallet.features["movement:signIn"]) {
+      const signInFeature = getWalletFeature<{ signIn: (input: MovementSignInInput) => Promise<any> }>(
+        selectedWallet,
+        "movement:signIn",
+        "aptos:signIn"
+      );
+      if (!signInFeature) {
         throw new WalletNotSupportedMethod(
-          `aptos:signIn is not supported by ${selectedWallet.name}`,
+          `signIn is not supported by ${selectedWallet.name}`,
         ).message;
       }
 
-      const response =
-        await selectedWallet.features["movement:signIn"].signIn(input);
+      const response = await signInFeature.signIn(input);
       if (response.status === UserResponseStatus.REJECTED) {
         throw new WalletConnectionError("User has rejected the request")
           .message;
@@ -657,8 +689,13 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       this.setWallet(selectedWallet);
       const { account, output } = await onConnect();
       this.setAccount(account);
-      const network = await selectedWallet.features["movement:network"].network();
-      this.setNetwork(network);
+      const networkFeature = getWalletFeature<{ network: () => Promise<NetworkInfo> }>(
+        selectedWallet,
+        "movement:network",
+        "aptos:network"
+      );
+      const network = await networkFeature?.network();
+      this.setNetwork(network ?? null);
       await this.setAnsName();
       setLocalStorage(selectedWallet.name);
       this._connected = true;
@@ -684,7 +721,12 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
   async disconnect(): Promise<void> {
     try {
       this.ensureWalletExists(this._wallet);
-      await this._wallet.features["movement:disconnect"].disconnect();
+      const disconnectFeature = getWalletFeature<{ disconnect: () => Promise<void> }>(
+        this._wallet,
+        "movement:disconnect",
+        "aptos:disconnect"
+      );
+      await disconnectFeature?.disconnect();
       this.clearData();
       this.recordEvent("wallet_disconnect");
       this.emit("disconnect");
@@ -732,19 +774,22 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
         transactionInput.transactionSubmitter
       );
 
-      if (
-        this._wallet.features["movement:signAndSubmitTransaction"] &&
-        !shouldUseTxnSubmitter
-      ) {
+      const signAndSubmitFeature = getWalletFeature<{
+        signAndSubmitTransaction: any;
+        version?: string;
+      }>(
+        this._wallet,
+        "movement:signAndSubmitTransaction",
+        "aptos:signAndSubmitTransaction"
+      );
+
+      if (signAndSubmitFeature && !shouldUseTxnSubmitter) {
         // check for backward compatibility. before version 1.1.0 the standard expected
         // AnyRawTransaction input so the adapter built the transaction before sending it to the wallet
-        if (
-          this._wallet.features["movement:signAndSubmitTransaction"].version !==
-          "1.1.0"
-        ) {
+        if (signAndSubmitFeature.version !== "1.1.0") {
           const movementConfig = getMovementConfig(this._network, this._dappConfig);
 
-          const aptos = new Aptos(movementConfig);
+          const aptos = new Movement(movementConfig);
           const transaction = await aptos.transaction.build.simple({
             sender: this._account.address.toString(),
             data: transactionInput.data,
@@ -755,10 +800,8 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
             transaction: AnyRawTransaction,
           ) => Promise<UserResponse<MovementSignAndSubmitTransactionOutput>>;
 
-          const signAndSubmitTransactionMethod = this._wallet.features[
-            "movement:signAndSubmitTransaction"
-          ]
-            .signAndSubmitTransaction as unknown as MovementSignAndSubmitTransactionV1Method;
+          const signAndSubmitTransactionMethod =
+            signAndSubmitFeature.signAndSubmitTransaction as unknown as MovementSignAndSubmitTransactionV1Method;
 
           const response = (await signAndSubmitTransactionMethod(
             transaction,
@@ -772,9 +815,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
           return response.args;
         }
 
-        const response = await this._wallet.features[
-          "movement:signAndSubmitTransaction"
-        ].signAndSubmitTransaction({
+        const response = await signAndSubmitFeature.signAndSubmitTransaction({
           payload: transactionInput.data,
           gasUnitPrice: transactionInput.options?.gasUnitPrice,
           maxGasAmount: transactionInput.options?.maxGasAmount,
@@ -789,7 +830,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       // If wallet does not support signAndSubmitTransaction or a transaction submitter
       // is provided, the adapter will sign and submit it for the dapp.
       const movementConfig = getMovementConfig(this._network, this._dappConfig);
-      const aptos = new Aptos(movementConfig);
+      const aptos = new Movement(movementConfig);
       const transaction = await aptos.transaction.build.simple({
         sender: this._account.address.toString(),
         data: transactionInput.data,
@@ -851,11 +892,18 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       this.ensureAccountExists(this._account);
       this.recordEvent("sign_transaction");
 
+      const signTransactionFeature = getWalletFeature<{
+        signTransaction: any;
+        version?: string;
+      }>(
+        this._wallet,
+        "movement:signTransaction",
+        "aptos:signTransaction"
+      );
+
       // dapp sends a generated transaction (i.e AnyRawTransaction), which is supported by the wallet standard at signTransaction version 1.0.0
       if ("rawTransaction" in transactionOrPayload) {
-        const response = (await this._wallet?.features[
-          "movement:signTransaction"
-        ].signTransaction(
+        const response = (await signTransactionFeature?.signTransaction(
           transactionOrPayload,
           asFeePayer,
         )) as UserResponse<AccountAuthenticator>;
@@ -868,9 +916,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
           rawTransaction: transactionOrPayload.rawTransaction.bcsToBytes(),
         };
       } // dapp sends a transaction data input (i.e InputTransactionData), which is supported by the wallet standard at signTransaction version 1.1.0
-      else if (
-        this._wallet.features["movement:signTransaction"]?.version === "1.1.0"
-      ) {
+      else if (signTransactionFeature?.version === "1.1.0") {
         // convert input to standard expected input
         const signTransactionV1_1StandardInput: MovementSignTransactionInputV1_1 =
           {
@@ -887,10 +933,9 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
               : undefined,
           };
 
-        const walletSignTransactionMethod = this._wallet?.features[
-          "movement:signTransaction"
-        ].signTransaction as MovementSignTransactionMethod &
-          MovementSignTransactionMethodV1_1;
+        const walletSignTransactionMethod =
+          signTransactionFeature.signTransaction as MovementSignTransactionMethod &
+            MovementSignTransactionMethodV1_1;
 
         const response = (await walletSignTransactionMethod(
           signTransactionV1_1StandardInput,
@@ -906,7 +951,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       } else {
         // dapp input is InputTransactionData but the wallet does not support it, so we convert it to a rawTransaction
         const movementConfig = getMovementConfig(this._network, this._dappConfig);
-        const aptos = new Aptos(movementConfig);
+        const aptos = new Movement(movementConfig);
 
         const transaction = await aptos.transaction.build.simple({
           sender: this._account.address,
@@ -915,9 +960,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
           withFeePayer: transactionOrPayload.withFeePayer,
         });
 
-        const response = (await this._wallet?.features[
-          "movement:signTransaction"
-        ].signTransaction(
+        const response = (await signTransactionFeature?.signTransaction(
           transaction,
           asFeePayer,
         )) as UserResponse<AccountAuthenticator>;
@@ -952,8 +995,12 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       this.ensureWalletExists(this._wallet);
       this.recordEvent("sign_message");
 
-      const response =
-        await this._wallet?.features["movement:signMessage"]?.signMessage(message);
+      const signMessageFeature = getWalletFeature<{ signMessage: (msg: MovementSignMessageInput) => Promise<any> }>(
+        this._wallet,
+        "movement:signMessage",
+        "aptos:signMessage"
+      );
+      const response = await signMessageFeature?.signMessage(message);
       if (response.status === UserResponseStatus.REJECTED) {
         throw new WalletConnectionError("User has rejected the request")
           .message;
@@ -988,7 +1035,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       });
 
       const movementConfig = getMovementConfig(this._network, this._dappConfig);
-      const aptos = new Aptos(movementConfig);
+      const aptos = new Movement(movementConfig);
       if (additionalSignersAuthenticators !== undefined) {
         const multiAgentTxn = {
           ...transaction,
@@ -1012,7 +1059,12 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
   async onAccountChange(): Promise<void> {
     try {
       this.ensureWalletExists(this._wallet);
-      await this._wallet.features["movement:onAccountChange"]?.onAccountChange(
+      const onAccountChangeFeature = getWalletFeature<{ onAccountChange: (cb: (data: AccountInfo) => void) => Promise<void> }>(
+        this._wallet,
+        "movement:onAccountChange",
+        "aptos:onAccountChange"
+      );
+      await onAccountChangeFeature?.onAccountChange(
         async (data: AccountInfo) => {
           this.setAccount(data);
           await this.setAnsName();
@@ -1034,7 +1086,12 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
   async onNetworkChange(): Promise<void> {
     try {
       this.ensureWalletExists(this._wallet);
-      await this._wallet.features["movement:onNetworkChange"]?.onNetworkChange(
+      const onNetworkChangeFeature = getWalletFeature<{ onNetworkChange: (cb: (data: NetworkInfo) => void) => Promise<void> }>(
+        this._wallet,
+        "movement:onNetworkChange",
+        "aptos:onNetworkChange"
+      );
+      await onNetworkChangeFeature?.onNetworkChange(
         async (data: NetworkInfo) => {
           this.setNetwork(data);
           await this.setAnsName();
@@ -1070,11 +1127,13 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
         chainId,
       };
 
-      if (this._wallet.features["movement:changeNetwork"]) {
-        const response =
-          await this._wallet.features["movement:changeNetwork"].changeNetwork(
-            networkInfo,
-          );
+      const changeNetworkFeature = getWalletFeature<{ changeNetwork: (network: NetworkInfo) => Promise<any> }>(
+        this._wallet,
+        "movement:changeNetwork",
+        "aptos:changeNetwork"
+      );
+      if (changeNetworkFeature) {
+        const response = await changeNetworkFeature.changeNetwork(networkInfo);
         if (response.status === UserResponseStatus.REJECTED) {
           throw new WalletConnectionError("User has rejected the request")
             .message;
@@ -1103,9 +1162,12 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       this.recordEvent("sign_message_and_verify");
 
       // sign the message
-      const response = (await this._wallet.features[
-        "movement:signMessage"
-      ].signMessage(message)) as UserResponse<MovementSignMessageOutput>;
+      const signMessageFeature = getWalletFeature<{ signMessage: (msg: MovementSignMessageInput) => Promise<any> }>(
+        this._wallet,
+        "movement:signMessage",
+        "aptos:signMessage"
+      );
+      const response = (await signMessageFeature?.signMessage(message)) as UserResponse<MovementSignMessageOutput>;
 
       if (response.status === UserResponseStatus.REJECTED) {
         throw new WalletConnectionError("Failed to sign a message").message;

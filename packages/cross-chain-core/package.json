@@ -1,7 +1,7 @@
 {
-  "name": "@movement-labs/cross-chain-core",
+  "name": "@moveindustries/cross-chain-core",
   "version": "5.4.6",
-  "description": "Aptos Cross Chain Core",
+  "description": "Movement Cross Chain Core",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -13,19 +13,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aptos-labs/movement-wallet-adapter.git"
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter.git"
   },
-  "homepage": "https://github.com/aptos-labs/movement-wallet-adapter",
+  "homepage": "https://github.com/MoveIndustries/movement-wallet-adapter",
   "bugs": {
-    "url": "https://github.com/aptos-labs/movement-wallet-adapter/issues"
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter/issues"
   },
   "author": "movementlabs.xyz",
   "keywords": [
-    "Aptos",
+    "Movement",
     "Movement Labs",
     "Wallet",
     "Wallet Adapter",
-    "Aptos Wallet"
+    "Movement Wallet"
   ],
   "scripts": {
     "update-version": "node -p \"'export const CROSS_CHAIN_CORE_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts",
@@ -39,8 +39,8 @@
     "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist"
   },
   "devDependencies": {
-    "@movement-labs/eslint-config-adapter": "workspace:*",
-    "@movement-labs/wallet-adapter-tsconfig": "workspace:*",
+    "@moveindustries/eslint-config-adapter": "workspace:*",
+    "@moveindustries/wallet-adapter-tsconfig": "workspace:*",
     "@types/jest": "^29.2.4",
     "@types/node": "^20.10.4",
     "eslint": "^8.57.1",
@@ -50,10 +50,10 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@movement-labs/wallet-adapter-core": "workspace:*",
-    "@movement-labs/derived-wallet-ethereum": "workspace:*",
-    "@movement-labs/derived-wallet-solana": "workspace:*",
-    "@movement-labs/wallet-standard": "^0.5.2",
+    "@moveindustries/wallet-adapter-core": "workspace:*",
+    "@moveindustries/derived-wallet-ethereum": "workspace:*",
+    "@moveindustries/derived-wallet-solana": "workspace:*",
+    "@moveindustries/wallet-standard": "^0.5.2",
     "@mysten/sui": "^1.21.2",
     "@mysten/wallet-standard": "^0.13.26",
     "@solana/spl-token": "^0.4.12",
@@ -73,7 +73,7 @@
     "tweetnacl": "^1.0.3"
   },
   "peerDependencies": {
-    "@movement-labs/ts-sdk": "^5.1.1"
+    "@moveindustries/ts-sdk": "^5.1.5"
   },
   "files": [
     "dist",

@@ -1,11 +1,11 @@
 import {
   AccountAuthenticator,
   AnyRawTransaction,
-  Aptos,
+  Movement,
   MovementConfig,
   Network as MovementNetwork,
   Account,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 
 import {
   Chain,
@@ -94,7 +94,7 @@ export async function signAndSendTransaction(
   const movementConfig = new MovementConfig({
     network: MovementNetwork.TESTNET,
   });
-  const aptos = new Aptos(movementConfig);
+  const aptos = new Movement(movementConfig);
 
   const txnToSign = await aptos.transaction.build.simple({
     data: payload,

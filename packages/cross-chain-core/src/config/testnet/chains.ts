@@ -68,16 +68,16 @@ export const testnetChains: ChainsConfig = {
     symbol: "SOL",
     defaultRpc: "https://api.devnet.solana.com",
   },
-  Aptos: {
+  Movement: {
     key: "Movement",
     context: Context.APTOS,
     displayName: "Movement",
     explorerUrl: "https://explorer.movementlabs.xyz?network=testnet",
-    explorerName: "Aptos Explorer",
+    explorerName: "Movement Explorer",
     chainId: 0,
     icon: "Movement",
-    symbol: "APT",
-    defaultRpc: "https://fullnode.testnet.aptos.dev",
+    symbol: "MOVE",
+    defaultRpc: "https://fullnode.testnet.movementlabs.xyz/v1",
   },
   // Sui: {
   //   key: "Sui",

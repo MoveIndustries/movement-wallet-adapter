@@ -6,7 +6,7 @@ import {
   AccountAuthenticator,
   AnyRawTransaction,
   Ed25519Account,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import TransactionHash from "~/components/TransactionHash.vue";
 import { toast } from "~/components/ui/toast";
 

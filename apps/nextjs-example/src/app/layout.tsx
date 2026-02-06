@@ -1,16 +1,13 @@
-import "@movement-labs/wallet-adapter-ant-design/dist/index.css";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { WalletProvider } from "@/components/WalletProvider";
-import { Toaster } from "@/components/ui/toaster";
+import { ClientProviders } from "@/components/ClientProviders";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google";
 import { PropsWithChildren } from "react";
-import { AutoConnectProvider } from "@/components/AutoConnectProvider";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
-import { TransactionSubmitterProvider } from "@/components/TransactionSubmitterProvider";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -34,20 +31,15 @@ export default function RootLayout({ children }: PropsWithChildren) {
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >
-          <AutoConnectProvider>
-            <ReactQueryClientProvider>
-              <TransactionSubmitterProvider>
-                <WalletProvider>
-                  {children}
-                  <Toaster />
-                </WalletProvider>
-              </TransactionSubmitterProvider>
-            </ReactQueryClientProvider>
-          </AutoConnectProvider>
+          <ReactQueryClientProvider>
+            <WalletProvider>
+              <ClientProviders>{children}</ClientProviders>
+            </WalletProvider>
+          </ReactQueryClientProvider>
         </ThemeProvider>
       </body>
     </html>

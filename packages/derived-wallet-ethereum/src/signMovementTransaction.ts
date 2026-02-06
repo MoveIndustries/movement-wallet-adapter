@@ -1,7 +1,7 @@
 import {
   DerivableAbstractPublicKey,
   mapUserResponse,
-} from "@movement-labs/derived-wallet-base";
+} from "@moveindustries/derived-wallet-base";
 import {
   AbstractedAccount,
   AccountAuthenticator,
@@ -10,8 +10,8 @@ import {
   generateSigningMessageForTransaction,
   hashValues,
   Serializer,
-} from "@movement-labs/ts-sdk";
-import { UserResponse } from "@movement-labs/wallet-standard";
+} from "@moveindustries/ts-sdk";
+import { UserResponse } from "@moveindustries/wallet-standard";
 import { BrowserProvider, Eip1193Provider } from "ethers";
 import { createSiweEnvelopeForMovementTransaction } from "./createSiweEnvelope";
 import { EIP1193SiweSignature } from "./EIP1193DerivedSignature";

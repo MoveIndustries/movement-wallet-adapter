@@ -6,7 +6,7 @@ import {
   getMovementConnectWallets,
   partitionWallets,
   MovementPrivacyPolicy,
-} from "@movement-labs/wallet-adapter-vue";
+} from "@moveindustries/wallet-adapter-vue";
 
 import { ChevronDown } from "lucide-vue-next";
 import {

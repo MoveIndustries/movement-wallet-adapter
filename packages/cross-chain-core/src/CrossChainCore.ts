@@ -1,4 +1,4 @@
-import { Account, Network } from "@movement-labs/ts-sdk";
+import { Account, Network } from "@moveindustries/ts-sdk";
 
 import {
   WormholeTransferRequest,
@@ -38,8 +38,8 @@ export interface CrossChainDappConfig {
     };
   };
 }
-export type { AccountAddressInput } from "@movement-labs/ts-sdk";
-export { NetworkToChainId, NetworkToNodeAPI } from "@movement-labs/ts-sdk";
+export type { AccountAddressInput } from "@moveindustries/ts-sdk";
+export { NetworkToChainId, NetworkToNodeAPI } from "@moveindustries/ts-sdk";
 export type MovementAccount = Account;
 
 // List of all the supported chain

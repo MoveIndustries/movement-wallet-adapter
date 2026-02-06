@@ -6,8 +6,9 @@ import {
   wormhole,
   PlatformLoader,
   TransferState,
+  Chain as WormholeChain,
 } from "@wormhole-foundation/sdk";
-import { Network, sleep } from "@movement-labs/ts-sdk";
+import { Network, sleep } from "@moveindustries/ts-sdk";
 import aptos from "@wormhole-foundation/sdk/aptos";
 import solana from "@wormhole-foundation/sdk/solana";
 import evm from "@wormhole-foundation/sdk/evm";
@@ -17,6 +18,15 @@ import {
   CrossChainProvider,
   CrossChainCore,
 } from "../../CrossChainCore";
+
+// Helper to map our Chain type to Wormhole SDK's Chain type
+// "Movement" maps to "Aptos" since Movement is Aptos-compatible
+function toWormholeChain(chain: Chain): WormholeChain {
+  if (chain === "Movement") {
+    return "Aptos" as WormholeChain;
+  }
+  return chain as WormholeChain;
+}
 import { logger } from "../../utils/logger";
 import { MovementLocalSigner } from "./signers/MovementLocalSigner";
 import { Signer } from "./signers/Signer";
@@ -34,8 +44,8 @@ import {
   WormholeWithdrawRequest,
   WormholeWithdrawResponse,
 } from "./types";
-import { SolanaDerivedWallet } from "@movement-labs/derived-wallet-solana";
-import { EIP1193DerivedWallet } from "@movement-labs/derived-wallet-ethereum";
+import { SolanaDerivedWallet } from "@moveindustries/derived-wallet-solana";
+import { EIP1193DerivedWallet } from "@moveindustries/derived-wallet-ethereum";
 
 export class WormholeProvider
   implements
@@ -95,11 +105,11 @@ export class WormholeProvider
     );
 
     const destContext = this._wormholeContext
-      .getPlatform(chainToPlatform(destinationChain))
-      .getChain(destinationChain);
+      .getPlatform(chainToPlatform(toWormholeChain(destinationChain)))
+      .getChain(toWormholeChain(destinationChain));
     const sourceContext = this._wormholeContext
-      .getPlatform(chainToPlatform(sourceChain))
-      .getChain(sourceChain);
+      .getPlatform(chainToPlatform(toWormholeChain(sourceChain)))
+      .getChain(toWormholeChain(sourceChain));
 
     logger.log("sourceContext", sourceContext);
     logger.log("sourceToken", sourceToken);
@@ -217,7 +227,7 @@ export class WormholeProvider
       this.wormholeRequest,
       signer,
       this.wormholeQuote,
-      Wormhole.chainAddress("Movement", destinationAddress.toString()),
+      Wormhole.chainAddress(toWormholeChain("Movement"), destinationAddress.toString()),
     );
 
     const originChainTxnId =
@@ -250,7 +260,7 @@ export class WormholeProvider
 
             try {
               const signer = new MovementLocalSigner(
-                "Movement",
+                toWormholeChain("Movement"),
                 {},
                 mainSigner, // the account that signs the "claim" transaction
                 sponsorAccount ? sponsorAccount : undefined, // the fee payer account
@@ -352,14 +362,14 @@ export class WormholeProvider
     logger.log("wormholeQuote", this.wormholeQuote);
     logger.log(
       "Wormhole.chainAddress",
-      Wormhole.chainAddress(sourceChain, input.destinationAddress.toString()),
+      Wormhole.chainAddress(toWormholeChain(sourceChain), input.destinationAddress.toString()),
     );
 
     let receipt = await this.wormholeRoute.initiate(
       this.wormholeRequest,
       signer,
       this.wormholeQuote,
-      Wormhole.chainAddress(sourceChain, input.destinationAddress.toString()),
+      Wormhole.chainAddress(toWormholeChain(sourceChain), input.destinationAddress.toString()),
     );
     logger.log("receipt", receipt);
 
@@ -448,12 +458,12 @@ export class WormholeProvider
     destToken: TokenId;
   } {
     const sourceToken: TokenId = Wormhole.tokenId(
-      this.crossChainCore.TOKENS[sourceChain].tokenId.chain as Chain,
+      toWormholeChain(this.crossChainCore.TOKENS[sourceChain].tokenId.chain as Chain),
       this.crossChainCore.TOKENS[sourceChain].tokenId.address,
     );
 
     const destToken: TokenId = Wormhole.tokenId(
-      this.crossChainCore.TOKENS[destinationChain].tokenId.chain as Chain,
+      toWormholeChain(this.crossChainCore.TOKENS[destinationChain].tokenId.chain as Chain),
       this.crossChainCore.TOKENS[destinationChain].tokenId.address,
     );
 

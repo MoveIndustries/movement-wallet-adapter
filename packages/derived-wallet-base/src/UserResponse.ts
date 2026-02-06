@@ -3,7 +3,7 @@ import {
   UserRejection,
   UserResponse,
   UserResponseStatus,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 
 export function makeUserApproval<T>(args: T): UserApproval<T> {
   return {

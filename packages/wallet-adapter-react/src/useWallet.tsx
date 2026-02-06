@@ -16,7 +16,7 @@ import {
   InputSubmitTransactionData,
   MovementSignInInput,
   MovementSignInOutput,
-} from "@movement-labs/wallet-adapter-core";
+} from "@moveindustries/wallet-adapter-core";
 
 export interface WalletContextState {
   connected: boolean;

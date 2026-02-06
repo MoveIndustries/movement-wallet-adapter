@@ -3,9 +3,9 @@ import {
   mapUserResponse,
   StructuredMessage,
   StructuredMessageInput,
-} from "@movement-labs/derived-wallet-base";
-import { Ed25519Signature } from "@movement-labs/ts-sdk";
-import { MovementSignMessageOutput } from "@movement-labs/wallet-standard";
+} from "@moveindustries/derived-wallet-base";
+import { Ed25519Signature } from "@moveindustries/ts-sdk";
+import { MovementSignMessageOutput } from "@moveindustries/wallet-standard";
 import { StandardWalletAdapter as SolanaWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base";
 import { wrapSolanaUserResponse } from "./shared";
 import { SolanaDerivedPublicKey } from "./SolanaDerivedPublicKey";

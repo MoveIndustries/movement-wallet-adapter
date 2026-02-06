@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { WalletSelector as ShadcnWalletSelector } from "@/components/WalletSelector";
-import { WalletConnector as MuiWalletSelector } from "@movement-labs/wallet-adapter-mui-design";
+import { WalletConnector as MuiWalletSelector } from "@moveindustries/wallet-adapter-mui-design";
 
 export function WalletSelection() {
   const { autoConnect, setAutoConnect } = useAutoConnect();

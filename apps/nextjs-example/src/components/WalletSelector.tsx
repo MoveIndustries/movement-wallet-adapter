@@ -1,295 +1,125 @@
 "use client";
 
-import {
-  AboutPetraWeb,
-  AboutPetraWebEducationScreen,
-  AdapterNotDetectedWallet,
-  AdapterWallet,
-  MovementPrivacyPolicy,
-  groupAndSortWallets,
-  isInstallRequired,
-  isPetraWebWallet,
-  PETRA_WEB_ACCOUNT_URL,
-  truncateAddress,
-  useWallet,
-  WalletItem,
-  WalletSortingOptions,
-} from "@movement-labs/wallet-adapter-react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  ChevronDown,
-  Copy,
-  LogOut,
-  User,
-} from "lucide-react";
-import { useCallback, useState } from "react";
-import { Button } from "./ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "./ui/collapsible";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { useToast } from "./ui/use-toast";
+import { useWallet } from "@moveindustries/wallet-adapter-react";
+import { WalletModal } from "@moveindustries/wallet-adapter-move-design";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import { Copy, LogOut, ChevronDown } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
-  const { account, connected, disconnect, wallet } = useWallet();
+function truncateAddress(address: string | undefined) {
+  if (!address) return;
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
+}
+
+export function WalletSelector() {
+  const { account, connected, disconnect } = useWallet();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const closeDialog = useCallback(() => setIsDialogOpen(false), []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const copyAddress = useCallback(async () => {
     if (!account?.address) return;
     try {
       await navigator.clipboard.writeText(account.address.toString());
       toast({
-        title: "Success",
-        description: "Copied wallet address to clipboard.",
+        title: "Copied",
+        description: "Wallet address copied to clipboard",
       });
     } catch {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to copy wallet address.",
+        description: "Failed to copy wallet address",
       });
     }
   }, [account?.address, toast]);
 
-  return connected ? (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button>
-          {account?.ansName ||
-            truncateAddress(account?.address?.toString()) ||
-            "Unknown"}
+  if (connected && account) {
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <Button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          variant="outline"
+          className="flex items-center gap-2"
+        >
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="font-mono">
+            {truncateAddress(account?.address?.toString())}
+          </span>
+          <ChevronDown
+            className={`w-4 h-4 transition-transform ${
+              isDropdownOpen ? "rotate-180" : ""
+            }`}
+          />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onSelect={copyAddress} className="gap-2">
-          <Copy className="h-4 w-4" /> Copy address
-        </DropdownMenuItem>
-        {wallet && isPetraWebWallet(wallet) && (
-          <DropdownMenuItem asChild>
-            <a
-              href={PETRA_WEB_ACCOUNT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex gap-2"
-            >
-              <User className="h-4 w-4" /> Account
-            </a>
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuItem onSelect={disconnect} className="gap-2">
-          <LogOut className="h-4 w-4" /> Disconnect
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  ) : (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button>Connect a Wallet</Button>
-      </DialogTrigger>
-      <ConnectWalletDialog close={closeDialog} {...walletSortingOptions} />
-    </Dialog>
-  );
-}
 
-interface ConnectWalletDialogProps extends WalletSortingOptions {
-  close: () => void;
-}
-
-function ConnectWalletDialog({
-  close,
-  ...walletSortingOptions
-}: ConnectWalletDialogProps) {
-  const { wallets = [], notDetectedWallets = [] } = useWallet();
-
-  const { petraWebWallets, availableWallets, installableWallets } =
-    groupAndSortWallets(
-      [...wallets, ...notDetectedWallets],
-      walletSortingOptions,
-    );
-
-  const hasPetraWebWallets = !!petraWebWallets.length;
-
-  return (
-    <DialogContent className="max-h-screen overflow-auto">
-      <AboutPetraWeb renderEducationScreen={renderEducationScreen}>
-        <DialogHeader>
-          <DialogTitle className="flex flex-col text-center leading-snug">
-            {hasPetraWebWallets ? (
-              <>
-                <span>Log in or sign up</span>
-                <span>with Social + Petra Web</span>
-              </>
-            ) : (
-              "Connect Wallet"
-            )}
-          </DialogTitle>
-        </DialogHeader>
-
-        {hasPetraWebWallets && (
-          <div className="flex flex-col gap-2 pt-3">
-            {petraWebWallets.map((wallet) => (
-              <PetraWebWalletRow
-                key={wallet.name}
-                wallet={wallet}
-                onConnect={close}
-              />
-            ))}
-            <p className="flex gap-1 justify-center items-center text-muted-foreground text-sm">
-              Learn more about{" "}
-              <AboutPetraWeb.Trigger className="flex gap-1 py-3 items-center text-foreground">
-                Petra Web <ArrowRight size={16} />
-              </AboutPetraWeb.Trigger>
-            </p>
-            <MovementPrivacyPolicy className="flex flex-col items-center py-1">
-              <p className="text-xs leading-5">
-                <MovementPrivacyPolicy.Disclaimer />{" "}
-                <MovementPrivacyPolicy.Link className="text-muted-foreground underline underline-offset-4" />
-                <span className="text-muted-foreground">.</span>
+        {isDropdownOpen && (
+          <div className="absolute right-0 mt-2 w-64 bg-card border border-border rounded-lg shadow-2xl overflow-hidden z-50">
+            <div className="p-3 border-b border-border">
+              <p className="text-xs text-muted-foreground mb-1">
+                Connected Address
               </p>
-              <MovementPrivacyPolicy.PoweredBy className="flex gap-1.5 items-center text-xs leading-5 text-muted-foreground" />
-            </MovementPrivacyPolicy>
-            <div className="flex items-center gap-3 pt-4 text-muted-foreground">
-              <div className="h-px w-full bg-secondary" />
-              Or
-              <div className="h-px w-full bg-secondary" />
+              <p className="text-sm font-mono text-foreground break-all">
+                {account?.address?.toString()}
+              </p>
+            </div>
+
+            <div className="p-1">
+              <button
+                onClick={() => {
+                  copyAddress();
+                  setIsDropdownOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-foreground hover:bg-muted rounded-lg transition-colors cursor-pointer"
+              >
+                <Copy className="w-4 h-4 text-muted-foreground" />
+                Copy Address
+              </button>
+
+              <button
+                onClick={() => {
+                  disconnect();
+                  setIsDropdownOpen(false);
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2 text-left text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                Disconnect
+              </button>
             </div>
           </div>
         )}
-
-        <div className="flex flex-col gap-3 pt-3">
-          {availableWallets.map((wallet) => (
-            <WalletRow key={wallet.name} wallet={wallet} onConnect={close} />
-          ))}
-          {!!installableWallets.length && (
-            <Collapsible className="flex flex-col gap-3">
-              <CollapsibleTrigger asChild>
-                <Button size="sm" variant="ghost" className="gap-2">
-                  More wallets <ChevronDown />
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="flex flex-col gap-3">
-                {installableWallets.map((wallet) => (
-                  <WalletRow
-                    key={wallet.name}
-                    wallet={wallet}
-                    onConnect={close}
-                  />
-                ))}
-              </CollapsibleContent>
-            </Collapsible>
-          )}
-        </div>
-      </AboutPetraWeb>
-    </DialogContent>
-  );
-}
-
-interface WalletRowProps {
-  wallet: AdapterWallet | AdapterNotDetectedWallet;
-  onConnect?: () => void;
-}
-
-function WalletRow({ wallet, onConnect }: WalletRowProps) {
-  return (
-    <WalletItem
-      wallet={wallet}
-      onConnect={onConnect}
-      className="flex items-center justify-between px-4 py-3 gap-4 border rounded-md"
-    >
-      <div className="flex items-center gap-4">
-        <WalletItem.Icon className="h-6 w-6" />
-        <WalletItem.Name className="text-base font-normal" />
       </div>
-      {isInstallRequired(wallet) ? (
-        <Button size="sm" variant="ghost" asChild>
-          <WalletItem.InstallLink />
-        </Button>
-      ) : (
-        <WalletItem.ConnectButton asChild>
-          <Button size="sm">Connect</Button>
-        </WalletItem.ConnectButton>
-      )}
-    </WalletItem>
-  );
-}
+    );
+  }
 
-function PetraWebWalletRow({ wallet, onConnect }: WalletRowProps) {
-  return (
-    <WalletItem wallet={wallet} onConnect={onConnect}>
-      <WalletItem.ConnectButton asChild>
-        <Button size="lg" variant="outline" className="w-full gap-4">
-          <WalletItem.Icon className="h-5 w-5" />
-          <WalletItem.Name className="text-base font-normal" />
-        </Button>
-      </WalletItem.ConnectButton>
-    </WalletItem>
-  );
-}
-
-function renderEducationScreen(screen: AboutPetraWebEducationScreen) {
   return (
     <>
-      <DialogHeader className="grid grid-cols-[1fr_4fr_1fr] items-center space-y-0">
-        <Button variant="ghost" size="icon" onClick={screen.cancel}>
-          <ArrowLeft />
-        </Button>
-        <DialogTitle className="leading-snug text-base text-center">
-          About Petra Web
-        </DialogTitle>
-      </DialogHeader>
+      <Button onClick={() => setIsModalOpen(true)}>Connect Wallet</Button>
 
-      <div className="flex h-[162px] pb-3 items-end justify-center">
-        <screen.Graphic />
-      </div>
-      <div className="flex flex-col gap-2 text-center pb-4">
-        <screen.Title className="text-xl" />
-        <screen.Description className="text-sm text-muted-foreground [&>a]:underline [&>a]:underline-offset-4 [&>a]:text-foreground" />
-      </div>
-
-      <div className="grid grid-cols-3 items-center">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={screen.back}
-          className="justify-self-start"
-        >
-          Back
-        </Button>
-        <div className="flex items-center gap-2 place-self-center">
-          {screen.screenIndicators.map((ScreenIndicator, i) => (
-            <ScreenIndicator key={i} className="py-4">
-              <div className="h-0.5 w-6 transition-colors bg-muted [[data-active]>&]:bg-foreground" />
-            </ScreenIndicator>
-          ))}
-        </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={screen.next}
-          className="gap-2 justify-self-end"
-        >
-          {screen.screenIndex === screen.totalScreens - 1 ? "Finish" : "Next"}
-          <ArrowRight size={16} />
-        </Button>
-      </div>
+      {mounted && isModalOpen && (
+        <WalletModal onClose={() => setIsModalOpen(false)} />
+      )}
     </>
   );
 }

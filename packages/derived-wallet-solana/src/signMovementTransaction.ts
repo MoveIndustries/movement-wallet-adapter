@@ -2,7 +2,7 @@ import { createSignInMessage } from "@solana/wallet-standard-util";
 import {
   mapUserResponse,
   DerivableAbstractPublicKey,
-} from "@movement-labs/derived-wallet-base";
+} from "@moveindustries/derived-wallet-base";
 import {
   AccountAuthenticator,
   AccountAuthenticatorAbstraction,
@@ -12,7 +12,7 @@ import {
   hashValues,
   Serializer,
   AbstractedAccount,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import { PublicKey as SolanaPublicKey } from "@solana/web3.js";
 import { StandardWalletAdapter as SolanaWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base";
 import { createSiwsEnvelopeForMovementTransaction } from "./createSiwsEnvelope";

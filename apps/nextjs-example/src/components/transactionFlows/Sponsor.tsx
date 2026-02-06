@@ -4,8 +4,8 @@ import {
   AccountAddress,
   AccountAuthenticator,
   AnyRawTransaction,
-} from "@movement-labs/ts-sdk";
-import { useWallet } from "@movement-labs/wallet-adapter-react";
+} from "@moveindustries/ts-sdk";
+import { useWallet } from "@moveindustries/wallet-adapter-react";
 import { useState } from "react";
 import { TransactionHash } from "../TransactionHash";
 import { Button } from "../ui/button";

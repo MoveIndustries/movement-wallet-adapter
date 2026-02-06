@@ -1,10 +1,10 @@
 "use client";
 
-import { MovementWalletAdapterProvider } from "@movement-labs/wallet-adapter-react";
-import { setupAutomaticEthereumWalletDerivation } from "@movement-labs/derived-wallet-ethereum";
-import { setupAutomaticSolanaWalletDerivation } from "@movement-labs/derived-wallet-solana";
+import { MovementWalletAdapterProvider } from "@moveindustries/wallet-adapter-react";
+import { setupAutomaticEthereumWalletDerivation } from "@moveindustries/derived-wallet-ethereum";
+import { setupAutomaticSolanaWalletDerivation } from "@moveindustries/derived-wallet-solana";
 import { PropsWithChildren } from "react";
-import { Network } from "@movement-labs/ts-sdk";
+import { Network } from "@moveindustries/ts-sdk";
 import { useClaimSecretKey } from "@/hooks/useClaimSecretKey";
 import { useAutoConnect } from "./AutoConnectProvider";
 import { useToast } from "./ui/use-toast";

@@ -3,11 +3,11 @@ import {
   mapUserResponse,
   StructuredMessage,
   StructuredMessageInput,
-} from "@movement-labs/derived-wallet-base";
+} from "@moveindustries/derived-wallet-base";
 import {
   MovementSignMessageOutput,
   UserResponse,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 import { BrowserProvider, Eip1193Provider } from "ethers";
 import { EIP1193DerivedPublicKey } from "./EIP1193DerivedPublicKey";
 import { EIP1193PersonalSignature } from "./EIP1193DerivedSignature";

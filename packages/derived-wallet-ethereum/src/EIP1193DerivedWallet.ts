@@ -2,14 +2,14 @@ import {
   fetchDevnetChainId,
   isNullCallback,
   mapUserResponse,
-} from "@movement-labs/derived-wallet-base";
+} from "@moveindustries/derived-wallet-base";
 import {
   AccountAuthenticator,
   AnyRawTransaction,
   Network,
   NetworkToChainId,
   NetworkToNodeAPI,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   AccountInfo,
   MOVEMENT_CHAINS,
@@ -23,7 +23,7 @@ import {
   UserResponse,
   UserResponseStatus,
   WalletIcon,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 import { BrowserProvider } from "ethers";
 import type { EIP1193Provider, EIP6963ProviderDetail } from "mipd";
 import { EIP1193DerivedPublicKey } from "./EIP1193DerivedPublicKey";

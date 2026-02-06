@@ -2,8 +2,8 @@ import {
   createStructuredMessageStatement,
   createTransactionStatement,
   StructuredMessage,
-} from "@movement-labs/derived-wallet-base";
-import { AnyRawTransaction, Hex, HexInput } from "@movement-labs/ts-sdk";
+} from "@moveindustries/derived-wallet-base";
+import { AnyRawTransaction, Hex, HexInput } from "@moveindustries/ts-sdk";
 import { createSiweMessage } from "viem/siwe";
 import { EthereumAddress } from "./shared";
 

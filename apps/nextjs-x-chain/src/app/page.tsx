@@ -11,9 +11,9 @@ import {
   Network,
   PrivateKey,
   PrivateKeyVariants,
-} from "@movement-labs/ts-sdk";
-import { useWallet } from "@movement-labs/wallet-adapter-react";
-import { registerWallet } from "@movement-labs/wallet-standard";
+} from "@moveindustries/ts-sdk";
+import { useWallet } from "@moveindustries/wallet-adapter-react";
+import { registerWallet } from "@moveindustries/wallet-standard";
 import { init as initTelegram } from "@telegram-apps/sdk";
 import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -29,7 +29,7 @@ import {
   OriginWalletDetails,
 } from "@/utils/derivedWallet";
 import { CCTPWithdraw } from "./components/CCTPWithdraw";
-import { CrossChainCore } from "@movement-labs/cross-chain-core";
+import { CrossChainCore } from "@moveindustries/cross-chain-core";
 
 // Example of how to register a browser extension wallet plugin.
 // Browser extension wallets should call registerWallet once on page load.

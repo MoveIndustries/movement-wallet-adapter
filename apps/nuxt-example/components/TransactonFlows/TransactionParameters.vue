@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { movementClient, isSendableNetwork } from "@/utils";
-import { InputTransactionData } from "@movement-labs/wallet-adapter-vue";
+import { InputTransactionData } from "@moveindustries/wallet-adapter-vue";
 import { useToast } from "~/components/ui/toast";
 const { toast } = useToast();
 const { $walletAdapter } = useNuxtApp();

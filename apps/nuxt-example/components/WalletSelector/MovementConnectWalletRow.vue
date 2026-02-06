@@ -4,7 +4,7 @@ import {
   WalletItem,
   WalletIcon,
   WalletName,
-} from "@movement-labs/wallet-adapter-vue";
+} from "@moveindustries/wallet-adapter-vue";
 
 interface Props {
   wallet: AnyMovementWallet;

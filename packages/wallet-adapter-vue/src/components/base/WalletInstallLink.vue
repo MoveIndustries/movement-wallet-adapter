@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AdapterWallet } from "@movement-labs/wallet-adapter-core";
+import { AdapterWallet } from "@moveindustries/wallet-adapter-core";
 
 interface WalletItemProps {
   installLink: AdapterWallet["url"] | undefined;

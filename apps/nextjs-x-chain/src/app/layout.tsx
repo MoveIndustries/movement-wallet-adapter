@@ -1,4 +1,4 @@
-import "@movement-labs/wallet-adapter-ant-design/dist/index.css";
+import "@moveindustries/wallet-adapter-ant-design/dist/index.css";
 import "./globals.css";
 
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -11,7 +11,7 @@ import { PropsWithChildren } from "react";
 import { AutoConnectProvider } from "@/components/AutoConnectProvider";
 import { ReactQueryClientProvider } from "@/components/ReactQueryClientProvider";
 import { USDCBalanceProvider } from "@/contexts/USDCBalanceContext";
-import { Network } from "@movement-labs/ts-sdk";
+import { Network } from "@moveindustries/ts-sdk";
 
 const fontSans = FontSans({
   subsets: ["latin"],

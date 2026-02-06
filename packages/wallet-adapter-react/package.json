@@ -1,5 +1,5 @@
 {
-  "name": "@movement-labs/wallet-adapter-react",
+  "name": "@moveindustries/wallet-adapter-react",
   "version": "7.2.2",
   "description": "Movement Wallet Adapter React Provider",
   "main": "./dist/index.js",
@@ -13,15 +13,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aptos-labs/movement-wallet-adapter.git"
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter.git"
   },
-  "homepage": "https://github.com/aptos-labs/movement-wallet-adapter",
+  "homepage": "https://github.com/MoveIndustries/movement-wallet-adapter",
   "bugs": {
-    "url": "https://github.com/aptos-labs/movement-wallet-adapter/issues"
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter/issues"
   },
   "author": "movementlabs.xyz",
   "keywords": [
-    "Aptos",
+    "Movement",
     "Movement Labs",
     "Wallet",
     "Wallet Adapter",
@@ -37,7 +37,7 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts*\""
   },
   "devDependencies": {
-    "@movement-labs/wallet-adapter-tsconfig": "workspace:*",
+    "@moveindustries/wallet-adapter-tsconfig": "workspace:*",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "eslint": "^8.57.1",
@@ -45,7 +45,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@movement-labs/wallet-adapter-core": "workspace:*",
+    "@moveindustries/wallet-adapter-core": "workspace:*",
     "@radix-ui/react-slot": "^1.0.2"
   },
   "peerDependencies": {

@@ -19,24 +19,13 @@ export const ChainIdToAnsSupportedNetworkMap: Record<string, string> = {
   "2": "testnet", // testnet
 };
 
-/**
- * The base URL for all Movement Connect wallets.
- *
- * @deprecated Use {@link PETRA_WEB_BASE_URL} instead.
- */
-export const MOVEMENT_CONNECT_BASE_URL = "https://aptosconnect.app";
-
-/** The base URL for all Petra Web wallets. */
-export const PETRA_WEB_BASE_URL = "https://web.petra.app";
-
-/**
- * The URL to the Movement Connect account page if the user is signed in to Movement Connect.
- *
- * @deprecated Use {@link PETRA_WEB_ACCOUNT_URL} instead.
- */
-export const MOVEMENT_CONNECT_ACCOUNT_URL =
-  "https://aptosconnect.app/dashboard/main-account";
-
-/** The URL to the Petra Web account page if the user is signed in to Petra Web. */
-export const PETRA_WEB_ACCOUNT_URL =
-  "https://web.petra.app/dashboard/main-account";
+// TODO: Re-enable when Movement supports social sign-in (Petra Web / Movement Connect)
+// These stub constants are kept for backwards compatibility - they point to disabled/placeholder URLs
+/** @deprecated Social sign-in disabled */
+export const MOVEMENT_CONNECT_BASE_URL = "";
+/** @deprecated Social sign-in disabled */
+export const PETRA_WEB_BASE_URL = "";
+/** @deprecated Social sign-in disabled */
+export const MOVEMENT_CONNECT_ACCOUNT_URL = "";
+/** @deprecated Social sign-in disabled */
+export const PETRA_WEB_ACCOUNT_URL = "";

@@ -1,4 +1,4 @@
-import { Aptos, MovementConfig, Network } from "@movement-labs/ts-sdk";
+import { Movement, MovementConfig, Network } from "@moveindustries/ts-sdk";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { mainnetTokens, testnetTokens } from "../config";
 import { ethers, JsonRpcProvider } from "ethers";
@@ -62,7 +62,7 @@ export const getMovementWalletUSDCBalance = async (
       : testnetTokens["Movement"];
   const tokenAddress = token.tokenId.address;
   const movementConfig = new MovementConfig({ network: movementNetwork });
-  const connection = new Aptos(movementConfig);
+  const connection = new Movement(movementConfig);
   const response = await connection.getCurrentFungibleAssetBalances({
     options: {
       where: {

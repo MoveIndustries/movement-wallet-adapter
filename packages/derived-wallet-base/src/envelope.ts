@@ -3,7 +3,7 @@ import {
   NetworkToChainId,
   TransactionPayload,
   TransactionPayloadEntryFunction,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import { StructuredMessage } from "./StructuredMessage";
 
 /**

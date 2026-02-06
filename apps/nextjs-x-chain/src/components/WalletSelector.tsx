@@ -14,7 +14,7 @@ import {
   isInstallRequired,
   truncateAddress,
   useWallet,
-} from "@movement-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 import {
   ArrowLeft,
   ArrowRight,

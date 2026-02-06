@@ -6,7 +6,7 @@ import {
   isValidFunctionInfo,
   Serializable,
   Serializer,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 
 /**
  * The domain separator used to calculate the DAA account address.

@@ -1,8 +1,8 @@
-import { AccountAuthenticator, AnyRawTransaction } from "@movement-labs/ts-sdk";
+import { AccountAuthenticator, AnyRawTransaction } from "@moveindustries/ts-sdk";
 import {
   MovementSignMessageOutput,
   UserResponse,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 import { StandardWalletAdapter as SolanaWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base";
 import { PublicKey as SolanaPublicKey } from "@solana/web3.js";
 import { defaultAuthenticationFunction } from "./shared";

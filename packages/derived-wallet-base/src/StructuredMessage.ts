@@ -1,4 +1,4 @@
-import { AccountAddressInput } from "@movement-labs/ts-sdk";
+import { AccountAddressInput } from "@moveindustries/ts-sdk";
 
 export const structuredMessagePrefix = "MOVEMENT" as const;
 

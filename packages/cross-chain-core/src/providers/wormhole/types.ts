@@ -1,5 +1,5 @@
-import { AccountAddressInput, Account } from "@movement-labs/ts-sdk";
-import { AdapterWallet } from "@movement-labs/wallet-adapter-core";
+import { AccountAddressInput, Account } from "@moveindustries/ts-sdk";
+import { AdapterWallet } from "@moveindustries/wallet-adapter-core";
 import { routes, AttestationReceipt } from "@wormhole-foundation/sdk/dist/cjs";
 import { Chain, MovementAccount } from "../..";
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { CrossChainCore } from "@movement-labs/cross-chain-core";
-import { Chain } from "@movement-labs/cross-chain-core";
-import { Network } from "@movement-labs/ts-sdk";
+import { CrossChainCore } from "@moveindustries/cross-chain-core";
+import { Chain } from "@moveindustries/cross-chain-core";
+import { Network } from "@moveindustries/ts-sdk";
 import {
   createContext,
   useContext,

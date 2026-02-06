@@ -19,7 +19,7 @@ import {
   WalletReadyState,
   MovementSignInInput,
   MovementSignInOutput,
-} from "@movement-labs/wallet-adapter-core";
+} from "@moveindustries/wallet-adapter-core";
 import { ReactNode, FC, useState, useEffect, useCallback, useRef } from "react";
 import { WalletContext } from "./useWallet";
 

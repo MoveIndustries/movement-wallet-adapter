@@ -23,16 +23,16 @@ export const mainnetChains: ChainsConfig = {
     symbol: "SOL",
     defaultRpc: "https://solana-mainnet.rpc.extrnode.com",
   },
-  Aptos: {
+  Movement: {
     key: "Movement",
     context: Context.APTOS,
     displayName: "Movement",
     explorerUrl: "https://explorer.movementlabs.xyz/",
-    explorerName: "Aptos Explorer",
+    explorerName: "Movement Explorer",
     chainId: 0,
     icon: "Movement",
-    symbol: "APT",
-    defaultRpc: "https://fullnode.mainnet.aptos.dev",
+    symbol: "MOVE",
+    defaultRpc: "https://fullnode.mainnet.movementlabs.xyz/v1",
   },
   Avalanche: {
     key: "Avalanche",

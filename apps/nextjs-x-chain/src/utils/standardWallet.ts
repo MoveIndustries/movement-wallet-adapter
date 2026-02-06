@@ -2,20 +2,20 @@ import {
   Account,
   AccountAuthenticator,
   AnyRawTransaction,
-  Aptos,
+  Movement,
   MovementConfig,
   Hex,
   Network,
   SigningScheme,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   MOVEMENT_CHAINS,
   AccountInfo,
   MovementConnectMethod,
-  AptosDisconnectMethod,
-  AptosGetAccountMethod,
-  AptosGetNetworkMethod,
-  AptosOnAccountChangeMethod,
+  MovementDisconnectMethod,
+  MovementGetAccountMethod,
+  MovementGetNetworkMethod,
+  MovementOnAccountChangeMethod,
   MovementSignMessageInput,
   MovementSignMessageMethod,
   MovementSignMessageOutput,
@@ -26,10 +26,10 @@ import {
   UserResponse,
   registerWallet,
   MovementWalletAccount,
-  AptosOnNetworkChangeMethod,
+  MovementOnNetworkChangeMethod,
   MovementFeatures,
   UserResponseStatus,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 
 /**
  * This is an implementation of the template AIP-62 Wallet Plugin template.
@@ -142,7 +142,7 @@ export class MyWallet implements MovementWallet {
    * Remember: These two variables SHOULD LIKELY BE DELETED after you replace your implementations of each feature with ones that use your Wallet.
    */
   signer: Account;
-  aptos: Aptos;
+  aptos: Movement;
 
   /**
    * In order to be compatible with the AIP-62 Wallet standard, ensure you are at least supporting all
@@ -206,7 +206,7 @@ export class MyWallet implements MovementWallet {
       network: Network.DEVNET,
     });
     // Use the instance Aptos connection to process requests.
-    this.aptos = new Aptos(movementConfig);
+    this.aptos = new Movement(movementConfig);
 
     // Update our Wallet object to know that we are connected to this new signer.
     this.accounts = [new MyWalletAccount(this.signer)];
@@ -217,7 +217,7 @@ export class MyWallet implements MovementWallet {
    *
    * @returns Return account info.
    */
-  account: AptosGetAccountMethod = async (): Promise<AccountInfo> => {
+  account: MovementGetAccountMethod = async (): Promise<AccountInfo> => {
     const account = new AccountInfo({
       address: this.signer.accountAddress,
       publicKey: this.signer.publicKey,
@@ -266,7 +266,7 @@ export class MyWallet implements MovementWallet {
    *
    * @returns Which network the connected Wallet is pointing to.
    */
-  network: AptosGetNetworkMethod = async (): Promise<NetworkInfo> => {
+  network: MovementGetNetworkMethod = async (): Promise<NetworkInfo> => {
     // You may use getLedgerInfo() to determine which ledger your Wallet is connected to.
     const network = await this.aptos.getLedgerInfo();
     return {
@@ -282,7 +282,7 @@ export class MyWallet implements MovementWallet {
    *
    * @returns Resolves when done cleaning up.
    */
-  disconnect: AptosDisconnectMethod = async (): Promise<void> => {
+  disconnect: MovementDisconnectMethod = async (): Promise<void> => {
     // THIS LOGIC SHOULD BE REPLACED. IT IS FOR EXAMPLE PURPOSES ONLY.
     return Promise.resolve();
   };
@@ -356,7 +356,7 @@ export class MyWallet implements MovementWallet {
    *
    * @returns when the logic is resolved.
    */
-  onAccountChange: AptosOnAccountChangeMethod = async (): Promise<void> => {
+  onAccountChange: MovementOnAccountChangeMethod = async (): Promise<void> => {
     return Promise.resolve();
   };
 
@@ -365,7 +365,7 @@ export class MyWallet implements MovementWallet {
    *
    * @returns when the logic is resolved.
    */
-  onNetworkChange: AptosOnNetworkChangeMethod = async (): Promise<void> => {
+  onNetworkChange: MovementOnNetworkChangeMethod = async (): Promise<void> => {
     return Promise.resolve();
   };
 }

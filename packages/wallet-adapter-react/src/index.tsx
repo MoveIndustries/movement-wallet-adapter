@@ -1,4 +1,4 @@
-export * from "@movement-labs/wallet-adapter-core";
+export * from "@moveindustries/wallet-adapter-core";
 export * from "./WalletProvider";
 export * from "./components/AboutMovementConnect";
 export * from "./components/AboutPetraWeb";

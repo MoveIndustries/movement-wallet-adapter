@@ -15,7 +15,7 @@ import {
   AvailableWallets,
   WalletCore,
   WalletCoreEvents,
-} from "@movement-labs/wallet-adapter-core";
+} from "@moveindustries/wallet-adapter-core";
 import {
   ref,
   Ref,

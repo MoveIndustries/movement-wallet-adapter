@@ -2,7 +2,7 @@ import {
   computeDerivableAuthenticationKey,
   encodeStructuredMessage,
   parseMovementSigningMessage,
-} from "@movement-labs/derived-wallet-base";
+} from "@moveindustries/derived-wallet-base";
 import {
   AccountPublicKey,
   MovementConfig,
@@ -14,7 +14,7 @@ import {
   Serializer,
   Signature,
   VerifySignatureArgs,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import { verifyMessage as verifyEthereumMessage } from "ethers";
 import { createSiweEnvelopeForMovementTransaction } from "./createSiweEnvelope";
 import {

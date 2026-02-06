@@ -3,7 +3,7 @@ import {
   AccountAddress,
   AccountAuthenticator,
   AnyRawTransaction,
-  Aptos,
+  Movement,
   MovementConfig,
   Network as MovementNetwork,
   Deserializer,
@@ -13,15 +13,15 @@ import {
   Serializer,
   SimpleEntryFunctionArgumentTypes,
   U64,
-} from "@movement-labs/ts-sdk";
-import { AdapterWallet } from "@movement-labs/wallet-adapter-core";
+} from "@moveindustries/ts-sdk";
+import { AdapterWallet } from "@moveindustries/wallet-adapter-core";
 import { Network } from "@wormhole-foundation/sdk";
 import {
   AptosChains,
   AptosUnsignedTransaction,
 } from "@wormhole-foundation/sdk-aptos";
 import { GasStationApiKey } from "..";
-import { UserResponseStatus } from "@movement-labs/wallet-standard";
+import { UserResponseStatus } from "@moveindustries/wallet-standard";
 
 export async function signAndSendTransaction(
   request: AptosUnsignedTransaction<Network, AptosChains>,
@@ -47,7 +47,7 @@ export async function signAndSendTransaction(
   const movementConfig = new MovementConfig({
     network: MovementNetwork.TESTNET,
   });
-  const aptos = new Aptos(movementConfig);
+  const aptos = new Movement(movementConfig);
 
   // TODO: handle mainnet
   const contractAddress = MovementNetwork.TESTNET

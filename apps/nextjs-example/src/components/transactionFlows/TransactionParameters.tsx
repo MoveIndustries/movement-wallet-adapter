@@ -1,8 +1,5 @@
 import { movementClient, isSendableNetwork } from "@/utils";
-import {
-  InputTransactionData,
-  useWallet,
-} from "@movement-labs/wallet-adapter-react";
+import { InputTransactionData, useWallet } from "@moveindustries/wallet-adapter-react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "../ui/use-toast";

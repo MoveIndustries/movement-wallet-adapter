@@ -1,4 +1,4 @@
-export * from "@movement-labs/wallet-adapter-core";
+export * from "@moveindustries/wallet-adapter-core";
 export * from "./composables/useWallet";
 export { default as WalletItem } from "./components/WalletItem.vue";
 export { default as WalletIcon } from "./components/base/WalletIcon.vue";

@@ -4,7 +4,7 @@ import {
   MOVEMENT_CONNECT_ACCOUNT_URL,
   isMovementConnectWallet,
   truncateAddress,
-} from "@movement-labs/wallet-adapter-vue";
+} from "@moveindustries/wallet-adapter-vue";
 import { Copy, LogOut, User } from "lucide-vue-next";
 import { DialogRoot as Dialog, DialogTrigger } from "radix-vue";
 

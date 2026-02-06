@@ -2,14 +2,14 @@ import {
   accountInfoFromPublicKey,
   fetchDevnetChainId,
   isNullCallback,
-} from "@movement-labs/derived-wallet-base";
+} from "@moveindustries/derived-wallet-base";
 import {
   AccountAuthenticator,
   AnyRawTransaction,
   Network,
   NetworkToChainId,
   NetworkToNodeAPI,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   AccountInfo,
   MOVEMENT_CHAINS,
@@ -23,7 +23,7 @@ import {
   UserResponse,
   UserResponseStatus,
   WalletIcon,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 import { StandardWalletAdapter as SolanaWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base";
 import { PublicKey as SolanaPublicKey } from "@solana/web3.js";
 import { defaultAuthenticationFunction } from "./shared";

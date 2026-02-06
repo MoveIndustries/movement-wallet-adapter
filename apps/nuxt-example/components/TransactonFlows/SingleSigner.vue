@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, h } from "vue";
 import { movementClient, isSendableNetwork } from "@/utils";
-import { AccountAddress, parseTypeTag, U64 } from "@movement-labs/ts-sdk";
-import { InputTransactionData } from "@movement-labs/wallet-adapter-core";
+import { AccountAddress, parseTypeTag, U64 } from "@moveindustries/ts-sdk";
+import { InputTransactionData } from "@moveindustries/wallet-adapter-core";
 import TransactionHash from "~/components/TransactionHash.vue";
 import { useToast } from "~/components/ui/toast";
 const { toast } = useToast();

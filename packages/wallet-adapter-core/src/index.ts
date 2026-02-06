@@ -1,11 +1,11 @@
-import { MovementSignInBoundFields } from "@movement-labs/wallet-standard";
+import { MovementSignInBoundFields } from "@moveindustries/wallet-standard";
 import { WALLET_ADAPTER_CORE_VERSION } from "./version";
 
 export type {
   MovementSignInOutput,
   MovementSignInInput,
   MovementSignInBoundFields,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 /**
  * @deprecated Use `MovementSignInBoundFields` instead. This will be removed in future versions.
  */

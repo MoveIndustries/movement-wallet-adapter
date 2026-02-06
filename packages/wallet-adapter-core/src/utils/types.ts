@@ -2,8 +2,8 @@ import {
   AccountAddressInput,
   InputGenerateTransactionOptions,
   InputTransactionPluginData,
-} from "@movement-labs/ts-sdk";
-import { InputGenerateTransactionPayloadData } from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
+import { InputGenerateTransactionPayloadData } from "@moveindustries/ts-sdk";
 import { WalletReadyState } from "../constants";
 
 export interface MovementStandardSupportedWallet {

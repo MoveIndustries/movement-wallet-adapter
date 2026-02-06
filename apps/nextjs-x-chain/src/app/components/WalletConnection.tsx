@@ -7,14 +7,14 @@ import {
   OriginWalletDetails,
 } from "@/utils/derivedWallet";
 import { isEIP1193DerivedWallet } from "@/utils/derivedWallet";
-import { Network } from "@movement-labs/ts-sdk";
+import { Network } from "@moveindustries/ts-sdk";
 import {
   AccountInfo,
   AdapterWallet,
   MovementChangeNetworkOutput,
   isMovementNetwork,
   NetworkInfo,
-} from "@movement-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 import Image from "next/image";
 
 interface WalletConnectionProps {

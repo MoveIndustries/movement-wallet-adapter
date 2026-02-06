@@ -1,15 +1,15 @@
 import {
-  Aptos,
+  Movement,
   MovementConfig,
   Hex,
   Network,
   NetworkToNodeAPI,
   PluginSettings,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   NetworkInfo,
   NetworkInfo as StandardNetworkInfo,
-} from "@movement-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 
 import { DappConfig } from "../WalletCore";
 import { WalletSignAndSubmitMessageError } from "../error";
@@ -136,7 +136,7 @@ export const isMovementLiveNetwork = (networkInfo: Network): boolean => {
  * Helper function to fetch Devnet chain id
  */
 export const fetchDevnetChainId = async (): Promise<number> => {
-  const aptos = new Aptos(); // default to devnet
+  const aptos = new Movement(); // default to devnet
   return await aptos.getChainId();
 };
 

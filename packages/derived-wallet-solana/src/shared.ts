@@ -1,8 +1,8 @@
 import {
   makeUserApproval,
   makeUserRejection,
-} from "@movement-labs/derived-wallet-base";
-import { UserResponse } from "@movement-labs/wallet-standard";
+} from "@moveindustries/derived-wallet-base";
+import { UserResponse } from "@moveindustries/wallet-standard";
 import { WalletError } from "@solana/wallet-adapter-base";
 
 export const defaultAuthenticationFunction =

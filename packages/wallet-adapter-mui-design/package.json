@@ -1,5 +1,5 @@
 {
-  "name": "@movement-labs/wallet-adapter-mui-design",
+  "name": "@moveindustries/wallet-adapter-mui-design",
   "version": "5.3.2",
   "description": "Movement Wallet Adapter mui design",
   "main": "./dist/index.js",
@@ -13,15 +13,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aptos-labs/movement-wallet-adapter.git"
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter.git"
   },
-  "homepage": "https://github.com/aptos-labs/movement-wallet-adapter",
+  "homepage": "https://github.com/MoveIndustries/movement-wallet-adapter",
   "bugs": {
-    "url": "https://github.com/aptos-labs/movement-wallet-adapter/issues"
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter/issues"
   },
   "author": "movementlabs.xyz",
   "keywords": [
-    "Aptos",
+    "Movement",
     "Movement Labs",
     "Wallet",
     "Wallet Adapter",
@@ -35,7 +35,7 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts*\""
   },
   "devDependencies": {
-    "@movement-labs/wallet-adapter-tsconfig": "workspace:*",
+    "@moveindustries/wallet-adapter-tsconfig": "workspace:*",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "eslint": "^8.57.1",
@@ -43,7 +43,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@movement-labs/wallet-adapter-react": "workspace:*",
+    "@moveindustries/wallet-adapter-react": "workspace:*",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.11.0",

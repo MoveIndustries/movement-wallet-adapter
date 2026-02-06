@@ -12,7 +12,7 @@ import {
   RawTransaction,
   RawTransactionWithData,
   SimpleTransaction,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   decodeStructuredMessage,
   StructuredMessage,

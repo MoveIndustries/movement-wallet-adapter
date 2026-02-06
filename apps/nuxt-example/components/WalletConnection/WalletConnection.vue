@@ -4,8 +4,8 @@ import {
   NetworkInfo,
   WalletInfo,
   isMovementNetwork,
-} from "@movement-labs/wallet-adapter-vue";
-import { Network } from "@movement-labs/ts-sdk";
+} from "@moveindustries/wallet-adapter-vue";
+import { Network } from "@moveindustries/ts-sdk";
 
 const WalletIcon = defineAsyncComponent(
   () => import("~/components/ui/Wallet/WalletIcon.vue"),

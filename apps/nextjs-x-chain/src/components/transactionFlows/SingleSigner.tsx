@@ -7,12 +7,12 @@ import {
   Network,
   PrivateKey,
   PrivateKeyVariants,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   InputTransactionData,
   useWallet,
   AdapterWallet,
-} from "@movement-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 
 import { isSendableNetwork, movementClient } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -164,8 +164,9 @@ export function SingleSigner({ dappNetwork, wallet }: SingleSignerProps) {
       };
 
       // If is testnet, and is not a native aptos wallet,we use gas station to sponsor the transaction
+      // Note: Type cast needed because @aptos-labs/gas-station-client uses Aptos types
       if (!wallet.isMovementNativeWallet && dappNetwork === Network.TESTNET) {
-        transactionInput.transactionSubmitter = getTransactionSubmitter();
+        transactionInput.transactionSubmitter = getTransactionSubmitter() as any;
       }
 
       const txn = await signAndSubmitTransaction(transactionInput);

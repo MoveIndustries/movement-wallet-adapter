@@ -9,7 +9,7 @@ import {
   groupAndSortWallets,
   isInstallRequired,
   useWallet,
-} from "@movement-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 import {
   Box,
   Button,

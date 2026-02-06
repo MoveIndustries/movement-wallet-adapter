@@ -2,7 +2,7 @@ import {
   computeDerivableAuthenticationKey,
   encodeStructuredMessage,
   parseMovementSigningMessage,
-} from "@movement-labs/derived-wallet-base";
+} from "@moveindustries/derived-wallet-base";
 import {
   AccountPublicKey,
   MovementConfig,
@@ -15,7 +15,7 @@ import {
   Serializer,
   Signature,
   VerifySignatureArgs,
-} from "@movement-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import { createSignInMessage as createSolanaSignInMessage } from "@solana/wallet-standard-util";
 import { PublicKey as SolanaPublicKey } from "@solana/web3.js";
 import { createSiwsEnvelopeForMovementTransaction } from "./createSiwsEnvelope";

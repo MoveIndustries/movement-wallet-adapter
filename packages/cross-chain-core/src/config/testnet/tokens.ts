@@ -19,7 +19,7 @@ export const testnetTokens: Record<string, TokenConfig> = {
     icon: "USDC",
     decimals: 6,
   },
-  Aptos: {
+  Movement: {
     symbol: "USDC",
     decimals: 6,
     tokenId: {

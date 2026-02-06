@@ -1,7 +1,6 @@
 import { isSendableNetwork, movementClient } from "@/utils";
-import { parseTypeTag, AccountAddress, U64 } from "@movement-labs/ts-sdk";
-import { InputTransactionData } from "@movement-labs/wallet-adapter-core";
-import { useWallet } from "@movement-labs/wallet-adapter-react";
+import { parseTypeTag, AccountAddress, U64 } from "@moveindustries/ts-sdk";
+import { InputTransactionData, useWallet } from "@moveindustries/wallet-adapter-react";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { useToast } from "../ui/use-toast";

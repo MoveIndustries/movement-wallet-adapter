@@ -1,5 +1,5 @@
 {
-  "extends": "@movement-labs/wallet-adapter-tsconfig/base.json",
+  "extends": "@moveindustries/wallet-adapter-tsconfig/base.json",
   "include": ["."],
   "exclude": ["dist", "build", "node_modules"],
   "compilerOptions": {
