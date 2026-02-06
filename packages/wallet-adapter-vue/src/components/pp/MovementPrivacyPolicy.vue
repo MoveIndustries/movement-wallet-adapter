@@ -3,7 +3,7 @@ import Disclaimer from "./Disclaimer.vue";
 import Link from "./Link.vue";
 import PoweredBy from "./PoweredBy.vue";
 
-const APTOS_PRIVACY_POLICY_URL = "https://aptoslabs.com/privacy";
+const MOVEMENT_PRIVACY_POLICY_URL = "https://movementlabs.xyz/privacy";
 </script>
 
 <template>
@@ -13,10 +13,10 @@ const APTOS_PRIVACY_POLICY_URL = "https://aptoslabs.com/privacy";
     <slot name="poweredBy" />
   </template>
   <template v-else>
-    <div :class="$style.aptosPrivacyPolicy" v-bind="$attrs">
+    <div :class="$style.movementPrivacyPolicy" v-bind="$attrs">
       <div>
         <Disclaimer />
-        <Link :class="$style.link" :href="APTOS_PRIVACY_POLICY_URL" /><span
+        <Link :class="$style.link" :href="MOVEMENT_PRIVACY_POLICY_URL" /><span
           >.</span
         >
       </div>
@@ -30,7 +30,7 @@ const APTOS_PRIVACY_POLICY_URL = "https://aptoslabs.com/privacy";
   --muted-color: hsl(240 3.8% 46.1%);
   --foreground: hsl(240 10% 3.9%);
 }
-.aptosPrivacyPolicy {
+.movementPrivacyPolicy {
   display: flex;
   align-items: center;
   flex-direction: column;

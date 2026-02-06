@@ -5,25 +5,25 @@ import {
   AdapterWallet,
   NetworkInfo,
   InputTransactionData,
-  AptosSignAndSubmitTransactionOutput,
+  MovementSignAndSubmitTransactionOutput,
   AnyRawTransaction,
   InputGenerateTransactionOptions,
   AccountAuthenticator,
-  AptosSignMessageInput,
-  AptosSignMessageOutput,
+  MovementSignMessageInput,
+  MovementSignMessageOutput,
   AdapterNotDetectedWallet,
   WalletCore,
   Network,
   InputSubmitTransactionData,
   PendingTransactionResponse,
   WalletReadyState,
-  AptosSignInInput,
-  AptosSignInOutput,
-} from "@aptos-labs/wallet-adapter-core";
+  MovementSignInInput,
+  MovementSignInOutput,
+} from "@moveindustries/wallet-adapter-core";
 import { ReactNode, FC, useState, useEffect, useCallback, useRef } from "react";
 import { WalletContext } from "./useWallet";
 
-export interface AptosWalletProviderProps {
+export interface MovementWalletProviderProps {
   children: ReactNode;
   optInWallets?: ReadonlyArray<AvailableWallets>;
   autoConnect?:
@@ -46,14 +46,14 @@ const initialState: {
   wallet: null,
 };
 
-export const AptosWalletAdapterProvider: FC<AptosWalletProviderProps> = ({
+export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
   children,
   optInWallets,
   autoConnect = false,
   dappConfig,
   disableTelemetry = false,
   onError,
-}: AptosWalletProviderProps) => {
+}: MovementWalletProviderProps) => {
   const didAttemptAutoConnectRef = useRef(false);
 
   const [{ account, network, connected, wallet }, setState] =
@@ -96,7 +96,7 @@ export const AptosWalletAdapterProvider: FC<AptosWalletProviderProps> = ({
     }
 
     // Make sure the user has a previously connected wallet
-    const walletName = localStorage.getItem("AptosWalletName");
+    const walletName = localStorage.getItem("MovementWalletName");
     if (!walletName) {
       setIsLoading(false);
       return;
@@ -156,8 +156,8 @@ export const AptosWalletAdapterProvider: FC<AptosWalletProviderProps> = ({
 
   const signIn = async (args: {
     walletName: string;
-    input: AptosSignInInput;
-  }): Promise<AptosSignInOutput> => {
+    input: MovementSignInInput;
+  }): Promise<MovementSignInOutput> => {
     if (!walletCore) {
       throw new Error("WalletCore is not initialized");
     }
@@ -184,7 +184,7 @@ export const AptosWalletAdapterProvider: FC<AptosWalletProviderProps> = ({
 
   const signAndSubmitTransaction = async (
     transaction: InputTransactionData,
-  ): Promise<AptosSignAndSubmitTransactionOutput> => {
+  ): Promise<MovementSignAndSubmitTransactionOutput> => {
     try {
       if (!walletCore) {
         throw new Error("WalletCore is not initialized");
@@ -237,8 +237,8 @@ export const AptosWalletAdapterProvider: FC<AptosWalletProviderProps> = ({
   };
 
   const signMessage = async (
-    message: AptosSignMessageInput,
-  ): Promise<AptosSignMessageOutput> => {
+    message: MovementSignMessageInput,
+  ): Promise<MovementSignMessageOutput> => {
     if (!walletCore) {
       throw new Error("WalletCore is not initialized");
     }
@@ -251,7 +251,7 @@ export const AptosWalletAdapterProvider: FC<AptosWalletProviderProps> = ({
   };
 
   const signMessageAndVerify = async (
-    message: AptosSignMessageInput,
+    message: MovementSignMessageInput,
   ): Promise<boolean> => {
     if (!walletCore) {
       throw new Error("WalletCore is not initialized");

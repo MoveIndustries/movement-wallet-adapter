@@ -1,8 +1,8 @@
 import {
   makeUserApproval,
   makeUserRejection,
-} from "@aptos-labs/derived-wallet-base";
-import { UserResponse } from "@aptos-labs/wallet-standard";
+} from "@moveindustries/derived-wallet-base";
+import { UserResponse } from "@moveindustries/wallet-standard";
 import { isError as isEthersError } from "ethers";
 
 export type EthereumAddress = `0x${string}`;

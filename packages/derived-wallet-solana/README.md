@@ -2,11 +2,11 @@
 
 # Derived Wallet Solana
 
-A light-weight add-on package to the [@aptos-labs/wallet-adapter-react](../wallet-adapter-react/) that enables the functionality to use a Solana wallet as a Native Aptos Wallet
+A light-weight add-on package to the [@movement-labs/wallet-adapter-react](../wallet-adapter-react/) that enables the functionality to use a Solana wallet as a Native Movement Wallet
 
 ### How does Solana wallet work with the wallet adapter?
 
-When a user connects to a dApp using a supported Solana wallet, the adapter computes the user's Derivable Abstracted Account (DAA) address and converts the Solana account to follow the Aptos wallet standard interface.
+When a user connects to a dApp using a supported Solana wallet, the adapter computes the user's Derivable Abstracted Account (DAA) address and converts the Solana account to follow the Movement wallet standard interface.
 This ensures a seamless interaction with the wallet for both developers and end users.
 
 The computation of the DAA address is done using the `authenticationFunction` and the `accountIdentity`, both of which are defined in this package:
@@ -21,7 +21,7 @@ The computation of the DAA address is done using the `authenticationFunction` an
 The wallet adapter follows the [Solana Wallet Standard](https://github.com/wallet-standard/wallet-standard/blob/master/DESIGN.md) to discover wallets.
 Currently, the wallets that have been tested and support cross-chain accounts are:
 
-|          | Aptos Devnet | Aptos Testnet | Aptos Mainnet |
+|          | Movement Devnet | Movement Testnet | Movement Mainnet |
 | -------- | ------------ | ------------- | ------------- |
 | Phantom  | ✅           | ✅            |
 | Solflare | ✅           | ✅            |
@@ -30,46 +30,46 @@ Currently, the wallets that have been tested and support cross-chain accounts ar
 
 ### Usage
 
-1. Install the [@aptos-labs/wallet-adapter-react](../wallet-adapter-react/) package
+1. Install the [@movement-labs/wallet-adapter-react](../wallet-adapter-react/) package
 
 ```bash
-npm install @aptos-labs/wallet-adapter-react
+npm install @movement-labs/wallet-adapter-react
 ```
 
-2. Install the package `@aptos-labs/derived-wallet-solana`
+2. Install the package `@movement-labs/derived-wallet-solana`
 
 ```bash
-npm install @aptos-labs/derived-wallet-solana
+npm install @movement-labs/derived-wallet-solana
 ```
 
 3. Import the automatic detection function
 
 ```tsx
-import { AptosWalletAdapterProvider } from "@aptos-labs/wallet-adapter-react";
-import { setupAutomaticSolanaWalletDerivation } from "@aptos-labs/derived-wallet-solana";
+import { MovementWalletAdapterProvider } from "@movement-labs/wallet-adapter-react";
+import { setupAutomaticSolanaWalletDerivation } from "@movement-labs/derived-wallet-solana";
 
-setupAutomaticSolanaWalletDerivation({ defaultNetwork: Network.TESTNET }); // Network.TESTNET is the Aptos network your dapp is working with
+setupAutomaticSolanaWalletDerivation({ defaultNetwork: Network.TESTNET }); // Network.TESTNET is the Movement network your dapp is working with
 
 .....
 
-<AptosWalletAdapterProvider
+<MovementWalletAdapterProvider
  dappConfig={{
     network: Network.TESTNET,
   }}
 >
   {children}
-<AptosWalletAdapterProvider/>
+<MovementWalletAdapterProvider/>
 ```
 
 #### Submitting a transaction
 
-In most cases, allowing users to submit a transaction with a Solana account to the Aptos chain requires using a sponsor transaction.
+In most cases, allowing users to submit a transaction with a Solana account to the Movement chain requires using a sponsor transaction.
 This is because the Solana account might not have APT to pay for gas.
 Therefore, the dApp should consider maintaining a sponsor account to sponsor the transactions.
 
 ```tsx filename="SignAndSubmitDemo.tsx"
 import React from "react";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@movement-labs/wallet-adapter-react";
 import {
   Aptos,
   AptosConfig,
@@ -78,9 +78,9 @@ import {
   PrivateKey,
   PrivateKeyVariants,
   Account,
-} from "@aptos-labs/ts-sdk";
+} from "@movement-labs/ts-sdk";
 
-// Initialize an Aptos client
+// Initialize a Movement client
 const config = new AptosConfig({ network: Network.TESTNET });
 const aptos = new Aptos(config);
 
@@ -154,7 +154,7 @@ export default SignAndSubmit;
 - The package retains the origin wallet, so developers should be able to use it and interact with it by:
 
 ```tsx
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@movement-labs/wallet-adapter-react";
 
 const { isSolanaDerivedWallet } = useWallet();
 
@@ -166,7 +166,7 @@ if (isSolanaDerivedWallet(wallet)) {
 ### Resources
 
 - X-Chain Accounts Adapter Demo App
-  - [Live site](https://aptos-labs.github.io/aptos-wallet-adapter/nextjs-cross-chain-example/)
+  - [Live site](https://movement-labs.github.io/movement-wallet-adapter/nextjs-cross-chain-example/)
   - [Source code](../../apps/nextjs-x-chain/)
 - [AIP-113 Derivable Account Abstraction](https://github.com/aptos-foundation/AIPs/blob/main/aips/aip-113.md)
 - [AIP-121 x-chain DAA authentication using Sign-in-With-Solana](https://github.com/aptos-foundation/AIPs/blob/main/aips/aip-121.md)

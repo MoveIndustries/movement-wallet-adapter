@@ -1,9 +1,8 @@
 "use client";
 
-import { useAutoConnect } from "@/components/AutoConnectProvider";
 import { DisplayValue, LabelValueGrid } from "@/components/LabelValueGrid";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { WalletSelector as ShadcnWalletSelector } from "@/components/WalletSelector";
+import { WalletSelector } from "@/components/WalletSelector";
 import { MultiAgent } from "@/components/transactionFlows/MultiAgent";
 import { SingleSigner } from "@/components/transactionFlows/SingleSigner";
 import { Sponsor } from "@/components/transactionFlows/Sponsor";
@@ -18,27 +17,23 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Switch } from "@/components/ui/switch";
 import { isMainnet } from "@/utils";
-import { Network } from "@aptos-labs/ts-sdk";
-import { WalletSelector as AntdWalletSelector } from "@aptos-labs/wallet-adapter-ant-design";
-import { WalletConnector as MuiWalletSelector } from "@aptos-labs/wallet-adapter-mui-design";
+import { Network } from "@moveindustries/ts-sdk";
 import {
   AccountInfo,
   AdapterWallet,
-  AptosChangeNetworkOutput,
+  MovementChangeNetworkOutput,
   NetworkInfo,
-  isAptosNetwork,
+  isMovementNetwork,
   useWallet,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 import { init as initTelegram } from "@telegram-apps/sdk";
 import { AlertCircle } from "lucide-react";
 import Image from "next/image";
 
 // Imports for registering a browser extension wallet plugin on page load
 import { MyWallet } from "@/utils/standardWallet";
-import { registerWallet } from "@aptos-labs/wallet-standard";
-import { TransactionSubmitterToggle } from "@/components/TransactionSubmitterToggle";
+import { registerWallet } from "@moveindustries/wallet-standard";
 
 // Example of how to register a browser extension wallet plugin.
 // Browser extension wallets should call registerWallet once on page load.
@@ -64,11 +59,11 @@ export default function Home() {
       <div className="flex justify-between gap-6 pb-10">
         <div className="flex flex-col gap-2 md:gap-3">
           <h1 className="text-xl sm:text-3xl font-semibold tracking-tight">
-            Aptos Wallet Adapter Tester
+            Movement Wallet Adapter Tester
             {network?.name ? ` — ${network.name}` : ""}
           </h1>
           <a
-            href="https://github.com/aptos-labs/aptos-wallet-adapter/tree/main/apps/nextjs-example"
+            href="https://github.com/movement-labs/movement-wallet-adapter/tree/main/apps/nextjs-example"
             target="_blank"
             rel="noreferrer"
             className="text-sm text-muted-foreground underline underline-offset-2 font-medium leading-none"
@@ -77,7 +72,6 @@ export default function Home() {
           </a>
         </div>
         <div className="flex items-center gap-2">
-          <TransactionSubmitterToggle />
           <ThemeToggle />
         </div>
       </div>
@@ -112,41 +106,18 @@ export default function Home() {
 }
 
 function WalletSelection() {
-  const { autoConnect, setAutoConnect } = useAutoConnect();
-
   return (
     <Card>
       <CardHeader>
         <CardTitle>Wallet Selection</CardTitle>
         <CardDescription>
-          Connect a wallet using one of the following wallet selectors.
+          Connect a wallet using the Movement Design System wallet modal.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-6 pt-6 pb-12 justify-between items-center">
-          <div className="flex flex-col gap-4 items-center">
-            <div className="text-sm text-muted-foreground">shadcn/ui</div>
-            <ShadcnWalletSelector />
-          </div>
-          <div className="flex flex-col gap-4 items-center">
-            <div className="text-sm text-muted-foreground">Ant Design</div>
-            <AntdWalletSelector />
-          </div>
-          <div className="flex flex-col gap-4 items-center">
-            <div className="text-sm text-muted-foreground">Material UI</div>
-            <MuiWalletSelector />
-          </div>
+        <div className="flex flex-wrap gap-6 pt-6 pb-6 justify-center items-center">
+          <WalletSelector />
         </div>
-        <label className="flex items-center gap-4 cursor-pointer">
-          <Switch
-            id="auto-connect-switch"
-            checked={autoConnect}
-            onCheckedChange={setAutoConnect}
-          />
-          <Label htmlFor="auto-connect-switch">
-            Auto reconnect on page load
-          </Label>
-        </label>
       </CardContent>
     </Card>
   );
@@ -156,7 +127,7 @@ interface WalletConnectionProps {
   account: AccountInfo | null;
   network: NetworkInfo | null;
   wallet: AdapterWallet | null;
-  changeNetwork: (network: Network) => Promise<AptosChangeNetworkOutput>;
+  changeNetwork: (network: Network) => Promise<MovementChangeNetworkOutput>;
 }
 
 function WalletConnection({
@@ -166,7 +137,7 @@ function WalletConnection({
   changeNetwork,
 }: WalletConnectionProps) {
   const isValidNetworkName = () => {
-    if (isAptosNetwork(network)) {
+    if (isMovementNetwork(network)) {
       return Object.values<string | undefined>(Network).includes(network?.name);
     }
     // If the configured network is not an Aptos network, i.e is a custom network
@@ -255,13 +226,6 @@ function WalletConnection({
                 subLabel: "(only if attached)",
                 value: <p>{account?.ansName ?? "Not Present"}</p>,
               },
-              // {
-              //   label: "Min keys required",
-              //   subLabel: "(only for multisig)",
-              //   value: (
-              //     <p>{account?.minKeysRequired?.toString() ?? "Not Present"}</p>
-              //   ),
-              // },
             ]}
           />
         </div>

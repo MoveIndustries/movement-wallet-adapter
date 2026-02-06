@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {
-  AnyAptosWallet,
+  AnyMovementWallet,
   WalletItem,
   WalletIcon,
   WalletName,
-} from "@aptos-labs/wallet-adapter-vue";
+} from "@moveindustries/wallet-adapter-vue";
 
 interface Props {
-  wallet: AnyAptosWallet;
+  wallet: AnyMovementWallet;
   onConnect: () => void;
 }
 

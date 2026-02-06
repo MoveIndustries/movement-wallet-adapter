@@ -43,7 +43,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "src/index.ts"),
       },
-      external: ["vue", "@aptos-labs/wallet-adapter-core"],
+      external: ["vue", "@moveindustries/wallet-adapter-core"],
       output: {
         exports: "named",
         globals: {

@@ -3,9 +3,9 @@ import {
   AccountInfo,
   NetworkInfo,
   WalletInfo,
-  isAptosNetwork,
-} from "@aptos-labs/wallet-adapter-vue";
-import { Network } from "@aptos-labs/ts-sdk";
+  isMovementNetwork,
+} from "@moveindustries/wallet-adapter-vue";
+import { Network } from "@moveindustries/ts-sdk";
 
 const WalletIcon = defineAsyncComponent(
   () => import("~/components/ui/Wallet/WalletIcon.vue"),
@@ -29,7 +29,7 @@ defineEmits(["changeNetwork"]);
 const { account, network, wallet } = toRefs(props);
 
 const isValidNetworkName = computed(() => {
-  if (isAptosNetwork(network.value)) {
+  if (isMovementNetwork(network.value)) {
     return Object.values<string | undefined>(Network).includes(
       network.value?.name,
     );

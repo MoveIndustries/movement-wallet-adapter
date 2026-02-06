@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import AptosLogo from "../icons/AptosLogo.vue";
+import MovementLogo from "../icons/MovementLogo.vue";
 </script>
 
 <template>
   <div v-bind="$attrs">
     <span>Powered by</span>
-    <AptosLogo />
-    <span>Aptos Labs</span>
+    <MovementLogo />
+    <span>Movement Labs</span>
   </div>
 </template>

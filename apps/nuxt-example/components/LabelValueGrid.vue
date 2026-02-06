@@ -3,8 +3,8 @@ import {
   WalletInfo,
   AccountInfo,
   NetworkInfo,
-} from "@aptos-labs/wallet-adapter-vue";
-import { Network } from "@aptos-labs/ts-sdk";
+} from "@moveindustries/wallet-adapter-vue";
+import { Network } from "@moveindustries/ts-sdk";
 
 export interface LabelValueGridProps {
   items: Array<{

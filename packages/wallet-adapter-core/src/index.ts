@@ -1,15 +1,15 @@
-import { AptosSignInBoundFields } from "@aptos-labs/wallet-standard";
+import { MovementSignInBoundFields } from "@moveindustries/wallet-standard";
 import { WALLET_ADAPTER_CORE_VERSION } from "./version";
 
 export type {
-  AptosSignInOutput,
-  AptosSignInInput,
-  AptosSignInBoundFields,
-} from "@aptos-labs/wallet-standard";
+  MovementSignInOutput,
+  MovementSignInInput,
+  MovementSignInBoundFields,
+} from "@moveindustries/wallet-standard";
 /**
- * @deprecated Use `AptosSignInBoundFields` instead. This will be removed in future versions.
+ * @deprecated Use `MovementSignInBoundFields` instead. This will be removed in future versions.
  */
-export type AptosSignInRequiredFields = AptosSignInBoundFields;
+export type MovementSignInRequiredFields = MovementSignInBoundFields;
 
 export * from "./WalletCore";
 export * from "./constants";

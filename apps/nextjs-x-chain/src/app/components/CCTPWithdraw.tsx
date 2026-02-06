@@ -13,24 +13,24 @@ import {
   CrossChainCore,
   EthereumChainIdToMainnetChain,
   EthereumChainIdToTestnetChain,
-} from "@aptos-labs/cross-chain-core";
+} from "@moveindustries/cross-chain-core";
 import {
   Account,
   Ed25519PrivateKey,
   Network,
   PrivateKey,
   PrivateKeyVariants,
-} from "@aptos-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   Chain,
   WormholeTransferResponse,
   WormholeQuoteResponse,
-} from "@aptos-labs/cross-chain-core";
-import { AdapterWallet } from "@aptos-labs/wallet-adapter-core";
+} from "@moveindustries/cross-chain-core";
+import { AdapterWallet } from "@moveindustries/wallet-adapter-core";
 import { Loader2, MoveDown } from "lucide-react";
 import USDC from "@/app/icons/USDC";
 import { chainToIcon } from "@/app/icons";
-import { useWallet } from "@aptos-labs/wallet-adapter-react";
+import { useWallet } from "@moveindustries/wallet-adapter-react";
 import {
   isEIP1193DerivedWallet,
   OriginWalletDetails,
@@ -105,7 +105,7 @@ export function CCTPWithdraw({
         setSourceChain(chain.key);
       });
     } else {
-      setSourceChain("Aptos");
+      setSourceChain("Movement");
     }
   }, [wallet]);
 
@@ -264,8 +264,8 @@ export function CCTPWithdraw({
                   }}
                 >
                   <img
-                    src={chainToIcon("Aptos")}
-                    alt="Aptos"
+                    src={chainToIcon("Movement")}
+                    alt="Movement"
                     height="32px"
                     width="32px"
                   />
@@ -354,13 +354,13 @@ export function CCTPWithdraw({
             <p className="text-lg">Transaction submitted</p>
             {transferResponse.originChainTxnId && (
               <a
-                href={`https://explorer.aptoslabs.com/txn/${transferResponse.originChainTxnId}?network=${
+                href={`https://explorer.movementlabs.xyz/txn/${transferResponse.originChainTxnId}?network=${
                   dappNetwork === Network.MAINNET ? "mainnet" : "testnet"
                 }`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <p className="text-md underline">View on Aptos Explorer</p>
+                <p className="text-md underline">View on Movement Explorer</p>
               </a>
             )}
             {transferResponse.destinationChainTxnId && (

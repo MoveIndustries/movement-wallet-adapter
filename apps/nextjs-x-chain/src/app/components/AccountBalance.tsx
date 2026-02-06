@@ -7,12 +7,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getAptBalanceQueryOptions } from "@/utils/getAptBalanceQueryOptions";
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import { Movement, MovementConfig, Network } from "@moveindustries/ts-sdk";
 import {
   AccountInfo,
   AdapterWallet,
   NetworkInfo,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
@@ -33,7 +33,7 @@ export function AccountBalance({ account, network }: AccountBalanceProps) {
 
   const { mutateAsync: fundAccount, isPending: isFunding } = useMutation({
     mutationFn: async () => {
-      const aptos = new Aptos(new AptosConfig({ network: network.name }));
+      const aptos = new Movement(new MovementConfig({ network: network.name }));
       await aptos.fundAccount({
         accountAddress: account.address,
         amount: 0.1e8,

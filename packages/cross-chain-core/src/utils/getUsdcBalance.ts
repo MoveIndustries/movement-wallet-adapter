@@ -1,4 +1,4 @@
-import { Aptos, AptosConfig, Network } from "@aptos-labs/ts-sdk";
+import { Movement, MovementConfig, Network } from "@moveindustries/ts-sdk";
 import { Connection, PublicKey } from "@solana/web3.js";
 import { mainnetTokens, testnetTokens } from "../config";
 import { ethers, JsonRpcProvider } from "ethers";
@@ -6,12 +6,12 @@ import { Chain } from "../CrossChainCore";
 
 export const getSolanaWalletUSDCBalance = async (
   walletAddress: string,
-  aptosNetwork: Network,
+  movementNetwork: Network,
   rpc: string,
 ): Promise<string> => {
   const address = new PublicKey(walletAddress);
   const tokenAddress =
-    aptosNetwork === Network.MAINNET
+    movementNetwork === Network.MAINNET
       ? mainnetTokens["Solana"].tokenId.address
       : testnetTokens["Solana"].tokenId.address;
 
@@ -35,12 +35,12 @@ export const getSolanaWalletUSDCBalance = async (
 
 export const getEthereumWalletUSDCBalance = async (
   walletAddress: string,
-  aptosNetwork: Network,
+  movementNetwork: Network,
   chain: Chain,
   rpc: string,
 ): Promise<string> => {
   const token =
-    aptosNetwork === Network.MAINNET
+    movementNetwork === Network.MAINNET
       ? mainnetTokens[chain]
       : testnetTokens[chain];
 
@@ -52,17 +52,17 @@ export const getEthereumWalletUSDCBalance = async (
   return ethers.formatUnits(balance, token.decimals).toString();
 };
 
-export const getAptosWalletUSDCBalance = async (
+export const getMovementWalletUSDCBalance = async (
   walletAddress: string,
-  aptosNetwork: Network,
+  movementNetwork: Network,
 ): Promise<string> => {
   const token =
-    aptosNetwork === Network.MAINNET
-      ? mainnetTokens["Aptos"]
-      : testnetTokens["Aptos"];
+    movementNetwork === Network.MAINNET
+      ? mainnetTokens["Movement"]
+      : testnetTokens["Movement"];
   const tokenAddress = token.tokenId.address;
-  const aptosConfig = new AptosConfig({ network: aptosNetwork });
-  const connection = new Aptos(aptosConfig);
+  const movementConfig = new MovementConfig({ network: movementNetwork });
+  const connection = new Movement(movementConfig);
   const response = await connection.getCurrentFungibleAssetBalances({
     options: {
       where: {

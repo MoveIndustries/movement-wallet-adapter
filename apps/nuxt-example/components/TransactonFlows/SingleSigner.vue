@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, h } from "vue";
-import { aptosClient, isSendableNetwork } from "@/utils";
-import { AccountAddress, parseTypeTag, U64 } from "@aptos-labs/ts-sdk";
-import { InputTransactionData } from "@aptos-labs/wallet-adapter-core";
+import { movementClient, isSendableNetwork } from "@/utils";
+import { AccountAddress, parseTypeTag, U64 } from "@moveindustries/ts-sdk";
+import { InputTransactionData } from "@moveindustries/wallet-adapter-core";
 import TransactionHash from "~/components/TransactionHash.vue";
 import { useToast } from "~/components/ui/toast";
 const { toast } = useToast();
@@ -17,7 +17,7 @@ const {
   signTransaction,
 } = $walletAdapter;
 
-const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 
 const isSendable = computed(() =>
   isSendableNetwork(connected.value, network.value?.name || undefined),
@@ -25,7 +25,7 @@ const isSendable = computed(() =>
 
 const onSignMessageAndVerify = async () => {
   const payload = {
-    message: "Hello from Aptos Wallet Adapter",
+    message: "Hello from Movement Wallet Adapter",
     nonce: Math.random().toString(16),
   };
   const response = await signMessageAndVerify(payload);
@@ -37,7 +37,7 @@ const onSignMessageAndVerify = async () => {
 
 const onSignMessage = async () => {
   const payload = {
-    message: "Hello from Aptos Wallet Adapter",
+    message: "Hello from Movement Wallet Adapter",
     nonce: Math.random().toString(16),
   };
   const response = await signMessage(payload);
@@ -52,13 +52,13 @@ const onSignAndSubmitTransaction = async () => {
   const transaction: InputTransactionData = {
     data: {
       function: "0x1::coin::transfer",
-      typeArguments: [APTOS_COIN],
+      typeArguments: [MOVEMENT_COIN],
       functionArguments: [account.value?.address.toString(), 1], // 1 is in Octas
     },
   };
   try {
     const response = await signAndSubmitTransaction(transaction);
-    await aptosClient(network.value).waitForTransaction({
+    await movementClient(network.value).waitForTransaction({
       transactionHash: response.hash,
     });
     toast({
@@ -80,14 +80,14 @@ const onSignAndSubmitBCSTransaction = async () => {
     const response = await signAndSubmitTransaction({
       data: {
         function: "0x1::coin::transfer",
-        typeArguments: [parseTypeTag(APTOS_COIN)],
+        typeArguments: [parseTypeTag(MOVEMENT_COIN)],
         functionArguments: [
           AccountAddress.from(account.value?.address),
           new U64(1),
         ], // 1 is in Octas
       },
     });
-    await aptosClient(network.value).waitForTransaction({
+    await movementClient(network.value).waitForTransaction({
       transactionHash: response.hash,
     });
     toast({
@@ -125,13 +125,13 @@ const onSignTransactionV2 = async () => {
   if (!account.value) return;
 
   try {
-    const transactionToSign = await aptosClient(
+    const transactionToSign = await movementClient(
       network.value,
     ).transaction.build.simple({
       sender: account.value?.address,
       data: {
         function: "0x1::coin::transfer",
-        typeArguments: [APTOS_COIN],
+        typeArguments: [MOVEMENT_COIN],
         functionArguments: [account.value?.address.toString(), 1], // 1 is in Octas
       },
     });

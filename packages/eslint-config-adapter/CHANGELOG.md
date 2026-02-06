@@ -1,4 +1,4 @@
-# @aptos-labs/eslint-config-adapter
+# @movement-labs/eslint-config-adapter
 
 ## 0.0.2
 

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, h } from "vue";
-import { aptosClient, isSendableNetwork } from "@/utils";
+import { movementClient, isSendableNetwork } from "@/utils";
 import {
   AccountAuthenticator,
   AnyRawTransaction,
   Account,
-} from "@aptos-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import TransactionHash from "~/components/TransactionHash.vue";
 import { useToast } from "~/components/ui/toast";
 const { toast } = useToast();
@@ -13,7 +13,7 @@ const { $walletAdapter } = useNuxtApp();
 const { network, connected, account, signTransaction, submitTransaction } =
   $walletAdapter || {};
 
-const APTOS_COIN = "0x1::aptos_coin::AptosCoin";
+const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 
 const transactionToSubmit = ref<AnyRawTransaction>();
 const senderAuthenticator = ref<AccountAuthenticator>();
@@ -32,14 +32,14 @@ const generateTransaction = async (): Promise<AnyRawTransaction> => {
   if (!account.value) {
     throw new Error("no account");
   }
-  const transactionToSign = await aptosClient(
+  const transactionToSign = await movementClient(
     network.value,
   ).transaction.build.simple({
     sender: account.value?.address,
     withFeePayer: true,
     data: {
       function: "0x1::coin::transfer",
-      typeArguments: [APTOS_COIN],
+      typeArguments: [MOVEMENT_COIN],
       functionArguments: [account.value?.address.toString(), 1], // 1 is in Octas
     },
   });
@@ -62,11 +62,11 @@ const onSignTransactionAsSponsor = async () => {
     throw new Error("No Transaction to sign");
   }
   try {
-    await aptosClient(network.value).fundAccount({
+    await movementClient(network.value).fundAccount({
         accountAddress: sponsor.accountAddress,
         amount: SPONSOR_INITIAL_BALANCE,
       });
-    feepayerAuthenticator.value = await aptosClient(
+    feepayerAuthenticator.value = await movementClient(
         network.value
       ).transaction.signAsFeePayer({
         signer: sponsor,

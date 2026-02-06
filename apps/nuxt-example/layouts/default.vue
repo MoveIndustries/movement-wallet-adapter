@@ -1,11 +1,11 @@
 <script setup lang="ts">
 useHead({
-  title: "Aptos Wallet Adapter Example",
+  title: "Movement Wallet Adapter Example",
   meta: [
     {
       name: "description",
       content:
-        "An example of how to use Aptos Wallet Adapter with Vue and Nuxt.js.",
+        "An example of how to use Movement Wallet Adapter with Vue and Nuxt.js.",
     },
   ],
   bodyAttrs: {

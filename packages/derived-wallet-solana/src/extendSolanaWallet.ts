@@ -1,32 +1,32 @@
-import { AccountAuthenticator, AnyRawTransaction } from "@aptos-labs/ts-sdk";
+import { AccountAuthenticator, AnyRawTransaction } from "@moveindustries/ts-sdk";
 import {
-  AptosSignMessageOutput,
+  MovementSignMessageOutput,
   UserResponse,
-} from "@aptos-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 import { StandardWalletAdapter as SolanaWalletAdapter } from "@solana/wallet-standard-wallet-adapter-base";
 import { PublicKey as SolanaPublicKey } from "@solana/web3.js";
 import { defaultAuthenticationFunction } from "./shared";
 import {
-  signAptosMessageWithSolana,
+  signMovementMessageWithSolana,
   StructuredMessageInputWithChainId,
-} from "./signAptosMessage";
-import { signAptosTransactionWithSolana } from "./signAptosTransaction";
+} from "./signMovementMessage";
+import { signMovementTransactionWithSolana } from "./signMovementTransaction";
 import { SolanaDerivedPublicKey } from "./SolanaDerivedPublicKey";
 
-export type SolanaWalletAdapterWithAptosFeatures = SolanaWalletAdapter & {
-  getAptosPublicKey: (
+export type SolanaWalletAdapterWithMovementFeatures = SolanaWalletAdapter & {
+  getMovementPublicKey: (
     solanaPublicKey: SolanaPublicKey,
   ) => SolanaDerivedPublicKey;
-  signAptosTransaction: (
+  signMovementTransaction: (
     rawTransaction: AnyRawTransaction,
   ) => Promise<UserResponse<AccountAuthenticator>>;
-  signAptosMessage: (
+  signMovementMessage: (
     input: StructuredMessageInputWithChainId,
-  ) => Promise<UserResponse<AptosSignMessageOutput>>;
+  ) => Promise<UserResponse<MovementSignMessageOutput>>;
 };
 
 /**
- * Utility function for extending a SolanaWalletAdapter with Aptos features.
+ * Utility function for extending a SolanaWalletAdapter with Movement features.
  * @param solanaWallet the source wallet adapter
  * @param authenticationFunction authentication function required for DAA
  *
@@ -35,29 +35,29 @@ export type SolanaWalletAdapterWithAptosFeatures = SolanaWalletAdapter & {
  * const extendedWallet = extendSolanaWallet(solanaWallet, authenticationFunction);
  *
  * const solanaSignature = await extendedWallet.signTransaction(solanaTransaction);
- * const aptosSignature = await extendedWallet.signAptosTransaction(aptosRawTransaction);
+ * const movementSignature = await extendedWallet.signMovementTransaction(movementRawTransaction);
  * ```
  */
 export function extendSolanaWallet(
   solanaWallet: SolanaWalletAdapter,
   authenticationFunction = defaultAuthenticationFunction,
 ) {
-  const extended = solanaWallet as SolanaWalletAdapterWithAptosFeatures;
-  extended.getAptosPublicKey = (solanaPublicKey: SolanaPublicKey) =>
+  const extended = solanaWallet as SolanaWalletAdapterWithMovementFeatures;
+  extended.getMovementPublicKey = (solanaPublicKey: SolanaPublicKey) =>
     new SolanaDerivedPublicKey({
       solanaPublicKey,
       domain: window.location.host,
       authenticationFunction,
     });
-  extended.signAptosTransaction = (rawTransaction: AnyRawTransaction) =>
-    signAptosTransactionWithSolana({
+  extended.signMovementTransaction = (rawTransaction: AnyRawTransaction) =>
+    signMovementTransactionWithSolana({
       solanaWallet,
       authenticationFunction,
       rawTransaction,
       domain: window.location.host,
     });
-  extended.signAptosMessage = (messageInput) => {
-    return signAptosMessageWithSolana({
+  extended.signMovementMessage = (messageInput) => {
+    return signMovementMessageWithSolana({
       solanaWallet,
       authenticationFunction,
       messageInput,

@@ -1,8 +1,9 @@
 import { WalletInfo } from "./types";
 import { AdapterNotDetectedWallet, AdapterWallet } from "../WalletCore";
 import {
-  APTOS_CONNECT_BASE_URL,
-  PETRA_WEB_BASE_URL,
+  // TODO: Re-enable when Movement supports social sign-in
+  // MOVEMENT_CONNECT_BASE_URL,
+  // PETRA_WEB_BASE_URL,
   WalletReadyState,
 } from "../constants";
 import { isRedirectable } from "./helpers";
@@ -55,63 +56,62 @@ export function truncateAddress(address: string | undefined) {
   return `${address.slice(0, 6)}...${address.slice(-5)}`;
 }
 
+// TODO: Re-enable when Movement supports social sign-in (Petra Web / Movement Connect)
+// These stub functions are kept for backwards compatibility with UI packages
 /**
- * Returns `true` if the provided wallet is an Aptos Connect wallet.
- *
- * @deprecated Use {@link isPetraWebWallet} instead.
+ * @deprecated Social sign-in disabled - always returns false
  */
-export function isAptosConnectWallet(wallet: WalletInfo | AdapterWallet) {
-  return isPetraWebWallet(wallet);
+export function isMovementConnectWallet(wallet: WalletInfo | AdapterWallet) {
+  return false;
 }
 
-/** Returns `true` if the provided wallet is a Petra Web wallet. */
+/**
+ * @deprecated Social sign-in disabled - always returns false
+ */
 export function isPetraWebWallet(wallet: WalletInfo | AdapterWallet) {
-  if (!wallet.url) return false;
-  return (
-    wallet.url.startsWith(APTOS_CONNECT_BASE_URL) ||
-    wallet.url.startsWith(PETRA_WEB_BASE_URL)
-  );
+  return false;
 }
 
-/**
- * Partitions the `wallets` array so that Aptos Connect wallets are grouped separately from the rest.
- * Petra Web is a web wallet that uses social login to create accounts on the blockchain.
- *
- * @deprecated Use {@link getPetraWebWallets} instead.
- */
-export function getAptosConnectWallets(
-  wallets: ReadonlyArray<AdapterWallet | AdapterNotDetectedWallet>,
-) {
-  const { defaultWallets, moreWallets } = partitionWallets(
-    wallets,
-    isAptosConnectWallet,
-  );
-  return { aptosConnectWallets: defaultWallets, otherWallets: moreWallets };
-}
+// /**
+//  * Partitions the `wallets` array so that Movement Connect wallets are grouped separately from the rest.
+//  * Petra Web is a web wallet that uses social login to create accounts on the blockchain.
+//  *
+//  * @deprecated Use {@link getPetraWebWallets} instead.
+//  */
+// export function getMovementConnectWallets(
+//   wallets: ReadonlyArray<AdapterWallet | AdapterNotDetectedWallet>,
+// ) {
+//   const { defaultWallets, moreWallets } = partitionWallets(
+//     wallets,
+//     isMovementConnectWallet,
+//   );
+//   return { movementConnectWallets: defaultWallets, otherWallets: moreWallets };
+// }
 
-/**
- * Partitions the `wallets` array so that Petra Web wallets are grouped separately from the rest.
- * Petra Web is a web wallet that uses social login to create accounts on the blockchain.
- */
-export function getPetraWebWallets(
-  wallets: ReadonlyArray<AdapterWallet | AdapterNotDetectedWallet>,
-) {
-  const { defaultWallets, moreWallets } = partitionWallets(
-    wallets,
-    isPetraWebWallet,
-  );
-  return { petraWebWallets: defaultWallets, otherWallets: moreWallets };
-}
+// /**
+//  * Partitions the `wallets` array so that Petra Web wallets are grouped separately from the rest.
+//  * Petra Web is a web wallet that uses social login to create accounts on the blockchain.
+//  */
+// export function getPetraWebWallets(
+//   wallets: ReadonlyArray<AdapterWallet | AdapterNotDetectedWallet>,
+// ) {
+//   const { defaultWallets, moreWallets } = partitionWallets(
+//     wallets,
+//     isPetraWebWallet,
+//   );
+//   return { petraWebWallets: defaultWallets, otherWallets: moreWallets };
+// }
 
 export interface WalletSortingOptions {
-  /**
-   * An optional function for sorting Aptos Connect wallets.
-   *
-   * @deprecated Use {@link sortPetraWebWallets} instead.
-   */
-  sortAptosConnectWallets?: (a: AdapterWallet, b: AdapterWallet) => number;
-  /** An optional function for sorting Petra Web wallets. */
-  sortPetraWebWallets?: (a: AdapterWallet, b: AdapterWallet) => number;
+  // TODO: Re-enable when Movement supports social sign-in
+  // /**
+  //  * An optional function for sorting Movement Connect wallets.
+  //  *
+  //  * @deprecated Use {@link sortPetraWebWallets} instead.
+  //  */
+  // sortMovementConnectWallets?: (a: AdapterWallet, b: AdapterWallet) => number;
+  // /** An optional function for sorting Petra Web wallets. */
+  // sortPetraWebWallets?: (a: AdapterWallet, b: AdapterWallet) => number;
   /** An optional function for sorting wallets that are currently installed or loadable. */
   sortAvailableWallets?: (
     a: AdapterWallet | AdapterNotDetectedWallet,
@@ -125,12 +125,7 @@ export interface WalletSortingOptions {
 }
 
 /**
- * Partitions the `wallets` array into three distinct groups:
- *
- * `aptosConnectWallets` - Use {@link petraWebWallets} instead.
- *
- * `petraWebWallets` - Wallets that use social login to create accounts on
- * the blockchain via Petra Web.
+ * Partitions the `wallets` array into groups:
  *
  * `availableWallets` - Wallets that are currently installed or loadable by the client.
  *
@@ -143,16 +138,8 @@ export function groupAndSortWallets(
   wallets: ReadonlyArray<AdapterWallet | AdapterNotDetectedWallet>,
   options?: WalletSortingOptions,
 ) {
-  const { aptosConnectWallets } = getAptosConnectWallets(wallets);
-  const { otherWallets, petraWebWallets } = getPetraWebWallets(wallets);
-  const { defaultWallets, moreWallets } = partitionWallets(otherWallets);
+  const { defaultWallets, moreWallets } = partitionWallets(wallets);
 
-  if (options?.sortAptosConnectWallets) {
-    aptosConnectWallets.sort(options.sortAptosConnectWallets);
-  }
-  if (options?.sortPetraWebWallets) {
-    petraWebWallets.sort(options.sortPetraWebWallets);
-  }
   if (options?.sortAvailableWallets) {
     defaultWallets.sort(options.sortAvailableWallets);
   }
@@ -161,10 +148,12 @@ export function groupAndSortWallets(
   }
 
   return {
-    /** @deprecated Use {@link petraWebWallets} instead. */
-    aptosConnectWallets,
-    /** Wallets that use social login to create an account on the blockchain */
-    petraWebWallets,
+    // TODO: Re-enable when Movement supports social sign-in
+    // These are kept as empty arrays for backwards compatibility with UI packages
+    /** @deprecated Social sign-in disabled - always returns empty array */
+    movementConnectWallets: [] as AdapterWallet[],
+    /** @deprecated Social sign-in disabled - always returns empty array */
+    petraWebWallets: [] as AdapterWallet[],
     /** Wallets that are currently installed or loadable. */
     availableWallets: defaultWallets,
     /** Wallets that are NOT currently installed or loadable. */

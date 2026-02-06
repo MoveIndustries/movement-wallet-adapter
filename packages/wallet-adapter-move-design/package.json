@@ -1,0 +1,62 @@
+{
+  "name": "@moveindustries/wallet-adapter-move-design",
+  "version": "1.0.0",
+  "description": "Movement Wallet Adapter Move Design System - WalletModal component",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter.git"
+  },
+  "homepage": "https://github.com/MoveIndustries/movement-wallet-adapter",
+  "bugs": {
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter/issues"
+  },
+  "author": "movementlabs.xyz",
+  "keywords": [
+    "Movement",
+    "Movement Labs",
+    "Wallet",
+    "Wallet Adapter",
+    "Wallet Modal",
+    "Design System",
+    "React"
+  ],
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm,cjs --dts --external react --external react-dom",
+    "dev": "tsup src/index.tsx --format esm,cjs --watch --dts --external react --external react-dom",
+    "clean": "rm -rf .turbo && rm -rf node_modules && rm -rf dist",
+    "lint": "TIMING=1 eslint \"src/**/*.ts*\""
+  },
+  "devDependencies": {
+    "@moveindustries/wallet-adapter-tsconfig": "workspace:*",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^8.57.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@moveindustries/wallet-adapter-react": "workspace:*",
+    "@okwallet/aptos-wallet-adapter": "^0.0.8",
+    "@msafe/aptos-wallet-adapter": "^1.1.1",
+    "@radix-ui/react-dialog": "^1.1.4",
+    "vaul": "^1.1.2",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.0.1",
+    "class-variance-authority": "^0.7.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
+  }
+}
