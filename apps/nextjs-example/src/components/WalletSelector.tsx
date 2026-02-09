@@ -5,7 +5,7 @@ import {
   AboutPetraWebEducationScreen,
   AdapterNotDetectedWallet,
   AdapterWallet,
-  AptosPrivacyPolicy,
+  MovementPrivacyPolicy,
   groupAndSortWallets,
   isInstallRequired,
   isPetraWebWallet,
@@ -14,7 +14,7 @@ import {
   useWallet,
   WalletItem,
   WalletSortingOptions,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -158,14 +158,14 @@ function ConnectWalletDialog({
                 Petra Web <ArrowRight size={16} />
               </AboutPetraWeb.Trigger>
             </p>
-            <AptosPrivacyPolicy className="flex flex-col items-center py-1">
+            <MovementPrivacyPolicy className="flex flex-col items-center py-1">
               <p className="text-xs leading-5">
-                <AptosPrivacyPolicy.Disclaimer />{" "}
-                <AptosPrivacyPolicy.Link className="text-muted-foreground underline underline-offset-4" />
+                <MovementPrivacyPolicy.Disclaimer />{" "}
+                <MovementPrivacyPolicy.Link className="text-muted-foreground underline underline-offset-4" />
                 <span className="text-muted-foreground">.</span>
               </p>
-              <AptosPrivacyPolicy.PoweredBy className="flex gap-1.5 items-center text-xs leading-5 text-muted-foreground" />
-            </AptosPrivacyPolicy>
+              <MovementPrivacyPolicy.PoweredBy className="flex gap-1.5 items-center text-xs leading-5 text-muted-foreground" />
+            </MovementPrivacyPolicy>
             <div className="flex items-center gap-3 pt-4 text-muted-foreground">
               <div className="h-px w-full bg-secondary" />
               Or

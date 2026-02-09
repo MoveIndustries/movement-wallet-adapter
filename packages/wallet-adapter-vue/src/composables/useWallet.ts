@@ -5,17 +5,17 @@ import {
   AnyRawTransaction,
   InputTransactionData,
   NetworkInfo,
-  AptosSignMessageInput,
-  AptosSignMessageOutput,
+  MovementSignMessageInput,
+  MovementSignMessageOutput,
   AdapterNotDetectedWallet,
   Network,
-  AptosChangeNetworkOutput,
+  MovementChangeNetworkOutput,
   PendingTransactionResponse,
   InputSubmitTransactionData,
   AvailableWallets,
   WalletCore,
   WalletCoreEvents,
-} from "@aptos-labs/wallet-adapter-core";
+} from "@moveindustries/wallet-adapter-core";
 import {
   ref,
   Ref,
@@ -49,19 +49,19 @@ export interface WalletContextState {
   submitTransaction(
     transaction: InputSubmitTransactionData,
   ): Promise<PendingTransactionResponse>;
-  signMessage(message: AptosSignMessageInput): Promise<AptosSignMessageOutput>;
-  signMessageAndVerify(message: AptosSignMessageInput): Promise<boolean>;
-  changeNetwork(network: Network): Promise<AptosChangeNetworkOutput>;
+  signMessage(message: MovementSignMessageInput): Promise<MovementSignMessageOutput>;
+  signMessageAndVerify(message: MovementSignMessageInput): Promise<boolean>;
+  changeNetwork(network: Network): Promise<MovementChangeNetworkOutput>;
 }
 
-export interface AptosWalletProviderProps {
+export interface MovementWalletProviderProps {
   disableTelemetry?: boolean;
   optInWallets?: ReadonlyArray<AvailableWallets>;
   dappConfig?: { network: Network };
   onError?: (error: any) => void;
 }
 
-const LOCAL_STORAGE_KEY = "AptosWalletName";
+const LOCAL_STORAGE_KEY = "MovementWalletName";
 
 const initialState: {
   account: AccountInfo | null;
@@ -100,12 +100,12 @@ function getWalletCoreInstance(
 
 /**
  *
- * @param {AptosWalletProviderProps} props - Optional object with properties for
+ * @param {MovementWalletProviderProps} props - Optional object with properties for
  * configuring the wallet adapter.
  * @return {WalletContextState}
  */
 export function useWallet(
-  props?: AptosWalletProviderProps,
+  props?: MovementWalletProviderProps,
 ): WalletContextState {
   const { disableTelemetry, optInWallets, dappConfig, onError } = props ?? {};
 
@@ -155,8 +155,8 @@ export function useWallet(
   };
 
   const signMessage = async (
-    message: AptosSignMessageInput,
-  ): Promise<AptosSignMessageOutput> => {
+    message: MovementSignMessageInput,
+  ): Promise<MovementSignMessageOutput> => {
     try {
       return await walletCoreInstance.signMessage(message);
     } catch (error: any) {
@@ -166,7 +166,7 @@ export function useWallet(
   };
 
   const signMessageAndVerify = async (
-    message: AptosSignMessageInput,
+    message: MovementSignMessageInput,
   ): Promise<boolean> => {
     try {
       return await walletCoreInstance.signMessageAndVerify(message);

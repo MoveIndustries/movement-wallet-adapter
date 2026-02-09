@@ -1,4 +1,4 @@
-# @aptos-labs/derived-wallet-base
+# @movement-labs/derived-wallet-base
 
 ## 0.8.1
 
@@ -40,7 +40,7 @@
 
 ### Minor Changes
 
-- fae2bf0: Bump @aptos-labs/wallet-standard to 0.5.0 which removes the `message` and `signingMessage` fields from the `AptosSignInInput` of the `signIn` request.
+- fae2bf0: Bump @movement-labs/wallet-standard to 0.5.0 which removes the `message` and `signingMessage` fields from the `AptosSignInInput` of the `signIn` request.
 
 ## 0.3.0
 

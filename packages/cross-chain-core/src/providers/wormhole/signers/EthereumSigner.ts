@@ -4,8 +4,8 @@ import {
 } from "@wormhole-foundation/sdk-evm";
 import { Network } from "@wormhole-foundation/sdk";
 import { ethers, getBigInt } from "ethers";
-import { AdapterWallet } from "@aptos-labs/wallet-adapter-core";
-import { EIP1193DerivedWallet } from "@aptos-labs/derived-wallet-ethereum";
+import { AdapterWallet } from "@moveindustries/wallet-adapter-core";
+import { EIP1193DerivedWallet } from "@moveindustries/derived-wallet-ethereum";
 export async function signAndSendTransaction(
   request: EvmUnsignedTransaction<Network, EvmChains>,
   wallet: AdapterWallet,

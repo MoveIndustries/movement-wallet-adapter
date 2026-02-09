@@ -9,8 +9,8 @@ export default defineNuxtConfig({
   },
   ssr: false, // Ensure static generation
   app: {
-    baseURL: isProd ? "/aptos-wallet-adapter/nuxt-example" : "", // Must match your GitHub Pages repo path
-    cdnURL: isProd ? "/aptos-wallet-adapter/nuxt-example" : "", // Ensures assets load from correct path
+    baseURL: isProd ? "/movement-wallet-adapter/nuxt-example" : "", // Must match your GitHub Pages repo path
+    cdnURL: isProd ? "/movement-wallet-adapter/nuxt-example" : "", // Ensures assets load from correct path
   },
 
   modules: ["@nuxtjs/color-mode", "@nuxtjs/google-fonts"],

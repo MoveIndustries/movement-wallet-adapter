@@ -1,11 +1,14 @@
 {
-  "name": "@aptos-labs/wallet-adapter-ant-design",
+  "name": "@moveindustries/wallet-adapter-ant-design",
   "version": "5.3.2",
-  "description": "Aptos Wallet Adapter ant-design",
+  "description": "Movement Wallet Adapter ant-design",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "license": "Apache-2.0",
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -19,16 +22,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/aptos-labs/aptos-wallet-adapter.git"
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter.git"
   },
-  "homepage": "https://github.com/aptos-labs/aptos-wallet-adapter",
+  "homepage": "https://github.com/MoveIndustries/movement-wallet-adapter",
   "bugs": {
-    "url": "https://github.com/aptos-labs/aptos-wallet-adapter/issues"
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter/issues"
   },
-  "author": "aptoslabs.com",
+  "author": "movementlabs.xyz",
   "keywords": [
-    "Aptos",
-    "Aptos Labs",
+    "Movement",
+    "Movement Labs",
     "Wallet",
     "Wallet Adapter",
     "Wallet Adapter Provider",
@@ -41,7 +44,7 @@
     "lint": "TIMING=1 eslint \"src/**/*.ts*\""
   },
   "devDependencies": {
-    "@aptos-labs/wallet-adapter-tsconfig": "workspace:*",
+    "@moveindustries/wallet-adapter-tsconfig": "workspace:*",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "eslint": "^8.57.1",
@@ -50,7 +53,7 @@
   },
   "dependencies": {
     "@ant-design/icons": "^5.3.7",
-    "@aptos-labs/wallet-adapter-react": "workspace:*",
+    "@moveindustries/wallet-adapter-react": "workspace:*",
     "antd": "^5.18.3"
   },
   "peerDependencies": {

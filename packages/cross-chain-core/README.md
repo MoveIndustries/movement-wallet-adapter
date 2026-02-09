@@ -8,16 +8,16 @@ A wrapper for CCTP cross chain transactions.
 
 ### Usage
 
-Install the `@aptos-labs/cross-chain-core` package
+Install the `@movement-labs/cross-chain-core` package
 
 ```cli
-pnpm i @aptos-labs/cross-chain-core
+pnpm i @movement-labs/cross-chain-core
 ```
 
 Import the `CrossChainCore` class
 
 ```ts
-import { CrossChainCore } from "@aptos-labs/cross-chain-core";
+import { CrossChainCore } from "@movement-labs/cross-chain-core";
 ```
 
 Initialize `CrossChainCore` and chosen provider

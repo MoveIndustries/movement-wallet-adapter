@@ -1,5 +1,5 @@
-import { useWallet, WalletContextState } from "@aptos-labs/wallet-adapter-vue";
-import { Network } from "@aptos-labs/ts-sdk";
+import { useWallet, WalletContextState } from "@moveindustries/wallet-adapter-vue";
+import { Network } from "@moveindustries/ts-sdk";
 import { useToast } from "~/components/ui/toast";
 import { useAutoConnect } from "~/composables/useAutoConnect";
 

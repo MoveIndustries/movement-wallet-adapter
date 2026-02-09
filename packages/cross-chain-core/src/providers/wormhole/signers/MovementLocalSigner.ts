@@ -1,11 +1,11 @@
 import {
   AccountAuthenticator,
   AnyRawTransaction,
-  Aptos,
-  AptosConfig,
-  Network as AptosNetwork,
+  Movement,
+  MovementConfig,
+  Network as MovementNetwork,
   Account,
-} from "@aptos-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 
 import {
   Chain,
@@ -20,7 +20,7 @@ import {
 } from "@wormhole-foundation/sdk-aptos";
 import { GasStationApiKey } from "../types";
 
-export class AptosLocalSigner<N extends Network, C extends Chain>
+export class MovementLocalSigner<N extends Network, C extends Chain>
   implements SignAndSendSigner<N, C>
 {
   _chain: C;
@@ -91,10 +91,10 @@ export async function signAndSendTransaction(
     }
   });
 
-  const aptosConfig = new AptosConfig({
-    network: AptosNetwork.TESTNET,
+  const movementConfig = new MovementConfig({
+    network: MovementNetwork.TESTNET,
   });
-  const aptos = new Aptos(aptosConfig);
+  const aptos = new Movement(movementConfig);
 
   const txnToSign = await aptos.transaction.build.simple({
     data: payload,

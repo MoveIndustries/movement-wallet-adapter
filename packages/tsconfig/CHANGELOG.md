@@ -1,4 +1,4 @@
-# @aptos-labs/wallet-adapter-tsconfig
+# @movement-labs/wallet-adapter-tsconfig
 
 ## 0.0.2
 

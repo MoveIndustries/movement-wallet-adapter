@@ -1,4 +1,4 @@
-const LOCAL_STORAGE_ITEM_KEY = "AptosWalletName";
+const LOCAL_STORAGE_ITEM_KEY = "MovementWalletName";
 
 export function setLocalStorage(walletName: string) {
   localStorage.setItem(LOCAL_STORAGE_ITEM_KEY, walletName);

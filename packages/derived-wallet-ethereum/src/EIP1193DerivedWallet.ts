@@ -2,34 +2,34 @@ import {
   fetchDevnetChainId,
   isNullCallback,
   mapUserResponse,
-} from "@aptos-labs/derived-wallet-base";
+} from "@moveindustries/derived-wallet-base";
 import {
   AccountAuthenticator,
   AnyRawTransaction,
   Network,
   NetworkToChainId,
   NetworkToNodeAPI,
-} from "@aptos-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   AccountInfo,
-  APTOS_CHAINS,
-  AptosChangeNetworkOutput,
-  AptosConnectOutput,
-  AptosFeatures,
-  AptosSignMessageInput,
-  AptosSignMessageOutput,
-  AptosWallet,
+  MOVEMENT_CHAINS,
+  MovementChangeNetworkOutput,
+  MovementConnectOutput,
+  MovementFeatures,
+  MovementSignMessageInput,
+  MovementSignMessageOutput,
+  MovementWallet,
   NetworkInfo,
   UserResponse,
   UserResponseStatus,
   WalletIcon,
-} from "@aptos-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 import { BrowserProvider } from "ethers";
 import type { EIP1193Provider, EIP6963ProviderDetail } from "mipd";
 import { EIP1193DerivedPublicKey } from "./EIP1193DerivedPublicKey";
 import { EthereumAddress, wrapEthersUserResponse } from "./shared";
-import { signAptosMessageWithEthereum } from "./signAptosMessage";
-import { signAptosTransactionWithEthereum } from "./signAptosTransaction";
+import { signMovementMessageWithEthereum } from "./signMovementMessage";
+import { signMovementTransactionWithEthereum } from "./signMovementTransaction";
 
 const defaultAuthenticationFunction =
   "0x1::ethereum_derivable_account::authenticate";
@@ -39,7 +39,7 @@ export interface EIP1193DerivedWalletOptions {
   defaultNetwork?: Network;
 }
 
-export class EIP1193DerivedWallet implements AptosWallet {
+export class EIP1193DerivedWallet implements MovementWallet {
   readonly eip1193Provider: EIP1193Provider;
   readonly eip1193Ethers: BrowserProvider;
   readonly domain: string;
@@ -51,7 +51,7 @@ export class EIP1193DerivedWallet implements AptosWallet {
   readonly icon: WalletIcon;
   readonly url: string;
   readonly accounts = [];
-  readonly chains = APTOS_CHAINS;
+  readonly chains = MOVEMENT_CHAINS;
 
   constructor(
     providerDetail: EIP6963ProviderDetail,
@@ -75,40 +75,40 @@ export class EIP1193DerivedWallet implements AptosWallet {
     this.url = info.rdns;
   }
 
-  readonly features: AptosFeatures = {
-    "aptos:connect": {
+  readonly features: MovementFeatures = {
+    "movement:connect": {
       version: "1.0.0",
       connect: () => this.connect(),
     },
-    "aptos:disconnect": {
+    "movement:disconnect": {
       version: "1.0.0",
       disconnect: () => this.disconnect(),
     },
-    "aptos:account": {
+    "movement:account": {
       version: "1.0.0",
       account: () => this.getActiveAccount(),
     },
-    "aptos:onAccountChange": {
+    "movement:onAccountChange": {
       version: "1.0.0",
       onAccountChange: async (callback) => this.onActiveAccountChange(callback),
     },
-    "aptos:network": {
+    "movement:network": {
       version: "1.0.0",
       network: () => this.getActiveNetwork(),
     },
-    "aptos:changeNetwork": {
+    "movement:changeNetwork": {
       version: "1.0.0",
       changeNetwork: (newNetwork) => this.changeNetwork(newNetwork),
     },
-    "aptos:onNetworkChange": {
+    "movement:onNetworkChange": {
       version: "1.0.0",
       onNetworkChange: async (callback) => this.onActiveNetworkChange(callback),
     },
-    "aptos:signMessage": {
+    "movement:signMessage": {
       version: "1.0.0",
       signMessage: (args) => this.signMessage(args),
     },
-    "aptos:signTransaction": {
+    "movement:signTransaction": {
       version: "1.0.0",
       signTransaction: (...args) => this.signTransaction(...args),
     },
@@ -124,7 +124,7 @@ export class EIP1193DerivedWallet implements AptosWallet {
 
   // region Connection
 
-  async connect(): Promise<UserResponse<AptosConnectOutput>> {
+  async connect(): Promise<UserResponse<MovementConnectOutput>> {
     const response = await wrapEthersUserResponse(
       this.eip1193Ethers.getSigner(),
     );
@@ -132,8 +132,8 @@ export class EIP1193DerivedWallet implements AptosWallet {
       const publicKey = this.derivePublicKey(
         account.address as EthereumAddress,
       );
-      const aptosAddress = publicKey.authKey().derivedAddress();
-      return new AccountInfo({ publicKey, address: aptosAddress });
+      const movementAddress = publicKey.authKey().derivedAddress();
+      return new AccountInfo({ publicKey, address: movementAddress });
     });
   }
 
@@ -153,8 +153,8 @@ export class EIP1193DerivedWallet implements AptosWallet {
     const publicKey = this.derivePublicKey(
       activeAccount.address as EthereumAddress,
     );
-    const aptosAddress = publicKey.authKey().derivedAddress();
-    return new AccountInfo({ publicKey, address: aptosAddress });
+    const movementAddress = publicKey.authKey().derivedAddress();
+    return new AccountInfo({ publicKey, address: movementAddress });
   }
 
   private onAccountsChangedListeners: ((
@@ -174,8 +174,8 @@ export class EIP1193DerivedWallet implements AptosWallet {
           return;
         }
         const publicKey = this.derivePublicKey(ethereumAddress);
-        const aptosAddress = publicKey.authKey().derivedAddress();
-        const account = new AccountInfo({ publicKey, address: aptosAddress });
+        const movementAddress = publicKey.authKey().derivedAddress();
+        const account = new AccountInfo({ publicKey, address: movementAddress });
         callback(account);
       };
       this.onAccountsChangedListeners.push(listener);
@@ -203,7 +203,7 @@ export class EIP1193DerivedWallet implements AptosWallet {
 
   async changeNetwork(
     newNetwork: NetworkInfo,
-  ): Promise<UserResponse<AptosChangeNetworkOutput>> {
+  ): Promise<UserResponse<MovementChangeNetworkOutput>> {
     const { name, chainId, url } = newNetwork;
     if (name === Network.CUSTOM) {
       throw new Error("Custom network not currently supported");
@@ -235,14 +235,14 @@ export class EIP1193DerivedWallet implements AptosWallet {
   // region Signatures
 
   async signMessage(
-    input: AptosSignMessageInput,
-  ): Promise<UserResponse<AptosSignMessageOutput>> {
+    input: MovementSignMessageInput,
+  ): Promise<UserResponse<MovementSignMessageOutput>> {
     const chainId = input.chainId
       ? this.defaultNetwork === Network.DEVNET
         ? await fetchDevnetChainId()
         : NetworkToChainId[this.defaultNetwork]
       : undefined;
-    return signAptosMessageWithEthereum({
+    return signMovementMessageWithEthereum({
       eip1193Provider: this.eip1193Provider,
       authenticationFunction: this.authenticationFunction,
       messageInput: {
@@ -256,7 +256,7 @@ export class EIP1193DerivedWallet implements AptosWallet {
     rawTransaction: AnyRawTransaction,
     _asFeePayer?: boolean,
   ): Promise<UserResponse<AccountAuthenticator>> {
-    return signAptosTransactionWithEthereum({
+    return signMovementTransactionWithEthereum({
       eip1193Provider: this.eip1193Provider,
       authenticationFunction: this.authenticationFunction,
       rawTransaction,

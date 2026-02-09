@@ -3,9 +3,9 @@ import {
   AccountAddress,
   AccountAuthenticator,
   AnyRawTransaction,
-  Aptos,
-  AptosConfig,
-  Network as AptosNetwork,
+  Movement,
+  MovementConfig,
+  Network as MovementNetwork,
   Deserializer,
   EntryFunctionArgumentTypes,
   InputGenerateTransactionPayloadData,
@@ -13,15 +13,15 @@ import {
   Serializer,
   SimpleEntryFunctionArgumentTypes,
   U64,
-} from "@aptos-labs/ts-sdk";
-import { AdapterWallet } from "@aptos-labs/wallet-adapter-core";
+} from "@moveindustries/ts-sdk";
+import { AdapterWallet } from "@moveindustries/wallet-adapter-core";
 import { Network } from "@wormhole-foundation/sdk";
 import {
   AptosChains,
   AptosUnsignedTransaction,
 } from "@wormhole-foundation/sdk-aptos";
 import { GasStationApiKey } from "..";
-import { UserResponseStatus } from "@aptos-labs/wallet-standard";
+import { UserResponseStatus } from "@moveindustries/wallet-standard";
 
 export async function signAndSendTransaction(
   request: AptosUnsignedTransaction<Network, AptosChains>,
@@ -44,13 +44,13 @@ export async function signAndSendTransaction(
     }
   });
 
-  const aptosConfig = new AptosConfig({
-    network: AptosNetwork.TESTNET,
+  const movementConfig = new MovementConfig({
+    network: MovementNetwork.TESTNET,
   });
-  const aptos = new Aptos(aptosConfig);
+  const aptos = new Movement(movementConfig);
 
   // TODO: handle mainnet
-  const contractAddress = AptosNetwork.TESTNET
+  const contractAddress = MovementNetwork.TESTNET
     ? "0x5e2d961f06cd27aa07554a39d55f5ce1e58dff35d803c3529b1cd5c4fa3ab584"
     : "0x1";
 
@@ -64,7 +64,7 @@ export async function signAndSendTransaction(
 
   const transactionData: InputGenerateTransactionPayloadData = {
     // a custom function to withdraw tokens from the aptos chain, published here on testnet:
-    // https://explorer.aptoslabs.com/account/0x5e2d961f06cd27aa07554a39d55f5ce1e58dff35d803c3529b1cd5c4fa3ab584/modules/code/withdraw?network=testnet
+    // https://explorer.movementlabs.xyz/account/0x5e2d961f06cd27aa07554a39d55f5ce1e58dff35d803c3529b1cd5c4fa3ab584/modules/code/withdraw?network=testnet
     function: `${contractAddress}::withdraw::deposit_for_burn`,
     functionArguments,
   };
@@ -72,13 +72,13 @@ export async function signAndSendTransaction(
   const txnToSign = await aptos.transaction.build.simple({
     data: transactionData,
     sender: (
-      await wallet.features["aptos:account"]?.account()
+      await wallet.features["movement:account"]?.account()
     ).address.toString(),
     withFeePayer: sponsorAccount ? true : false,
   });
 
   const response =
-    await wallet.features["aptos:signTransaction"]?.signTransaction(txnToSign);
+    await wallet.features["movement:signTransaction"]?.signTransaction(txnToSign);
 
   if (response?.status === UserResponseStatus.REJECTED) {
     throw new Error("User has rejected the request");

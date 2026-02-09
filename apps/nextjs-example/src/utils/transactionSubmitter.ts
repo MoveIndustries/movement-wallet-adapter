@@ -1,10 +1,10 @@
 import {
-  Aptos,
-  AptosConfig,
+  Movement,
+  MovementConfig,
   InputSubmitTransactionData,
   PendingTransactionResponse,
   TransactionSubmitter,
-} from "@aptos-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 
 /**
  * This is a dummy transaction submitter that just logs the transaction and then
@@ -12,15 +12,15 @@ import {
  */
 class MyTransactionSubmitter implements TransactionSubmitter {
   submitTransaction(
-    args: { aptosConfig: AptosConfig } & Omit<
+    args: { movementConfig: MovementConfig } & Omit<
       InputSubmitTransactionData,
       "transactionSubmitter"
     >,
   ): Promise<PendingTransactionResponse> {
-    const { aptosConfig } = args;
+    const { movementConfig } = args;
     console.log("Submitting transaction with MyTransactionSubmitter", args);
-    const aptos = new Aptos(aptosConfig);
-    return aptos.transaction.submit.simple({
+    const movement = new Movement(movementConfig);
+    return movement.transaction.submit.simple({
       ...args,
       // We do this so we don't recurse back to this function but instead use the
       // proper regular txn submitter.

@@ -1,6 +1,6 @@
-import { AccountAddressInput } from "@aptos-labs/ts-sdk";
+import { AccountAddressInput } from "@moveindustries/ts-sdk";
 
-export const structuredMessagePrefix = "APTOS" as const;
+export const structuredMessagePrefix = "MOVEMENT" as const;
 
 export interface StructuredMessageInput {
   message: string;

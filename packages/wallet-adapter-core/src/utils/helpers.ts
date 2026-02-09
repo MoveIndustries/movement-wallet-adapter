@@ -1,15 +1,15 @@
 import {
-  Aptos,
-  AptosConfig,
+  Movement,
+  MovementConfig,
   Hex,
   Network,
   NetworkToNodeAPI,
   PluginSettings,
-} from "@aptos-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   NetworkInfo,
   NetworkInfo as StandardNetworkInfo,
-} from "@aptos-labs/wallet-standard";
+} from "@moveindustries/wallet-standard";
 
 import { DappConfig } from "../WalletCore";
 import { WalletSignAndSubmitMessageError } from "../error";
@@ -49,16 +49,16 @@ export function generalizedErrorMessage(error: any): string {
 }
 
 /**
- * Helper function to get AptosConfig that supports Aptos and Custom networks
+ * Helper function to get MovementConfig that supports Aptos and Custom networks
  *
  * @param networkInfo
  * @param dappConfig
- * @returns AptosConfig
+ * @returns MovementConfig
  */
-export const getAptosConfig = (
+export const getMovementConfig = (
   networkInfo: NetworkInfo | null,
   dappConfig: DappConfig | undefined,
-): AptosConfig => {
+): MovementConfig => {
   if (!networkInfo) {
     throw new Error("Undefined network");
   }
@@ -67,19 +67,19 @@ export const getAptosConfig = (
     TRANSACTION_SUBMITTER: dappConfig?.transactionSubmitter,
   };
 
-  if (isAptosNetwork(networkInfo)) {
+  if (isMovementNetwork(networkInfo)) {
     const currentNetwork = convertNetwork(networkInfo);
 
-    if (isAptosLiveNetwork(currentNetwork)) {
-      const apiKey = dappConfig?.aptosApiKeys;
-      return new AptosConfig({
+    if (isMovementLiveNetwork(currentNetwork)) {
+      const apiKey = dappConfig?.movementApiKeys;
+      return new MovementConfig({
         network: currentNetwork,
         clientConfig: { API_KEY: apiKey ? apiKey[currentNetwork] : undefined },
         pluginSettings,
       });
     }
 
-    return new AptosConfig({
+    return new MovementConfig({
       network: currentNetwork,
       pluginSettings,
     });
@@ -95,7 +95,7 @@ export const getAptosConfig = (
     );
 
     if (isKnownNetwork) {
-      return new AptosConfig({
+      return new MovementConfig({
         network: Network.CUSTOM,
         fullnode: networkInfo.url,
         pluginSettings,
@@ -105,7 +105,7 @@ export const getAptosConfig = (
 
   // Custom networks are not supported, please ensure that the wallet is returning the appropriate network Mainnet, Testnet, Devnet, Local
   throw new Error(
-    `Invalid network, network ${networkInfo.name} not supported with Aptos wallet adapter to prevent user from using an unexpected network.`,
+    `Invalid network, network ${networkInfo.name} not supported with Movement wallet adapter to prevent user from using an unexpected network.`,
   );
 };
 
@@ -115,7 +115,7 @@ export const getAptosConfig = (
  * @param networkInfo
  * @returns boolean
  */
-export const isAptosNetwork = (
+export const isMovementNetwork = (
   networkInfo: NetworkInfo | StandardNetworkInfo | null,
 ): boolean => {
   if (!networkInfo) {
@@ -124,7 +124,7 @@ export const isAptosNetwork = (
   return NetworkToNodeAPI[networkInfo.name] !== undefined;
 };
 
-export const isAptosLiveNetwork = (networkInfo: Network): boolean => {
+export const isMovementLiveNetwork = (networkInfo: Network): boolean => {
   return (
     networkInfo === "devnet" ||
     networkInfo === "testnet" ||
@@ -136,7 +136,7 @@ export const isAptosLiveNetwork = (networkInfo: Network): boolean => {
  * Helper function to fetch Devnet chain id
  */
 export const fetchDevnetChainId = async (): Promise<number> => {
-  const aptos = new Aptos(); // default to devnet
+  const aptos = new Movement(); // default to devnet
   return await aptos.getChainId();
 };
 
@@ -184,6 +184,6 @@ export function convertNetwork(networkInfo: NetworkInfo | null): Network {
     case "local" as Network:
       return Network.LOCAL;
     default:
-      throw new Error("Invalid Aptos network name");
+      throw new Error("Invalid Movement network name");
   }
 }

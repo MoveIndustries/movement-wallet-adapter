@@ -2,8 +2,8 @@ import {
   createStructuredMessageStatement,
   createTransactionStatement,
   StructuredMessage,
-} from "@aptos-labs/derived-wallet-base";
-import { AnyRawTransaction, Hex, HexInput } from "@aptos-labs/ts-sdk";
+} from "@moveindustries/derived-wallet-base";
+import { AnyRawTransaction, Hex, HexInput } from "@moveindustries/ts-sdk";
 import { createSiweMessage } from "viem/siwe";
 import { EthereumAddress } from "./shared";
 
@@ -37,7 +37,7 @@ function createSiweEnvelope(
   });
 }
 
-export function createSiweEnvelopeForAptosStructuredMessage(
+export function createSiweEnvelopeForMovementStructuredMessage(
   input: CreateSiweEnvelopeInput & { structuredMessage: StructuredMessage },
 ) {
   const { structuredMessage, ...rest } = input;
@@ -45,7 +45,7 @@ export function createSiweEnvelopeForAptosStructuredMessage(
   return createSiweEnvelope({ ...rest, statement });
 }
 
-export function createSiweEnvelopeForAptosTransaction(
+export function createSiweEnvelopeForMovementTransaction(
   input: CreateSiweEnvelopeInput & {
     rawTransaction: AnyRawTransaction;
   },

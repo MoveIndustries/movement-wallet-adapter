@@ -2,8 +2,8 @@ import {
   createStructuredMessageStatement,
   createTransactionStatement,
   StructuredMessage,
-} from "@aptos-labs/derived-wallet-base";
-import { AnyRawTransaction, Hex, HexInput } from "@aptos-labs/ts-sdk";
+} from "@moveindustries/derived-wallet-base";
+import { AnyRawTransaction, Hex, HexInput } from "@moveindustries/ts-sdk";
 import { SolanaSignInInputWithRequiredFields } from "@solana/wallet-standard-util";
 import { PublicKey as SolanaPublicKey } from "@solana/web3.js";
 
@@ -29,11 +29,11 @@ function createSiwsEnvelope(
 }
 
 /**
- * Create a SIWS envelope for an Aptos structured message.
+ * Create a SIWS envelope for an Movement structured message.
  * A signature on the Solana blockchain by `solanaPublicKey` will be
- * considered as valid signature on the Aptos blockchain for the provided message.
+ * considered as valid signature on the Movement blockchain for the provided message.
  */
-export function createSiwsEnvelopeForAptosStructuredMessage(
+export function createSiwsEnvelopeForMovementStructuredMessage(
   input: CreateSiwsEnvelopeInput & { structuredMessage: StructuredMessage },
 ): SolanaSignInInputWithRequiredFields {
   const { structuredMessage, ...rest } = input;
@@ -42,11 +42,11 @@ export function createSiwsEnvelopeForAptosStructuredMessage(
 }
 
 /**
- * Create a SIWS envelope for an Aptos transaction.
+ * Create a SIWS envelope for an Movement transaction.
  * A signature on the Solana blockchain by `solanaPublicKey` will be
- * considered as valid signature on the Aptos blockchain for the provided transaction.
+ * considered as valid signature on the Movement blockchain for the provided transaction.
  */
-export function createSiwsEnvelopeForAptosTransaction(
+export function createSiwsEnvelopeForMovementTransaction(
   input: CreateSiwsEnvelopeInput & { rawTransaction: AnyRawTransaction },
 ): SolanaSignInInputWithRequiredFields {
   const { rawTransaction, ...rest } = input;

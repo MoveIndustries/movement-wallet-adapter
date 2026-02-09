@@ -19,11 +19,11 @@ export const mainnetTokens: Record<string, TokenConfig> = {
     icon: "USDC",
     decimals: 6,
   },
-  Aptos: {
+  Movement: {
     symbol: "USDC",
     decimals: 6,
     tokenId: {
-      chain: "Aptos",
+      chain: "Movement",
       address:
         "0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b",
     },

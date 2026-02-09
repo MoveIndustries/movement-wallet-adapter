@@ -1,8 +1,8 @@
 # Build Your Own Wallet Selector
 
-Although we provide pre-made wallet selector components through `@aptos-labs/wallet-adapter-ant-design` and `@aptos-labs/wallet-adapter-mui-design`, you may want to create your own wallet selector component if you're not already using [Ant Design](https://ant.design/) or [Material UI](https://mui.com/material-ui/) in your project.
+Although we provide pre-made wallet selector components through `@movement-labs/wallet-adapter-ant-design` and `@movement-labs/wallet-adapter-mui-design`, you may want to create your own wallet selector component if you're not already using [Ant Design](https://ant.design/) or [Material UI](https://mui.com/material-ui/) in your project.
 
-The `@aptos-labs/wallet-adapter-react` package exposes all of the primitives that have been created to maximize code reuse between our own wallet selector implementations. You can use these primitives yourself to implement your own wallet selector that integrates seamlessly with the look and feel of your application.
+The `@movement-labs/wallet-adapter-react` package exposes all of the primitives that have been created to maximize code reuse between our own wallet selector implementations. You can use these primitives yourself to implement your own wallet selector that integrates seamlessly with the look and feel of your application.
 
 This document covers each primitive one-by-one, but if you want to see a full example of how these primitives can be composed to create a full wallet selector, refer to the implementation of the `shadcn/ui` wallet selector located in [`WalletSelector.tsx`](../../../apps/nextjs-example/src/components/WalletSelector.tsx) from the example Next.js app.
 
@@ -60,7 +60,7 @@ import {
   WalletItem,
   WalletItemProps,
   isInstallRequired,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/wallet-adapter-react";
 
 const WalletRow = ({ wallet, onConnect }: WalletItemProps) => (
   <WalletItem wallet={wallet} onConnect={onConnect}>
@@ -79,7 +79,7 @@ const WalletRow = ({ wallet, onConnect }: WalletItemProps) => (
 ![shadcn/ui WalletItem](./images/wallet-item-2.png)
 
 ```tsx
-import { WalletItem, WalletItemProps } from "@aptos-labs/wallet-adapter-react";
+import { WalletItem, WalletItemProps } from "@movement-labs/wallet-adapter-react";
 
 const PetraWebWalletRow = ({ wallet, onConnect }: WalletItemProps) => {
   return (
@@ -118,7 +118,7 @@ This is a headless component that renders an anchor element that links to the in
 ### `AptosPrivacyPolicy`
 
 ```tsx
-import { AptosPrivacyPolicy } from "@aptos-labs/wallet-adapter-react";
+import { AptosPrivacyPolicy } from "@movement-labs/wallet-adapter-react";
 
 const PrivacyPolicy = () => (
   <AptosPrivacyPolicy>
@@ -154,7 +154,7 @@ This is a headless component that renders the "Powered by Aptos Labs" text with 
 import {
   AboutPetraWeb,
   AboutPetraWebEducationScreen,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@movement-labs/wallet-adapter-react";
 
 const WalletSelector = () => (
   <AboutPetraWeb renderEducationScreen={renderEducationScreen}>

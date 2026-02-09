@@ -6,8 +6,9 @@ import {
   wormhole,
   PlatformLoader,
   TransferState,
+  Chain as WormholeChain,
 } from "@wormhole-foundation/sdk";
-import { Network, sleep } from "@aptos-labs/ts-sdk";
+import { Network, sleep } from "@moveindustries/ts-sdk";
 import aptos from "@wormhole-foundation/sdk/aptos";
 import solana from "@wormhole-foundation/sdk/solana";
 import evm from "@wormhole-foundation/sdk/evm";
@@ -17,8 +18,17 @@ import {
   CrossChainProvider,
   CrossChainCore,
 } from "../../CrossChainCore";
+
+// Helper to map our Chain type to Wormhole SDK's Chain type
+// "Movement" maps to "Aptos" since Movement is Aptos-compatible
+function toWormholeChain(chain: Chain): WormholeChain {
+  if (chain === "Movement") {
+    return "Aptos" as WormholeChain;
+  }
+  return chain as WormholeChain;
+}
 import { logger } from "../../utils/logger";
-import { AptosLocalSigner } from "./signers/AptosLocalSigner";
+import { MovementLocalSigner } from "./signers/MovementLocalSigner";
 import { Signer } from "./signers/Signer";
 import { ChainConfig } from "../../config";
 import {
@@ -34,8 +44,8 @@ import {
   WormholeWithdrawRequest,
   WormholeWithdrawResponse,
 } from "./types";
-import { SolanaDerivedWallet } from "@aptos-labs/derived-wallet-solana";
-import { EIP1193DerivedWallet } from "@aptos-labs/derived-wallet-ethereum";
+import { SolanaDerivedWallet } from "@moveindustries/derived-wallet-solana";
+import { EIP1193DerivedWallet } from "@moveindustries/derived-wallet-ethereum";
 
 export class WormholeProvider
   implements
@@ -65,7 +75,7 @@ export class WormholeProvider
   }
 
   private async setWormholeContext(sourceChain: Chain) {
-    const dappNetwork = this.crossChainCore._dappConfig?.aptosNetwork;
+    const dappNetwork = this.crossChainCore._dappConfig?.movementNetwork;
     if (dappNetwork === Network.DEVNET) {
       throw new Error("Devnet is not supported on Wormhole");
     }
@@ -95,11 +105,11 @@ export class WormholeProvider
     );
 
     const destContext = this._wormholeContext
-      .getPlatform(chainToPlatform(destinationChain))
-      .getChain(destinationChain);
+      .getPlatform(chainToPlatform(toWormholeChain(destinationChain)))
+      .getChain(toWormholeChain(destinationChain));
     const sourceContext = this._wormholeContext
-      .getPlatform(chainToPlatform(sourceChain))
-      .getChain(sourceChain);
+      .getPlatform(chainToPlatform(toWormholeChain(sourceChain)))
+      .getChain(toWormholeChain(sourceChain));
 
     logger.log("sourceContext", sourceContext);
     logger.log("sourceToken", sourceToken);
@@ -140,8 +150,8 @@ export class WormholeProvider
     logger.log("type", type);
     // If the type of the transaction is "transfer", we want to transfer from a x-chain wallet to the Aptos wallet
     // If the type of the transaction is "withdraw", we want to transfer from the Aptos wallet to a x-chain wallet
-    const sourceChain = type === "transfer" ? originChain : "Aptos";
-    const destinationChain = type === "transfer" ? "Aptos" : originChain;
+    const sourceChain = type === "transfer" ? originChain : "Movement";
+    const destinationChain = type === "transfer" ? "Movement" : originChain;
 
     const { route, request } = await this.getRoute(
       sourceChain,
@@ -217,7 +227,7 @@ export class WormholeProvider
       this.wormholeRequest,
       signer,
       this.wormholeQuote,
-      Wormhole.chainAddress("Aptos", destinationAddress.toString()),
+      Wormhole.chainAddress(toWormholeChain("Movement"), destinationAddress.toString()),
     );
 
     const originChainTxnId =
@@ -249,8 +259,8 @@ export class WormholeProvider
             logger.log("Receipt is on track ", receipt);
 
             try {
-              const signer = new AptosLocalSigner(
-                "Aptos",
+              const signer = new MovementLocalSigner(
+                toWormholeChain("Movement"),
                 {},
                 mainSigner, // the account that signs the "claim" transaction
                 sponsorAccount ? sponsorAccount : undefined, // the fee payer account
@@ -294,7 +304,7 @@ export class WormholeProvider
   async transfer(
     input: WormholeTransferRequest,
   ): Promise<WormholeTransferResponse> {
-    if (this.crossChainCore._dappConfig?.aptosNetwork === Network.DEVNET) {
+    if (this.crossChainCore._dappConfig?.movementNetwork === Network.DEVNET) {
       throw new Error("Devnet is not supported on Wormhole");
     }
     // if amount is provided, it is expected to get the quote internally
@@ -337,9 +347,9 @@ export class WormholeProvider
     }
 
     const signer = new Signer(
-      this.getChainConfig("Aptos"),
+      this.getChainConfig("Movement"),
       (
-        await input.wallet.features["aptos:account"].account()
+        await input.wallet.features["movement:account"].account()
       ).address.toString(),
       {},
       input.wallet,
@@ -352,14 +362,14 @@ export class WormholeProvider
     logger.log("wormholeQuote", this.wormholeQuote);
     logger.log(
       "Wormhole.chainAddress",
-      Wormhole.chainAddress(sourceChain, input.destinationAddress.toString()),
+      Wormhole.chainAddress(toWormholeChain(sourceChain), input.destinationAddress.toString()),
     );
 
     let receipt = await this.wormholeRoute.initiate(
       this.wormholeRequest,
       signer,
       this.wormholeQuote,
-      Wormhole.chainAddress(sourceChain, input.destinationAddress.toString()),
+      Wormhole.chainAddress(toWormholeChain(sourceChain), input.destinationAddress.toString()),
     );
     logger.log("receipt", receipt);
 
@@ -448,12 +458,12 @@ export class WormholeProvider
     destToken: TokenId;
   } {
     const sourceToken: TokenId = Wormhole.tokenId(
-      this.crossChainCore.TOKENS[sourceChain].tokenId.chain as Chain,
+      toWormholeChain(this.crossChainCore.TOKENS[sourceChain].tokenId.chain as Chain),
       this.crossChainCore.TOKENS[sourceChain].tokenId.address,
     );
 
     const destToken: TokenId = Wormhole.tokenId(
-      this.crossChainCore.TOKENS[destinationChain].tokenId.chain as Chain,
+      toWormholeChain(this.crossChainCore.TOKENS[destinationChain].tokenId.chain as Chain),
       this.crossChainCore.TOKENS[destinationChain].tokenId.address,
     );
 

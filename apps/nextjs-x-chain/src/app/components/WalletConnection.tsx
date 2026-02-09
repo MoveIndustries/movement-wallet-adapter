@@ -7,14 +7,14 @@ import {
   OriginWalletDetails,
 } from "@/utils/derivedWallet";
 import { isEIP1193DerivedWallet } from "@/utils/derivedWallet";
-import { Network } from "@aptos-labs/ts-sdk";
+import { Network } from "@moveindustries/ts-sdk";
 import {
   AccountInfo,
   AdapterWallet,
-  AptosChangeNetworkOutput,
-  isAptosNetwork,
+  MovementChangeNetworkOutput,
+  isMovementNetwork,
   NetworkInfo,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 import Image from "next/image";
 
 interface WalletConnectionProps {
@@ -22,7 +22,7 @@ interface WalletConnectionProps {
   network: NetworkInfo | null;
   wallet: AdapterWallet | null;
   originWalletDetails: OriginWalletDetails | undefined;
-  changeNetwork: (network: Network) => Promise<AptosChangeNetworkOutput>;
+  changeNetwork: (network: Network) => Promise<MovementChangeNetworkOutput>;
 }
 
 export function WalletConnection({
@@ -33,7 +33,7 @@ export function WalletConnection({
   originWalletDetails,
 }: WalletConnectionProps) {
   const isValidNetworkName = () => {
-    if (isAptosNetwork(network)) {
+    if (isMovementNetwork(network)) {
       return Object.values<string | undefined>(Network).includes(network?.name);
     }
     // If the configured network is not an Aptos network, i.e is a custom network
@@ -42,7 +42,7 @@ export function WalletConnection({
   };
 
   const isNetworkChangeSupported =
-    wallet?.features["aptos:changeNetwork"] !== undefined;
+    wallet?.features["movement:changeNetwork"] !== undefined;
 
   const aptosAccountInfoLabels = [
     {

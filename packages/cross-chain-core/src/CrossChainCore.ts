@@ -1,4 +1,4 @@
-import { Account, Network } from "@aptos-labs/ts-sdk";
+import { Account, Network } from "@moveindustries/ts-sdk";
 
 import {
   WormholeTransferRequest,
@@ -20,13 +20,13 @@ import {
   ChainConfig,
 } from "./config";
 import {
-  getAptosWalletUSDCBalance,
+  getMovementWalletUSDCBalance,
   getEthereumWalletUSDCBalance,
   getSolanaWalletUSDCBalance,
 } from "./utils/getUsdcBalance";
 
 export interface CrossChainDappConfig {
-  aptosNetwork: Network;
+  movementNetwork: Network;
   disableTelemetry?: boolean;
   solanaConfig?: {
     rpc?: string;
@@ -38,16 +38,16 @@ export interface CrossChainDappConfig {
     };
   };
 }
-export type { AccountAddressInput } from "@aptos-labs/ts-sdk";
-export { NetworkToChainId, NetworkToNodeAPI } from "@aptos-labs/ts-sdk";
-export type AptosAccount = Account;
+export type { AccountAddressInput } from "@moveindustries/ts-sdk";
+export { NetworkToChainId, NetworkToNodeAPI } from "@moveindustries/ts-sdk";
+export type MovementAccount = Account;
 
 // List of all the supported chain
 export type Chain =
   | "Solana"
   | "Ethereum"
   | "Sepolia"
-  | "Aptos"
+  | "Movement"
   | "BaseSepolia"
   | "ArbitrumSepolia"
   | "Avalanche"
@@ -91,7 +91,7 @@ export interface CrossChainProvider<
 
 export class CrossChainCore {
   readonly _dappConfig: CrossChainDappConfig = {
-    aptosNetwork: Network.TESTNET,
+    movementNetwork: Network.TESTNET,
   };
 
   readonly CHAINS: ChainsConfig = testnetChains;
@@ -99,7 +99,7 @@ export class CrossChainCore {
 
   constructor(args: { dappConfig: CrossChainDappConfig }) {
     this._dappConfig = args.dappConfig;
-    if (args.dappConfig?.aptosNetwork === Network.MAINNET) {
+    if (args.dappConfig?.movementNetwork === Network.MAINNET) {
       this.CHAINS = mainnetChains;
       this.TOKENS = mainnetTokens;
     } else {
@@ -128,10 +128,10 @@ export class CrossChainCore {
     walletAddress: string,
     sourceChain: Chain,
   ): Promise<string> {
-    if (sourceChain === "Aptos") {
-      return await getAptosWalletUSDCBalance(
+    if (sourceChain === "Movement") {
+      return await getMovementWalletUSDCBalance(
         walletAddress,
-        this._dappConfig.aptosNetwork,
+        this._dappConfig.movementNetwork,
       );
     }
     if (!this.CHAINS[sourceChain]) {
@@ -141,7 +141,7 @@ export class CrossChainCore {
       case "Solana":
         return await getSolanaWalletUSDCBalance(
           walletAddress,
-          this._dappConfig.aptosNetwork,
+          this._dappConfig.movementNetwork,
           this._dappConfig?.solanaConfig?.rpc ??
             this.CHAINS[sourceChain].defaultRpc,
         );
@@ -156,7 +156,7 @@ export class CrossChainCore {
       case "Polygon":
         return await getEthereumWalletUSDCBalance(
           walletAddress,
-          this._dappConfig.aptosNetwork,
+          this._dappConfig.movementNetwork,
           sourceChain,
           // TODO: maybe let the user config it
           this.CHAINS[sourceChain].defaultRpc,

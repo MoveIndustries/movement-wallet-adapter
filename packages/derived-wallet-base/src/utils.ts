@@ -1,5 +1,5 @@
-import { AccountPublicKey, Aptos } from "@aptos-labs/ts-sdk";
-import { AccountInfo } from "@aptos-labs/wallet-standard";
+import { AccountPublicKey, Movement } from "@moveindustries/ts-sdk";
+import { AccountInfo } from "@moveindustries/wallet-standard";
 
 export function accountInfoFromPublicKey(publicKey: AccountPublicKey) {
   return new AccountInfo({
@@ -16,6 +16,6 @@ export function isNullCallback(callback: Function) {
  * Helper function to fetch Devnet chain id
  */
 export const fetchDevnetChainId = async (): Promise<number> => {
-  const aptos = new Aptos(); // default to devnet
+  const aptos = new Movement(); // default to devnet
   return await aptos.getChainId();
 };

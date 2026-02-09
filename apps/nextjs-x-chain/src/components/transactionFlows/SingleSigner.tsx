@@ -7,14 +7,14 @@ import {
   Network,
   PrivateKey,
   PrivateKeyVariants,
-} from "@aptos-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import {
   InputTransactionData,
   useWallet,
   AdapterWallet,
-} from "@aptos-labs/wallet-adapter-react";
+} from "@moveindustries/wallet-adapter-react";
 
-import { isSendableNetwork, aptosClient } from "@/utils";
+import { isSendableNetwork, movementClient } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
@@ -56,7 +56,7 @@ export function SingleSigner({ dappNetwork, wallet }: SingleSignerProps) {
     if (!account) return;
     try {
       const payload = {
-        message: "Hello from Aptos Wallet Adapter",
+        message: "Hello from Movement Wallet Adapter",
         nonce: generateNonce(),
       };
       const response = await signMessageAndVerify(payload);
@@ -78,7 +78,7 @@ export function SingleSigner({ dappNetwork, wallet }: SingleSignerProps) {
     if (!account) return;
     try {
       const payload = {
-        message: "Hello from Aptos Wallet Adapter",
+        message: "Hello from Movement Wallet Adapter",
         nonce: generateNonce(),
       };
       const response = await signMessage(payload);
@@ -143,7 +143,7 @@ export function SingleSigner({ dappNetwork, wallet }: SingleSignerProps) {
       transactionData = {
         function:
           "0xeadc81e5ac02adc11308f643761294e27103a4a36822761633fd40cb08f59ed9::message_board::post_message",
-        functionArguments: ["Hello from Aptos Wallet Adapter"],
+        functionArguments: ["Hello from Movement Wallet Adapter"],
       };
     } else {
       // We are on Devnet, so just use a simple transfer transaction as the derived account can fund their own account with APT.
@@ -164,13 +164,14 @@ export function SingleSigner({ dappNetwork, wallet }: SingleSignerProps) {
       };
 
       // If is testnet, and is not a native aptos wallet,we use gas station to sponsor the transaction
-      if (!wallet.isAptosNativeWallet && dappNetwork === Network.TESTNET) {
-        transactionInput.transactionSubmitter = getTransactionSubmitter();
+      // Note: Type cast needed because @aptos-labs/gas-station-client uses Aptos types
+      if (!wallet.isMovementNativeWallet && dappNetwork === Network.TESTNET) {
+        transactionInput.transactionSubmitter = getTransactionSubmitter() as any;
       }
 
       const txn = await signAndSubmitTransaction(transactionInput);
 
-      await aptosClient(network).waitForTransaction({
+      await movementClient(network).waitForTransaction({
         transactionHash: txn.hash,
       });
 

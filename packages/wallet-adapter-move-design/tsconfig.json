@@ -1,0 +1,8 @@
+{
+  "extends": "@moveindustries/wallet-adapter-tsconfig/react-library.json",
+  "compilerOptions": {
+    "lib": ["dom", "ES2016"]
+  },
+  "include": ["."],
+  "exclude": ["dist", "build", "node_modules"]
+}

@@ -1,11 +1,11 @@
 import {
   computeDerivableAuthenticationKey,
   encodeStructuredMessage,
-  parseAptosSigningMessage,
-} from "@aptos-labs/derived-wallet-base";
+  parseMovementSigningMessage,
+} from "@moveindustries/derived-wallet-base";
 import {
   AccountPublicKey,
-  AptosConfig,
+  MovementConfig,
   AuthenticationKey,
   Deserializer,
   hashValues,
@@ -14,9 +14,9 @@ import {
   Serializer,
   Signature,
   VerifySignatureArgs,
-} from "@aptos-labs/ts-sdk";
+} from "@moveindustries/ts-sdk";
 import { verifyMessage as verifyEthereumMessage } from "ethers";
-import { createSiweEnvelopeForAptosTransaction } from "./createSiweEnvelope";
+import { createSiweEnvelopeForMovementTransaction } from "./createSiweEnvelope";
 import {
   EIP1193SiweSignature,
   EIP1193PersonalSignature,
@@ -58,14 +58,14 @@ export class EIP1193DerivedPublicKey extends AccountPublicKey {
   }
 
   verifySignature({ message, signature }: VerifySignatureArgs): boolean {
-    const parsedSigningMessage = parseAptosSigningMessage(message);
+    const parsedSigningMessage = parseMovementSigningMessage(message);
 
     if (!parsedSigningMessage) {
       return false;
     }
 
     let messageBytes: Uint8Array | string;
-    // Handle structured message, i.e. a message signed withAptosSignMessageInput
+    // Handle structured message, i.e. a message signed withMovementSignMessageInput
     if (parsedSigningMessage.type === "structuredMessage") {
       if (!(signature instanceof EIP1193PersonalSignature)) return false;
 
@@ -84,7 +84,7 @@ export class EIP1193DerivedPublicKey extends AccountPublicKey {
         issuedAt,
       };
 
-      messageBytes = createSiweEnvelopeForAptosTransaction({
+      messageBytes = createSiweEnvelopeForMovementTransaction({
         ...parsedSigningMessage,
         ...envelopeInput,
         chainId:
@@ -100,7 +100,7 @@ export class EIP1193DerivedPublicKey extends AccountPublicKey {
   }
 
   async verifySignatureAsync(args: {
-    aptosConfig: AptosConfig;
+    movementConfig: MovementConfig;
     message: HexInput;
     signature: Signature;
   }): Promise<boolean> {
