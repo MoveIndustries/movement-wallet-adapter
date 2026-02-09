@@ -138,7 +138,7 @@ function ConnectWalletContent({
             "absolute top-6 right-6 z-9999 rounded-sm opacity-70",
             "cursor-pointer border border-white/20 bg-white/10 p-2 text-white",
             "transition-opacity hover:bg-white/20 hover:opacity-100",
-            "focus:outline-none",
+            "focus:outline-hidden",
           )}
         >
           <CloseIcon size={16} />
@@ -180,7 +180,7 @@ function ConnectWalletContent({
               className={cn(
                 "h-10 w-full rounded-full bg-accent px-4 py-1 [&_path]:fill-white",
                 "inline-flex cursor-pointer items-center justify-center gap-2 border-none",
-                "transition-all duration-200 ease-[ease]",
+                "transition-all duration-200 ease-in-out",
                 "hover:bg-background hover:text-foreground [&:hover_path]:fill-foreground",
               )}
               onClick={() => window.open(nightlyWallet.url, "_blank")}
@@ -199,7 +199,7 @@ function ConnectWalletContent({
                 "inline-flex items-center justify-center gap-2 self-center text-white",
                 "rounded-md text-sm font-medium whitespace-nowrap transition-all duration-200",
                 "cursor-pointer border-none bg-transparent",
-                "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+                "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
                 "disabled:pointer-events-none disabled:opacity-50",
                 "h-9 px-3 hover:bg-white/20",
               )}
@@ -362,7 +362,7 @@ function AptosConnectWalletRow({ wallet, onConnect }: WalletRowProps) {
           className={cn(
             "inline-flex w-full items-center justify-center gap-4 whitespace-nowrap",
             "rounded-md text-sm font-medium transition-colors",
-            "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+            "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden",
             "disabled:pointer-events-none disabled:opacity-50",
             "border-input bg-background hover:bg-accent hover:text-accent-foreground border",
             "h-11 px-2",

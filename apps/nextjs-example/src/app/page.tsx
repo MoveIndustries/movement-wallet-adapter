@@ -1,8 +1,9 @@
 "use client";
 
+import { useAutoConnect } from "@/components/AutoConnectProvider";
 import { DisplayValue, LabelValueGrid } from "@/components/LabelValueGrid";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { WalletSelector } from "@/components/WalletSelector";
+import { WalletSelector as ShadcnWalletSelector } from "@/components/WalletSelector";
 import { MultiAgent } from "@/components/transactionFlows/MultiAgent";
 import { SingleSigner } from "@/components/transactionFlows/SingleSigner";
 import { Sponsor } from "@/components/transactionFlows/Sponsor";
@@ -17,8 +18,12 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
 import { isMainnet } from "@/utils";
 import { Network } from "@moveindustries/ts-sdk";
+import { WalletSelector as AntdWalletSelector } from "@moveindustries/wallet-adapter-ant-design";
+import { WalletConnector as MuiWalletSelector } from "@moveindustries/wallet-adapter-mui-design";
+import { MoveDesignWalletSelector } from "@/components/MoveDesignWalletSelector";
 import {
   AccountInfo,
   AdapterWallet,
@@ -34,6 +39,7 @@ import Image from "next/image";
 // Imports for registering a browser extension wallet plugin on page load
 import { MyWallet } from "@/utils/standardWallet";
 import { registerWallet } from "@moveindustries/wallet-standard";
+import { TransactionSubmitterToggle } from "@/components/TransactionSubmitterToggle";
 
 // Example of how to register a browser extension wallet plugin.
 // Browser extension wallets should call registerWallet once on page load.
@@ -72,6 +78,7 @@ export default function Home() {
           </a>
         </div>
         <div className="flex items-center gap-2">
+          <TransactionSubmitterToggle />
           <ThemeToggle />
         </div>
       </div>
@@ -106,18 +113,45 @@ export default function Home() {
 }
 
 function WalletSelection() {
+  const { autoConnect, setAutoConnect } = useAutoConnect();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Wallet Selection</CardTitle>
         <CardDescription>
-          Connect a wallet using the Movement Design System wallet modal.
+          Connect a wallet using one of the following wallet selectors.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap gap-6 pt-6 pb-6 justify-center items-center">
-          <WalletSelector />
+        <div className="flex flex-wrap gap-6 pt-6 pb-12 justify-between items-center">
+          <div className="flex flex-col gap-4 items-center">
+            <div className="text-sm text-muted-foreground">shadcn/ui</div>
+            <ShadcnWalletSelector />
+          </div>
+          <div className="flex flex-col gap-4 items-center">
+            <div className="text-sm text-muted-foreground">Ant Design</div>
+            <AntdWalletSelector />
+          </div>
+          <div className="flex flex-col gap-4 items-center">
+            <div className="text-sm text-muted-foreground">Material UI</div>
+            <MuiWalletSelector />
+          </div>
+          <div className="flex flex-col gap-4 items-center">
+            <div className="text-sm text-muted-foreground">Move Design</div>
+            <MoveDesignWalletSelector />
+          </div>
         </div>
+        <label className="flex items-center gap-4 cursor-pointer">
+          <Switch
+            id="auto-connect-switch"
+            checked={autoConnect}
+            onCheckedChange={setAutoConnect}
+          />
+          <Label htmlFor="auto-connect-switch">
+            Auto reconnect on page load
+          </Label>
+        </label>
       </CardContent>
     </Card>
   );
@@ -151,7 +185,7 @@ function WalletConnection({
   };
 
   const isNetworkChangeSupported =
-    wallet?.features["aptos:changeNetwork"] !== undefined;
+    wallet?.features["movement:changeNetwork"] !== undefined;
 
   return (
     <Card>
@@ -226,6 +260,13 @@ function WalletConnection({
                 subLabel: "(only if attached)",
                 value: <p>{account?.ansName ?? "Not Present"}</p>,
               },
+              // {
+              //   label: "Min keys required",
+              //   subLabel: "(only for multisig)",
+              //   value: (
+              //     <p>{account?.minKeysRequired?.toString() ?? "Not Present"}</p>
+              //   ),
+              // },
             ]}
           />
         </div>

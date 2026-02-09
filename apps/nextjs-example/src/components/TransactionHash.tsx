@@ -1,4 +1,4 @@
-import { NetworkInfo, isMovementNetwork } from "@moveindustries/wallet-adapter-react";
+import { NetworkInfo, isMovementNetwork } from "@moveindustries/wallet-adapter-core";
 
 export interface TransactionHashProps {
   hash: string;

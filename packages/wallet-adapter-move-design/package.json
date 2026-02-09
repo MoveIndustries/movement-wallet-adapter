@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@moveindustries/wallet-adapter-react": "workspace:*",
-    "@okwallet/aptos-wallet-adapter": "^0.0.8",
+    "@okwallet/aptos-wallet-adapter": "^0.0.7",
     "@msafe/aptos-wallet-adapter": "^1.1.1",
     "@radix-ui/react-dialog": "^1.1.4",
     "vaul": "^1.1.2",

@@ -1,5 +1,5 @@
 import { Movement, MovementConfig, Network } from "@moveindustries/ts-sdk";
-import { NetworkInfo } from "@moveindustries/wallet-adapter-react";
+import { NetworkInfo } from "@moveindustries/wallet-adapter-core";
 
 export const movementClient = (network?: NetworkInfo | null) => {
   if (network?.name === Network.DEVNET) {

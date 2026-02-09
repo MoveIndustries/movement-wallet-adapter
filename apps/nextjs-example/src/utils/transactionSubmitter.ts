@@ -19,8 +19,8 @@ class MyTransactionSubmitter implements TransactionSubmitter {
   ): Promise<PendingTransactionResponse> {
     const { movementConfig } = args;
     console.log("Submitting transaction with MyTransactionSubmitter", args);
-    const aptos = new Movement(movementConfig);
-    return aptos.transaction.submit.simple({
+    const movement = new Movement(movementConfig);
+    return movement.transaction.submit.simple({
       ...args,
       // We do this so we don't recurse back to this function but instead use the
       // proper regular txn submitter.
