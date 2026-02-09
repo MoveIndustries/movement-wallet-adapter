@@ -10,6 +10,14 @@
     "require": "./dist/index.js",
     "import": "./dist/index.mjs"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter.git"
+  },
+  "homepage": "https://github.com/MoveIndustries/movement-wallet-adapter",
+  "bugs": {
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter/issues"
+  },
   "author": "movementlabs.xyz",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:declarations",

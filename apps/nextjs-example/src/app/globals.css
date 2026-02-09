@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-@source "../../../../packages/wallet-adapter-move-design/src";
+@import "@moveindustries/wallet-adapter-move-design/styles";
 
 /* Movement Design System Fonts (used by wallet-adapter-move-design) */
 @font-face {

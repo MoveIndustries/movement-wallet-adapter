@@ -135,7 +135,7 @@ function ConnectWalletContent({
         <button
           onClick={onClose}
           className={cn(
-            "absolute top-6 right-6 z-9999 rounded-sm opacity-70",
+            "absolute top-6 right-6 z-9999 rounded-xs opacity-70",
             "cursor-pointer border border-white/20 bg-white/10 p-2 text-white",
             "transition-opacity hover:bg-white/20 hover:opacity-100",
             "focus:outline-hidden",
