@@ -1,5 +1,11 @@
 # @movement-labs/wallet-adapter-ant-design
 
+## 5.3.3
+
+### Patch Changes
+
+- 2e524e0: Tailwind CSS v4 class fixes, add importable styles entrypoint, add README, and package metadata improvements
+
 ## 5.3.2
 
 ### Patch Changes

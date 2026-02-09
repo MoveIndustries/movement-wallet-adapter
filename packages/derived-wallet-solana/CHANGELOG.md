@@ -1,5 +1,13 @@
 # @movement-labs/derived-wallet-solana
 
+## 0.8.2
+
+### Patch Changes
+
+- 2e524e0: Tailwind CSS v4 class fixes, add importable styles entrypoint, add README, and package metadata improvements
+- Updated dependencies [2e524e0]
+  - @moveindustries/derived-wallet-base@0.8.2
+
 ## 0.8.1
 
 ### Patch Changes

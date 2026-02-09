@@ -1,5 +1,13 @@
 # @movement-labs/cross-chain-core
 
+## 5.4.7
+
+### Patch Changes
+
+- Updated dependencies [2e524e0]
+  - @moveindustries/derived-wallet-ethereum@0.8.2
+  - @moveindustries/derived-wallet-solana@0.8.2
+
 ## 5.4.6
 
 ### Patch Changes
