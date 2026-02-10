@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/wallet-adapter-core",
-  "version": "7.9.1",
+  "version": "7.10.0",
   "description": "Movement Wallet Adapter Core",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
