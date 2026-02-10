@@ -45,6 +45,7 @@ export interface WalletContextState {
   submitTransaction(
     transaction: InputSubmitTransactionData,
   ): Promise<PendingTransactionResponse>;
+  refetchMnsName(): Promise<void>;
   wallet: AdapterWallet | null;
   wallets: ReadonlyArray<AdapterWallet>;
   notDetectedWallets: ReadonlyArray<AdapterNotDetectedWallet>;

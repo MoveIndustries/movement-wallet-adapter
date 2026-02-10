@@ -121,6 +121,7 @@ const {
   signTransaction,
   signMessage,
   signMessageAndVerify,
+  refetchMnsName,
 } = useWallet();
 ```
 
@@ -282,4 +283,30 @@ const onSignMessageAndVerify = async () => {
 };
 
 <button onClick={onSignMessageAndVerify}>Sign message and verify</button>;
+```
+
+##### refetchMnsName()
+
+Re-fetches the MNS (Movement Name Service) primary name for the connected account. This is useful for dapps where users can set or change their primary MNS name on-chain and want the adapter to reflect the updated name without requiring a wallet reconnect.
+
+After calling `refetchMnsName()`, the `account.mnsName` property and any UI components that display the MNS name (e.g. `WalletSelector`) will update automatically.
+
+```js
+const onSetPrimaryName = async () => {
+  // Submit the transaction that sets the user's primary MNS name
+  const response = await signAndSubmitTransaction({
+    sender: account.address,
+    data: {
+      function: "0x1::mns::set_primary_name",
+      functionArguments: ["myname"],
+    },
+  });
+
+  await aptos.waitForTransaction({ transactionHash: response.hash });
+
+  // Refresh the MNS name in the adapter so UI updates immediately
+  await refetchMnsName();
+};
+
+<button onClick={onSetPrimaryName}>Set Primary Name</button>;
 ```

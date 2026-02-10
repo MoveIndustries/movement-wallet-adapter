@@ -276,6 +276,18 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
+  const refetchMnsName = async (): Promise<void> => {
+    if (!walletCore) {
+      throw new Error("WalletCore is not initialized");
+    }
+    try {
+      await walletCore.refetchMnsName();
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
   // Handle the adapter's connect event
   const handleConnect = (): void => {
     setState((state) => {
@@ -409,6 +421,7 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
         signMessageAndVerify,
         changeNetwork,
         submitTransaction,
+        refetchMnsName,
         account,
         network,
         connected,

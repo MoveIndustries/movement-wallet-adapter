@@ -443,6 +443,21 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
   }
 
   /**
+   * Re-fetches the MNS name for the current connected wallet account.
+   * Clears the cached name and queries MNS again, emitting an accountChange
+   * event with the updated name.
+   *
+   * Useful for dapps that allow users to set or change their primary MNS name
+   * and want the adapter to reflect the update without requiring a reconnect.
+   */
+  async refetchMnsName(): Promise<void> {
+    if (this._account) {
+      this._account.mnsName = undefined;
+    }
+    await this.setMnsName();
+  }
+
+  /**
    * Function to cleat wallet adapter data.
    *
    * - Removes current connected wallet state
