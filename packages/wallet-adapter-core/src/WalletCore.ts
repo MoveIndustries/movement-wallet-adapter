@@ -1144,6 +1144,9 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
           throw new WalletConnectionError("User has rejected the request")
             .message;
         }
+        this.setNetwork(networkInfo);
+        await this.setMnsName();
+        this.emit("networkChange", this._network);
         return response.args;
       }
 

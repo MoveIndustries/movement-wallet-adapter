@@ -1,5 +1,11 @@
 # @movement-labs/wallet-adapter-core
 
+## 7.9.1
+
+### Patch Changes
+
+- Fix network change not updating UI by setting local state and emitting networkChange event after wallet approves the change
+
 ## 7.8.0
 
 ### Minor Changes

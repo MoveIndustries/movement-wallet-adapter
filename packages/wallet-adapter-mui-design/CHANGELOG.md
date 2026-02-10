@@ -1,5 +1,11 @@
 # @movement-labs/wallet-adapter-mui-design
 
+## 5.4.1
+
+### Patch Changes
+
+- @moveindustries/wallet-adapter-react@7.3.1
+
 ## 5.3.3
 
 ### Patch Changes

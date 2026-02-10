@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/cross-chain-core",
-  "version": "5.4.8",
+  "version": "5.4.9",
   "description": "Movement Cross Chain Core",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

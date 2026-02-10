@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/wallet-adapter-ant-design",
-  "version": "5.4.0",
+  "version": "5.4.1",
   "description": "Movement Wallet Adapter ant-design",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

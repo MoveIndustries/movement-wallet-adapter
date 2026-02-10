@@ -1,5 +1,12 @@
 # @movement-labs/cross-chain-core
 
+## 5.4.9
+
+### Patch Changes
+
+- Updated dependencies
+  - @moveindustries/wallet-adapter-core@7.9.1
+
 ## 5.4.7
 
 ### Patch Changes
