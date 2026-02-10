@@ -37,7 +37,7 @@
     ]
   },
   "dependencies": {
-    "@moveindustries/wallet-standard": "^0.5.2"
+    "@moveindustries/wallet-standard": "^0.6.0"
   },
   "peerDependencies": {
     "@moveindustries/ts-sdk": "^5.1.6"

@@ -19,7 +19,7 @@
     "@moveindustries/wallet-adapter-react": "workspace:*",
     "@moveindustries/derived-wallet-ethereum": "workspace:^",
     "@moveindustries/derived-wallet-solana": "workspace:^",
-    "@moveindustries/wallet-standard": "^0.5.2",
+    "@moveindustries/wallet-standard": "^0.6.0",
     "@radix-ui/react-collapsible": "^1.0.3",
     "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-dropdown-menu": "^2.0.6",

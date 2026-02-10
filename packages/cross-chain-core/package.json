@@ -53,7 +53,7 @@
     "@moveindustries/wallet-adapter-core": "workspace:*",
     "@moveindustries/derived-wallet-ethereum": "workspace:*",
     "@moveindustries/derived-wallet-solana": "workspace:*",
-    "@moveindustries/wallet-standard": "^0.5.2",
+    "@moveindustries/wallet-standard": "^0.6.0",
     "@mysten/sui": "^1.21.2",
     "@mysten/wallet-standard": "^0.13.26",
     "@solana/spl-token": "^0.4.12",

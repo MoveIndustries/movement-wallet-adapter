@@ -13,7 +13,7 @@
     "@moveindustries/ts-sdk": "^5.1.6",
     "@moveindustries/wallet-adapter-core": "workspace:*",
     "@moveindustries/wallet-adapter-vue": "workspace:*",
-    "@moveindustries/wallet-standard": "^0.5.2",
+    "@moveindustries/wallet-standard": "^0.6.0",
     "@nuxtjs/google-fonts": "^3.2.0",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.1",
