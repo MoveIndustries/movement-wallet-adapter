@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/wallet-adapter-react",
-  "version": "7.2.3",
+  "version": "7.3.0",
   "description": "Movement Wallet Adapter React Provider",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

@@ -14,9 +14,9 @@ export enum NetworkName {
   Devnet = "devnet",
 }
 
-export const ChainIdToAnsSupportedNetworkMap: Record<string, string> = {
-  "1": "mainnet", // mainnet
-  "2": "testnet", // testnet
+export const ChainIdToMnsSupportedNetworkMap: Record<string, string> = {
+  "126": "mainnet", // Movement mainnet
+  "250": "testnet", // Movement testnet
 };
 
 // TODO: Re-enable when Movement supports social sign-in (Petra Web / Movement Connect)

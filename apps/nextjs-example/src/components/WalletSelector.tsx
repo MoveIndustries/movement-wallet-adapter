@@ -73,7 +73,7 @@ export function WalletSelector(walletSortingOptions: WalletSortingOptions) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button>
-          {account?.ansName ||
+          {account?.mnsName ||
             truncateAddress(account?.address?.toString()) ||
             "Unknown"}
         </Button>

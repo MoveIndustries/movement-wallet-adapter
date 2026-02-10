@@ -88,9 +88,9 @@ const isNetworkChangeSupported = computed(
               component: account?.publicKey.toString() ? DisplayValue : null,
             },
             {
-              label: 'ANS name',
+              label: 'MNS name',
               subLabel: '(only if attached)',
-              value: account?.ansName ?? 'Not Present',
+              value: account?.mnsName ?? 'Not Present',
             },
             {
               label: 'Min keys required',

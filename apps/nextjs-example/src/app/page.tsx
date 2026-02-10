@@ -256,9 +256,9 @@ function WalletConnection({
                 ),
               },
               {
-                label: "ANS name",
+                label: "MNS name",
                 subLabel: "(only if attached)",
-                value: <p>{account?.ansName ?? "Not Present"}</p>,
+                value: <p>{account?.mnsName ?? "Not Present"}</p>,
               },
               // {
               //   label: "Min keys required",

@@ -11,7 +11,7 @@
     "format": "prettier --write './**/*.{ts,tsx,js,jsx,json,md,html,css}'"
   },
   "dependencies": {
-    "@moveindustries/ts-sdk": "^5.1.5",
+    "@moveindustries/ts-sdk": "^5.1.6",
     "@moveindustries/wallet-adapter-ant-design": "workspace:*",
     "@moveindustries/wallet-adapter-move-design": "workspace:*",
     "@moveindustries/wallet-adapter-core": "workspace:*",

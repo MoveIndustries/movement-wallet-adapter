@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/derived-wallet-base",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/types/index.d.ts",
@@ -40,7 +40,7 @@
     "@moveindustries/wallet-standard": "^0.5.2"
   },
   "peerDependencies": {
-    "@moveindustries/ts-sdk": "^5.1.5"
+    "@moveindustries/ts-sdk": "^5.1.6"
   },
   "devDependencies": {
     "@moveindustries/eslint-config-adapter": "workspace:*",

@@ -10,7 +10,7 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@moveindustries/ts-sdk": "^5.1.5",
+    "@moveindustries/ts-sdk": "^5.1.6",
     "@moveindustries/wallet-adapter-core": "workspace:*",
     "@moveindustries/wallet-adapter-vue": "workspace:*",
     "@moveindustries/wallet-standard": "^0.5.2",

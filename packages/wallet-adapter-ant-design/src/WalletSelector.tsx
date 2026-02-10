@@ -112,7 +112,7 @@ export function WalletSelector({
   };
 
   const buttonText =
-    account?.ansName ||
+    account?.mnsName ||
     truncateAddress(account?.address?.toString()) ||
     "Unknown";
 

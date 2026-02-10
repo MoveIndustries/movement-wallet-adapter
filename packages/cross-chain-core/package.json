@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/cross-chain-core",
-  "version": "5.4.7",
+  "version": "5.4.8",
   "description": "Movement Cross Chain Core",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -73,7 +73,7 @@
     "tweetnacl": "^1.0.3"
   },
   "peerDependencies": {
-    "@moveindustries/ts-sdk": "^5.1.5"
+    "@moveindustries/ts-sdk": "^5.1.6"
   },
   "files": [
     "dist",

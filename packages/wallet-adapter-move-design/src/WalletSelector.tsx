@@ -314,8 +314,15 @@ export function WalletSelector({ className }: WalletSelectorProps) {
           </div>
         </div>
 
-        <span className="hidden max-w-[120px] truncate font-['Neue_Haas_Unica_Pro',sans-serif] text-sm leading-[1.225rem] font-medium md:block">
-          {reduceAddress(address)}
+        <span className="hidden max-w-[140px] items-baseline gap-1 font-['Neue_Haas_Unica_Pro',sans-serif] text-sm leading-[1.225rem] font-medium md:inline-flex">
+          {account?.mnsName ? (
+            <>
+              <span className="truncate">{account.mnsName}</span>
+              <span className="shrink-0 -translate-y-[1px] rounded-sm bg-[#81FFBA]/15 px-1 py-0.5 font-['TWK_Everett_Mono',monospace] text-[9px] font-bold leading-none tracking-wider text-[#81FFBA]">.move</span>
+            </>
+          ) : (
+            reduceAddress(address)
+          )}
         </span>
 
         <CaretDownIcon

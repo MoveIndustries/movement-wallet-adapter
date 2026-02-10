@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/derived-wallet-ethereum",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/types/index.d.ts",
@@ -46,7 +46,7 @@
     "viem": "^2.23.12"
   },
   "peerDependencies": {
-    "@moveindustries/ts-sdk": "^5.1.5"
+    "@moveindustries/ts-sdk": "^5.1.6"
   },
   "devDependencies": {
     "@moveindustries/eslint-config-adapter": "workspace:*",

@@ -4,6 +4,7 @@ import {
   AccountAuthenticator,
   AnyRawTransaction,
   Movement,
+  MovementConfig,
   InputSubmitTransactionData,
   Network,
   NetworkToChainId,
@@ -73,7 +74,7 @@ import {
   WalletNotSupportedMethod,
   WalletNotFoundError,
 } from "./error";
-import { ChainIdToAnsSupportedNetworkMap, WalletReadyState } from "./constants";
+import { ChainIdToMnsSupportedNetworkMap, WalletReadyState } from "./constants";
 import { WALLET_ADAPTER_CORE_VERSION } from "./version";
 import {
   fetchDevnetChainId,
@@ -160,9 +161,9 @@ export declare interface WalletCoreEvents {
   accountChange(account: AccountInfo | null): void;
 }
 
-export type AdapterAccountInfo = Omit<AccountInfo, "ansName"> & {
-  // ansName is a read-only property on the standard AccountInfo type
-  ansName?: string;
+export type AdapterAccountInfo = Omit<AccountInfo, "mnsName"> & {
+  // mnsName is a read-only property on the standard AccountInfo type
+  mnsName?: string;
 };
 
 export class WalletCore extends EventEmitter<WalletCoreEvents> {
@@ -409,29 +410,34 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
   }
 
   /**
-   * Queries and sets ANS name for the current connected wallet account
+   * Queries and sets MNS name for the current connected wallet account
    */
-  private async setAnsName(): Promise<void> {
+  private async setMnsName(): Promise<void> {
     if (this._network?.chainId && this._account) {
-      if (this._account.ansName) return;
-      // ANS supports only MAINNET or TESTNET
-      if (
-        !ChainIdToAnsSupportedNetworkMap[this._network.chainId] ||
-        !isMovementNetwork(this._network)
-      ) {
-        this._account.ansName = undefined;
+      if (this._account.mnsName) {
+        return;
+      }
+      // MNS supports only MAINNET or TESTNET (identified by chain ID)
+      const mnsNetwork = ChainIdToMnsSupportedNetworkMap[this._network.chainId];
+      if (!mnsNetwork) {
+        this._account.mnsName = undefined;
         return;
       }
 
-      const movementConfig = getMovementConfig(this._network, this._dappConfig);
-      const aptos = new Movement(movementConfig);
       try {
-        const name = await aptos.ans.getPrimaryName({
+        const movementConfig = new MovementConfig({
+          network: mnsNetwork as Network,
+        });
+        const aptos = new Movement(movementConfig);
+        const name = await aptos.mns.getPrimaryName({
           address: this._account.address.toString(),
         });
-        this._account.ansName = name;
+        this._account.mnsName = name;
+        if (name) {
+          this.emit("accountChange", this._account);
+        }
       } catch (error: any) {
-        console.log(`Error setting ANS name ${error}`);
+        console.log(`Error setting MNS name ${error}`);
       }
     }
   }
@@ -696,7 +702,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       );
       const network = await networkFeature?.network();
       this.setNetwork(network ?? null);
-      await this.setAnsName();
+      await this.setMnsName();
       setLocalStorage(selectedWallet.name);
       this._connected = true;
       this.recordEvent("wallet_connect");
@@ -1067,7 +1073,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       await onAccountChangeFeature?.onAccountChange(
         async (data: AccountInfo) => {
           this.setAccount(data);
-          await this.setAnsName();
+          await this.setMnsName();
           this.recordEvent("account_change");
           this.emit("accountChange", this._account);
         },
@@ -1094,7 +1100,7 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       await onNetworkChangeFeature?.onNetworkChange(
         async (data: NetworkInfo) => {
           this.setNetwork(data);
-          await this.setAnsName();
+          await this.setMnsName();
           this.emit("networkChange", this._network);
         },
       );

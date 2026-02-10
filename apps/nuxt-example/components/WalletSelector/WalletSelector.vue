@@ -55,7 +55,7 @@ async function connectWallet(wallet: AdapterWallet) {
       <DropdownMenuTrigger as-child>
         <Button>
           {{
-            account?.ansName ||
+            account?.mnsName ||
             truncateAddress(account?.address?.toString() || "") ||
             "Unknown"
           }}

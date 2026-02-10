@@ -15,7 +15,7 @@
     "@moveindustries/derived-wallet-ethereum": "workspace:^",
     "@moveindustries/derived-wallet-solana": "workspace:^",
     "@aptos-labs/gas-station-client": "^2.0.3",
-    "@moveindustries/ts-sdk": "^5.1.5",
+    "@moveindustries/ts-sdk": "^5.1.6",
     "@moveindustries/wallet-adapter-core": "workspace:*",
     "@moveindustries/wallet-adapter-mui-design": "workspace:*",
     "@moveindustries/wallet-adapter-react": "workspace:*",
