@@ -23,7 +23,7 @@ import { isMainnet } from "@/utils";
 import { Network } from "@moveindustries/ts-sdk";
 import { WalletSelector as AntdWalletSelector } from "@moveindustries/wallet-adapter-ant-design";
 import { WalletConnector as MuiWalletSelector } from "@moveindustries/wallet-adapter-mui-design";
-import { MoveDesignWalletSelector } from "@/components/MoveDesignWalletSelector";
+import { WalletSelector as MoveDesignWalletSelector } from "@moveindustries/wallet-adapter-move-design";
 import {
   AccountInfo,
   AdapterWallet,
