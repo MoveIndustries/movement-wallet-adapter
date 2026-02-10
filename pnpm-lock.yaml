@@ -5,7 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  '@moveindustries/wallet-standard': file:../moveindustries-wallet-standard
+  '@moveindustries/wallet-standard': ^0.5.3
   '@aptos-labs/aptos-client': ^2.0.0
   pbkdf2: ^3.1.3
   form-data: ^4.0.4
@@ -64,8 +64,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/wallet-adapter-react
       '@moveindustries/wallet-standard':
-        specifier: file:../../../moveindustries-wallet-standard
-        version: file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
       '@radix-ui/react-collapsible':
         specifier: ^1.0.3
         version: 1.1.12(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -185,8 +185,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/wallet-adapter-react
       '@moveindustries/wallet-standard':
-        specifier: file:../../../moveindustries-wallet-standard
-        version: file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
       '@radix-ui/react-collapsible':
         specifier: ^1.0.3
         version: 1.1.12(@types/react-dom@18.3.7(@types/react@18.3.27))(@types/react@18.3.27)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -294,8 +294,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/wallet-adapter-vue
       '@moveindustries/wallet-standard':
-        specifier: file:../../../moveindustries-wallet-standard
-        version: file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
       '@nuxtjs/google-fonts':
         specifier: ^3.2.0
         version: 3.2.0(magicast@0.5.1)
@@ -376,8 +376,8 @@ importers:
         specifier: workspace:*
         version: link:../wallet-adapter-core
       '@moveindustries/wallet-standard':
-        specifier: file:../../../moveindustries-wallet-standard
-        version: file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
       '@mysten/sui':
         specifier: ^1.21.2
         version: 1.45.2(typescript@5.9.3)
@@ -464,8 +464,8 @@ importers:
         specifier: ^5.1.5
         version: 5.1.5(got@11.8.6)
       '@moveindustries/wallet-standard':
-        specifier: file:../../../moveindustries-wallet-standard
-        version: file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
     devDependencies:
       '@moveindustries/eslint-config-adapter':
         specifier: workspace:*
@@ -507,8 +507,8 @@ importers:
         specifier: ^5.1.5
         version: 5.1.5(got@11.8.6)
       '@moveindustries/wallet-standard':
-        specifier: file:../../../moveindustries-wallet-standard
-        version: file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
       '@wallet-standard/app':
         specifier: ^1.1.0
         version: 1.1.0
@@ -562,8 +562,8 @@ importers:
         specifier: ^5.1.5
         version: 5.1.5(got@11.8.6)
       '@moveindustries/wallet-standard':
-        specifier: file:../../../moveindustries-wallet-standard
-        version: file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
       '@solana/wallet-adapter-base':
         specifier: ^0.9.23
         version: 0.9.27(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10))
@@ -678,8 +678,8 @@ importers:
         specifier: ^5.1.5
         version: 5.1.5(got@11.8.6)
       '@moveindustries/wallet-standard':
-        specifier: file:../../../moveindustries-wallet-standard
-        version: file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
+        specifier: ^0.5.3
+        version: 0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)
       buffer:
         specifier: ^6.0.3
         version: 6.0.3
@@ -2010,8 +2010,8 @@ packages:
     resolution: {integrity: sha512-xGS9T6waQQFqMP5oMVGgU6MAKAq8nKTabaksNnzxKf6/C26fUNf4eT287HR+vG7joeQBB2MZ4HgC4jNmq7da6g==}
     engines: {node: '>=20.0.0'}
 
-  '@moveindustries/wallet-standard@file:../moveindustries-wallet-standard':
-    resolution: {directory: ../moveindustries-wallet-standard, type: directory}
+  '@moveindustries/wallet-standard@0.5.3':
+    resolution: {integrity: sha512-ybBYkeL8CaavqNiTe+DY6gnTSEntJCarog/Pfc0kAI9JQn8STTynF+LWW2RXZT+EKlSnzAN8NpBfBM9oSzjGjw==}
     peerDependencies:
       '@moveindustries/ts-sdk': ^5.0.0
       '@wallet-standard/core': ^1.0.3
@@ -11904,7 +11904,7 @@ snapshots:
     transitivePeerDependencies:
       - got
 
-  '@moveindustries/wallet-standard@file:../moveindustries-wallet-standard(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)':
+  '@moveindustries/wallet-standard@0.5.3(@moveindustries/ts-sdk@5.1.5(got@11.8.6))(@wallet-standard/core@1.1.0)':
     dependencies:
       '@moveindustries/ts-sdk': 5.1.5(got@11.8.6)
       '@wallet-standard/core': 1.1.0

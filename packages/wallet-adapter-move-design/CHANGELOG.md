@@ -1,5 +1,11 @@
 # @moveindustries/wallet-adapter-move-design
 
+## 1.1.0
+
+### Minor Changes
+
+- Add WalletSelector component - a drop-in wallet button with connect/disconnect flow, address display, and dropdown menu
+
 ## 1.0.1
 
 ### Patch Changes

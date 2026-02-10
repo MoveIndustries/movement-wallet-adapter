@@ -1,6 +1,6 @@
 # @moveindustries/wallet-adapter-move-design
 
-Movement Design System wallet modal for the Movement Wallet Adapter. Provides a styled `WalletModal` component for connecting wallets in Movement dApps.
+Movement Design System wallet components for the Movement Wallet Adapter. Provides a styled `WalletModal` for connecting wallets and a `WalletSelector` drop-in button component for Movement dApps.
 
 ## Installation
 
@@ -26,11 +26,11 @@ Add the following import to your main CSS file (e.g., `globals.css`), **after** 
 @import "@moveindustries/wallet-adapter-move-design/styles";
 ```
 
-This `@source` directive tells Tailwind to scan the package's source files for class names. Without it, the modal will render without styles.
+This `@source` directive tells Tailwind to scan the package's source files for class names. Without it, the components will render without styles.
 
 ### Fonts
 
-The wallet modal uses the following fonts. Host them in your `public/fonts/` directory and add the corresponding `@font-face` declarations to your CSS:
+The wallet components use the following fonts. Host them in your `public/fonts/` directory and add the corresponding `@font-face` declarations to your CSS:
 
 - **TWK Everett Mono** (Regular 400, Medium 500, Bold 700)
 - **Neue Haas Unica Pro** (Regular 400)
@@ -69,7 +69,40 @@ The wallet modal uses the following fonts. Host them in your `public/fonts/` dir
 }
 ```
 
-## Usage
+## Components
+
+### WalletSelector
+
+A complete, drop-in wallet button that handles the full connect/disconnect flow. Renders a gradient "CONNECT" button when disconnected, and a pill-shaped address display with dropdown when connected.
+
+```tsx
+import { WalletSelector } from "@moveindustries/wallet-adapter-move-design";
+
+function Header() {
+  return (
+    <nav>
+      <WalletSelector />
+    </nav>
+  );
+}
+```
+
+#### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `className` | `string` | Optional class name applied to the outermost element |
+
+The `WalletSelector` includes:
+- Skeleton loading state before hydration
+- Gradient connect button with hover effects
+- Connected state with wallet icon, truncated address, and Move network badge
+- Dropdown with copy address and disconnect actions
+- Automatic wallet modal integration
+
+### WalletModal
+
+A lower-level modal component for wallet selection. Use this if you want to build your own connect button but use the standard wallet picker UI.
 
 ```tsx
 import { WalletModal } from "@moveindustries/wallet-adapter-move-design";
@@ -89,7 +122,7 @@ function WalletConnectButton() {
 }
 ```
 
-### Props
+#### Props
 
 | Prop | Type | Description |
 |------|------|-------------|

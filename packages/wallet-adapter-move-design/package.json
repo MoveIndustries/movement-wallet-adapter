@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/wallet-adapter-move-design",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Movement Wallet Adapter Move Design System - WalletModal component",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

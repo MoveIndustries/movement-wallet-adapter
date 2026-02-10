@@ -1,6 +1,6 @@
 {
   "name": "@moveindustries/wallet-adapter-core",
-  "version": "7.8.0",
+  "version": "7.8.1",
   "description": "Movement Wallet Adapter Core",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@aptos-connect/wallet-adapter-plugin": "^2.7.0",
-    "@moveindustries/wallet-standard": "^0.5.2",
+    "@moveindustries/wallet-standard": "^0.5.3",
     "buffer": "^6.0.3",
     "eventemitter3": "^4.0.7",
     "tweetnacl": "^1.0.3"
