@@ -85,18 +85,22 @@ export const getMovementConfig = (
     });
   }
 
-  const knownNetworks = {
-    okx: "https://wallet.okx.com/fullnode/aptos/discover/rpc",
+  // Known network URLs that should be allowed even when wallet reports "custom"
+  const knownNetworks: Record<string, { url: string; network: Network }> = {
+    okx: { url: "https://wallet.okx.com/fullnode/aptos/discover/rpc", network: Network.CUSTOM },
+    // Movement networks - for wallets like Nightly that report "custom" instead of network name
+    movementTestnet: { url: "https://testnet.movementnetwork.xyz/v1", network: Network.TESTNET },
+    movementMainnet: { url: "https://mainnet.movementnetwork.xyz/v1", network: Network.MAINNET },
   };
 
   if (networkInfo.url) {
-    const isKnownNetwork = Object.values(knownNetworks).includes(
-      networkInfo.url,
+    const matchedNetwork = Object.values(knownNetworks).find(
+      (n) => networkInfo.url?.startsWith(n.url.replace("/v1", "")) || networkInfo.url === n.url
     );
 
-    if (isKnownNetwork) {
+    if (matchedNetwork) {
       return new MovementConfig({
-        network: Network.CUSTOM,
+        network: matchedNetwork.network,
         fullnode: networkInfo.url,
         pluginSettings,
       });
