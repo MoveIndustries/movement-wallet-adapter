@@ -1,5 +1,11 @@
 # @movement-labs/wallet-adapter-core
 
+## 7.11.1
+
+### Patch Changes
+
+- include movement testnet and mainnet in knownNetworks
+
 ## 7.10.0
 
 ### Minor Changes
