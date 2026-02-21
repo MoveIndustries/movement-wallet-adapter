@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "node -e \"process.env.CI && process.exit(0)\" || nuxt prepare"
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
     "@moveindustries/ts-sdk": "^5.1.6",
