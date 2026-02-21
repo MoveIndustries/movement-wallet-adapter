@@ -14,6 +14,14 @@ export default defineNuxtConfig({
   },
 
   modules: ["@nuxtjs/color-mode", "@nuxtjs/google-fonts"],
+
+  postcss: {
+    plugins: {
+      "tailwindcss/nesting": {},
+      tailwindcss: {},
+      autoprefixer: {},
+    },
+  },
   plugins: ["~/plugins/buffer"],
   components: [
     {
@@ -29,13 +37,6 @@ export default defineNuxtConfig({
   },
 
   css: ["~/assets/css/main.css"],
-
-  postcss: {
-    plugins: {
-      tailwindcss: {},
-      autoprefixer: {},
-    },
-  },
 
   colorMode: {
     preference: "system",

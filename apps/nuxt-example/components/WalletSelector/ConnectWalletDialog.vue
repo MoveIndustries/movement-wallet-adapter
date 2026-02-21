@@ -3,8 +3,7 @@ import { Ref, toRefs, watch, unref } from "vue";
 import {
   AdapterWallet,
   AdapterNotDetectedWallet,
-  getMovementConnectWallets,
-  partitionWallets,
+  groupAndSortWallets,
   MovementPrivacyPolicy,
 } from "@moveindustries/wallet-adapter-vue";
 
@@ -31,16 +30,14 @@ const walletsForConnect = ref({
 watch(
   wallets,
   () => {
-    const { movementConnectWallets, otherWallets } = getMovementConnectWallets(
+    const { movementConnectWallets, availableWallets, installableWallets } = groupAndSortWallets(
       wallets.value
     );
 
-    const { defaultWallets, moreWallets } = partitionWallets(otherWallets);
-
     walletsForConnect.value = {
       movementConnectWallets: unref(movementConnectWallets),
-      defaultWallets: unref(defaultWallets),
-      moreWallets: unref(moreWallets),
+      defaultWallets: unref(availableWallets),
+      moreWallets: unref(installableWallets),
     };
   },
   {
