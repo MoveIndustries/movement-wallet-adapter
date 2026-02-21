@@ -15,10 +15,8 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useToast } from "~/components/ui/toast";
-import { useNuxtApp } from "#app";
-const { $walletAdapter } = useNuxtApp();
-const { account, connected, disconnect, wallet, wallets, connect } =
-  $walletAdapter || {};
+const walletAdapter = useWalletAdapter();
+const { account, connected, disconnect, wallet, wallets, connect } = walletAdapter;
 
 const { toast } = useToast();
 const isDialogOpen = ref(false);

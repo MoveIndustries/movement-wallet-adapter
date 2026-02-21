@@ -3,9 +3,9 @@ import { movementClient, isSendableNetwork } from "@/utils";
 import { InputTransactionData } from "@moveindustries/wallet-adapter-vue";
 import { useToast } from "~/components/ui/toast";
 const { toast } = useToast();
-const { $walletAdapter } = useNuxtApp();
+const walletAdapter = useWalletAdapter();
 const { network, connected, account, wallet, signAndSubmitTransaction } =
-  $walletAdapter || {};
+  walletAdapter || {};
 
 const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 const MaxGasAMount = 10000;

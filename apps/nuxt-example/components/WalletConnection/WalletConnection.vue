@@ -131,7 +131,7 @@ const isNetworkChangeSupported = computed(
           :modelValue="network.name"
           :orientation="'vertical'"
           class="flex gap-6"
-          @update:modelValue="$event"
+          @update:modelValue="$emit('changeNetwork', $event)"
           :disabled="!isNetworkChangeSupported"
         >
           <div class="flex items-center space-x-2">

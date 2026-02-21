@@ -1,8 +1,8 @@
 <script setup lang="ts">
-const { $walletAdapter } = useNuxtApp();
-useAutoConnect($walletAdapter.autoConnect);
+const walletAdapter = useWalletAdapter();
+useAutoConnect(walletAdapter.autoConnect);
 const setAutoConnect = (value: boolean) => {
-  $walletAdapter.autoConnect.value = value;
+  walletAdapter.autoConnect.value = value;
 };
 </script>
 
@@ -24,7 +24,7 @@ const setAutoConnect = (value: boolean) => {
       <label class="flex items-center gap-4 cursor-pointer">
         <Switch
           id="auto-connect-switch"
-          :checked="$walletAdapter.autoConnect.value"
+          :checked="walletAdapter.autoConnect.value"
           @update:checked="setAutoConnect"
         />
         <Label for="auto-connect-switch"> Auto reconnect on page load </Label>

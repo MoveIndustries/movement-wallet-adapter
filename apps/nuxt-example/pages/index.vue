@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { AlertCircle } from 'lucide-vue-next';
 import { isMainnet } from "@/utils";
-const { $walletAdapter } = useNuxtApp();
-const { network, connected, account, wallet, changeNetwork } =
-  $walletAdapter || {};
 
-
+const walletAdapter = useWalletAdapter();
+const { network, connected, account, wallet, changeNetwork } = walletAdapter;
 </script>
 
 <template>

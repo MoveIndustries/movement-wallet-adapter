@@ -6,7 +6,7 @@ import { InputTransactionData } from "@moveindustries/wallet-adapter-core";
 import TransactionHash from "~/components/TransactionHash.vue";
 import { useToast } from "~/components/ui/toast";
 const { toast } = useToast();
-const { $walletAdapter } = useNuxtApp();
+const walletAdapter = useWalletAdapter();
 const {
   network,
   connected,
@@ -15,7 +15,7 @@ const {
   signMessageAndVerify,
   signMessage,
   signTransaction,
-} = $walletAdapter;
+} = walletAdapter;
 
 const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 

@@ -7,8 +7,12 @@ onBeforeMount(() => {
 });
 </script>
 <template>
-  <NuxtLayout name="default">
-    <NuxtPage />
-  </NuxtLayout>
   <Toaster />
+  <ClientOnly>
+    <WalletProvider>
+      <NuxtLayout name="default">
+        <NuxtPage />
+      </NuxtLayout>
+    </WalletProvider>
+  </ClientOnly>
 </template>

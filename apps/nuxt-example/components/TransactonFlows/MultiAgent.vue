@@ -10,7 +10,7 @@ import {
 import TransactionHash from "~/components/TransactionHash.vue";
 import { toast } from "~/components/ui/toast";
 
-const { $walletAdapter } = useNuxtApp();
+const walletAdapter = useWalletAdapter();
 const {
   network,
   connected,
@@ -20,7 +20,7 @@ const {
   signMessage,
   signTransaction,
   submitTransaction,
-} = $walletAdapter;
+} = walletAdapter;
 
 const MOVEMENT_COIN = "0x1::aptos_coin::AptosCoin";
 

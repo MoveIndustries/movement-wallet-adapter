@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Ref, toRefs, watch, unref } from "vue";
+import { Ref, toRefs, watch, unref, onMounted } from "vue";
 import {
   AdapterWallet,
   AdapterNotDetectedWallet,
@@ -27,9 +27,8 @@ const walletsForConnect = ref({
   moreWallets: [] as AdapterNotDetectedWallet[],
 });
 
-watch(
-  wallets,
-  () => {
+const updateWallets = () => {
+  if (process.client) {
     const { movementConnectWallets, availableWallets, installableWallets } = groupAndSortWallets(
       wallets.value
     );
@@ -39,10 +38,17 @@ watch(
       defaultWallets: unref(availableWallets),
       moreWallets: unref(installableWallets),
     };
-  },
-  {
-    immediate: true,
-    deep: true,
+  }
+};
+
+onMounted(() => {
+  updateWallets();
+});
+
+watch(
+  wallets,
+  () => {
+    updateWallets();
   }
 );
 
