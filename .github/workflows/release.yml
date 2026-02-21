@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Authenticate as Aptos Labs Bot
+        if: vars.APTOS_LABS_BOT_APP_ID != ''
         uses: actions/create-github-app-token@v1
         id: authenticate
         with:
@@ -46,6 +47,7 @@ jobs:
         run: pnpm run build
 
       - name: Create Release Pull Request or Publish to npm
+        if: vars.APTOS_LABS_BOT_APP_ID != ''
         id: changesets
         uses: changesets/action@v1
         with:
@@ -58,7 +60,7 @@ jobs:
           NEXT_PUBLIC_SWAP_CCTP_MAIN_SIGNER_PRIVATE_KEY: ${{ secrets.NEXT_PUBLIC_SWAP_CCTP_MAIN_SIGNER_PRIVATE_KEY }}
           NEXT_PUBLIC_GAS_STATION_API_KEY: ${{ secrets.NEXT_PUBLIC_GAS_STATION_API_KEY }}
       - name: Deploy example dapps on Publish to npm
-        if: steps.changesets.outputs.published == 'true' # Runs only if publishing happened
+        if: vars.APTOS_LABS_BOT_APP_ID != '' && steps.changesets.outputs.published == 'true' # Runs only if publishing happened
         run: |
           pnpm run deploy:example
         env:
