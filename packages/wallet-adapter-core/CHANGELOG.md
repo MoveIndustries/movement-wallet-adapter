@@ -1,5 +1,11 @@
 # @movement-labs/wallet-adapter-core
 
+## 7.11.2
+
+### Patch Changes
+
+- Remove unused @aptos-connect/wallet-adapter-plugin dependency to fix peer dependency conflicts with @moveindustries/ts-sdk
+
 ## 7.11.1
 
 ### Patch Changes
