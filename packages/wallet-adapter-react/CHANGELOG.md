@@ -1,5 +1,12 @@
 # @movement-labs/wallet-adapter-react
 
+## 7.4.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @moveindustries/wallet-adapter-core@7.11.4
+
 ## 7.4.1
 
 ### Patch Changes

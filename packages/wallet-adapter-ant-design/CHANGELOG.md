@@ -1,5 +1,11 @@
 # @movement-labs/wallet-adapter-ant-design
 
+## 5.4.4
+
+### Patch Changes
+
+- @moveindustries/wallet-adapter-react@7.4.2
+
 ## 5.4.3
 
 ### Patch Changes

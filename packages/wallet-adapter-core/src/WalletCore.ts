@@ -91,6 +91,7 @@ import {
   crossChainStandardSupportedWalletList,
 } from "./registry";
 import { getSDKWallets } from "./sdkWallets";
+import { dedupeExtensionWalletsByChromeStoreId } from "./utils/dedupeChromeStoreWallets";
 import {
   AvailableWallets,
   MovementStandardSupportedWallet,
@@ -255,7 +256,11 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
   private setExtensionAIP62Wallets(
     extensionwWallets: readonly MovementWallet[],
   ): void {
-    extensionwWallets.map((wallet: AdapterWallet) => {
+    const extensionWalletsDeduped = dedupeExtensionWalletsByChromeStoreId(
+      extensionwWallets,
+    );
+
+    extensionWalletsDeduped.map((wallet: AdapterWallet) => {
       if (this.excludeWallet(wallet)) {
         return;
       }

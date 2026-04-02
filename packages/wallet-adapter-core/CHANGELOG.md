@@ -1,5 +1,17 @@
 # @movement-labs/wallet-adapter-core
 
+## 7.11.4
+
+### Patch Changes
+
+- add dedupe logic in case of multiple wallet named registered by an extension
+
+## 7.11.3
+
+### Patch Changes
+
+- Deduplicate AIP-62 extension wallets that share the same Chrome Web Store extension id (e.g. one extension registering multiple names such as MPCVault / Petra / Nightly with identical install URLs). The canonical row is chosen by matching the wallet name to the store listing slug. Real Nightly and MPC Vault remain separate when their store ids differ.
+
 ## 7.11.2
 
 ### Patch Changes
