@@ -288,6 +288,76 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
+  const supportsConfidentialAssets = (): boolean => {
+    if (!walletCore) return false;
+    const fn = walletCore.supportsConfidentialAssets;
+    return typeof fn === "function" ? fn.call(walletCore) : false;
+  };
+
+  const confidentialGetBalances = async (tokens: string[]) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialGetBalances(tokens);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialTransfer = async (input: {
+    token: string;
+    recipient: string;
+    amount: string;
+  }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialTransfer(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialRegister = async (input: { token: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialRegister(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialDeposit = async (input: { token: string; amount: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialDeposit(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialWithdraw = async (input: { token: string; amount: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialWithdraw(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialRolloverPending = async (input: { token: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialRolloverPending(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
   // Handle the adapter's connect event
   const handleConnect = (): void => {
     setState((state) => {
@@ -422,6 +492,13 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
         changeNetwork,
         submitTransaction,
         refetchMnsName,
+        supportsConfidentialAssets,
+        confidentialGetBalances,
+        confidentialTransfer,
+        confidentialRegister,
+        confidentialDeposit,
+        confidentialWithdraw,
+        confidentialRolloverPending,
         account,
         network,
         connected,
