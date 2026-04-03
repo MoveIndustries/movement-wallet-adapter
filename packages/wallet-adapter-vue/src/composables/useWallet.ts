@@ -52,6 +52,25 @@ export interface WalletContextState {
   signMessage(message: MovementSignMessageInput): Promise<MovementSignMessageOutput>;
   signMessageAndVerify(message: MovementSignMessageInput): Promise<boolean>;
   changeNetwork(network: Network): Promise<MovementChangeNetworkOutput>;
+  supportsConfidentialAssets(): boolean;
+  confidentialGetBalances(tokens: string[]): Promise<{
+    balances: Array<{
+      token: string;
+      available: string;
+      pending: string;
+      registered: boolean;
+      error?: string;
+    }>;
+  }>;
+  confidentialTransfer(input: {
+    token: string;
+    recipient: string;
+    amount: string;
+  }): Promise<{ hash: string }>;
+  confidentialRegister(input: { token: string }): Promise<{ hash: string }>;
+  confidentialDeposit(input: { token: string; amount: string }): Promise<{ hash: string }>;
+  confidentialWithdraw(input: { token: string; amount: string }): Promise<{ hash: string }>;
+  confidentialRolloverPending(input: { token: string }): Promise<{ hash: string }>;
 }
 
 export interface MovementWalletProviderProps {
@@ -201,6 +220,68 @@ export function useWallet(
   const changeNetwork = async (network: Network) => {
     try {
       return await walletCoreInstance.changeNetwork(network);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const supportsConfidentialAssets = (): boolean => {
+    return walletCoreInstance?.supportsConfidentialAssets() ?? false;
+  };
+
+  const confidentialGetBalances = async (tokens: string[]) => {
+    try {
+      return await walletCoreInstance.confidentialGetBalances(tokens);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialTransfer = async (input: {
+    token: string;
+    recipient: string;
+    amount: string;
+  }) => {
+    try {
+      return await walletCoreInstance.confidentialTransfer(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialRegister = async (input: { token: string }) => {
+    try {
+      return await walletCoreInstance.confidentialRegister(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialDeposit = async (input: { token: string; amount: string }) => {
+    try {
+      return await walletCoreInstance.confidentialDeposit(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialWithdraw = async (input: { token: string; amount: string }) => {
+    try {
+      return await walletCoreInstance.confidentialWithdraw(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialRolloverPending = async (input: { token: string }) => {
+    try {
+      return await walletCoreInstance.confidentialRolloverPending(input);
     } catch (error: any) {
       if (onError) onError(error);
       return Promise.reject(error);
@@ -393,5 +474,12 @@ export function useWallet(
     signMessage,
     signMessageAndVerify,
     changeNetwork,
+    supportsConfidentialAssets,
+    confidentialGetBalances,
+    confidentialTransfer,
+    confidentialRegister,
+    confidentialDeposit,
+    confidentialWithdraw,
+    confidentialRolloverPending,
   };
 }

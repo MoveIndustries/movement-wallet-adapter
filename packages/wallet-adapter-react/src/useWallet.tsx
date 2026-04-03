@@ -46,6 +46,25 @@ export interface WalletContextState {
     transaction: InputSubmitTransactionData,
   ): Promise<PendingTransactionResponse>;
   refetchMnsName(): Promise<void>;
+  supportsConfidentialAssets(): boolean;
+  confidentialGetBalances(tokens: string[]): Promise<{
+    balances: Array<{
+      token: string;
+      available: string;
+      pending: string;
+      registered: boolean;
+      error?: string;
+    }>;
+  }>;
+  confidentialTransfer(input: {
+    token: string;
+    recipient: string;
+    amount: string;
+  }): Promise<{ hash: string }>;
+  confidentialRegister(input: { token: string }): Promise<{ hash: string }>;
+  confidentialDeposit(input: { token: string; amount: string }): Promise<{ hash: string }>;
+  confidentialWithdraw(input: { token: string; amount: string }): Promise<{ hash: string }>;
+  confidentialRolloverPending(input: { token: string }): Promise<{ hash: string }>;
   wallet: AdapterWallet | null;
   wallets: ReadonlyArray<AdapterWallet>;
   notDetectedWallets: ReadonlyArray<AdapterNotDetectedWallet>;
