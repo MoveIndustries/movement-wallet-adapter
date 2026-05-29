@@ -1,5 +1,12 @@
 # @moveindustries/wallet-adapter-move-design
 
+## 1.2.5
+
+### Patch Changes
+
+- Updated dependencies
+  - @moveindustries/wallet-adapter-react@7.4.3
+
 ## 1.2.4
 
 ### Patch Changes
