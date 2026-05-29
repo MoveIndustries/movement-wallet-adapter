@@ -1,5 +1,11 @@
 # @movement-labs/wallet-adapter-react
 
+## 7.4.3
+
+### Patch Changes
+
+- support async autoConnect and late wallet injection
+
 ## 7.4.2
 
 ### Patch Changes
