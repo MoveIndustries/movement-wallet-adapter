@@ -1,5 +1,15 @@
 # @movement-labs/wallet-adapter-react
 
+## 7.4.4
+
+### Patch Changes
+
+- Fix invalid published dependency: 7.4.3 shipped
+  `@moveindustries/wallet-adapter-core` as the unresolved `workspace:*`
+  placeholder, breaking installs for npm/pnpm consumers
+  (`ERR_PNPM_WORKSPACE_PKG_NOT_FOUND`). Republished with the dependency
+  resolved to `7.11.4`. No runtime code changes from 7.4.3.
+
 ## 7.4.3
 
 ### Patch Changes
