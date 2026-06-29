@@ -16,6 +16,10 @@ import {
   InputSubmitTransactionData,
   MovementSignInInput,
   MovementSignInOutput,
+  ConfidentialBalance,
+  ConfidentialTransferInput,
+  ConfidentialWriteOptions,
+  ConfidentialWriteResult,
 } from "@moveindustries/wallet-adapter-core";
 
 export interface WalletContextState {
@@ -47,24 +51,26 @@ export interface WalletContextState {
   ): Promise<PendingTransactionResponse>;
   refetchMnsName(): Promise<void>;
   supportsConfidentialAssets(): boolean;
-  confidentialGetBalances(tokens: string[]): Promise<{
-    balances: Array<{
-      token: string;
-      available: string;
-      pending: string;
-      registered: boolean;
-      error?: string;
-    }>;
-  }>;
-  confidentialTransfer(input: {
+  confidentialGetBalances(tokens: string[]): Promise<{ balances: ConfidentialBalance[] }>;
+  confidentialIsRegistered(input: { token: string }): Promise<{ registered: boolean }>;
+  confidentialGetEncryptionKey(input: {
     token: string;
-    recipient: string;
-    amount: string;
-  }): Promise<{ hash: string }>;
-  confidentialRegister(input: { token: string }): Promise<{ hash: string }>;
-  confidentialDeposit(input: { token: string; amount: string }): Promise<{ hash: string }>;
-  confidentialWithdraw(input: { token: string; amount: string }): Promise<{ hash: string }>;
-  confidentialRolloverPending(input: { token: string }): Promise<{ hash: string }>;
+  }): Promise<{ encryptionKey: string | null }>;
+  confidentialGetGlobalAuditor(): Promise<{ auditorEncryptionKey?: string }>;
+  confidentialGetAuditor(input: { token: string }): Promise<{ auditorEncryptionKey?: string }>;
+  confidentialTransfer(input: ConfidentialTransferInput): Promise<ConfidentialWriteResult>;
+  confidentialRegister(
+    input: { token: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialDeposit(
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialWithdraw(
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialRolloverPending(
+    input: { token: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
   wallet: AdapterWallet | null;
   wallets: ReadonlyArray<AdapterWallet>;
   notDetectedWallets: ReadonlyArray<AdapterNotDetectedWallet>;

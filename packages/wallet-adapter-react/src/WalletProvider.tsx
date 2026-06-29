@@ -19,6 +19,8 @@ import {
   WalletReadyState,
   MovementSignInInput,
   MovementSignInOutput,
+  ConfidentialTransferInput,
+  ConfidentialWriteOptions,
 } from "@moveindustries/wallet-adapter-core";
 import { ReactNode, FC, useState, useEffect, useCallback, useRef } from "react";
 import { WalletContext } from "./useWallet";
@@ -304,11 +306,47 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
-  const confidentialTransfer = async (input: {
-    token: string;
-    recipient: string;
-    amount: string;
-  }) => {
+  const confidentialIsRegistered = async (input: { token: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialIsRegistered(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetEncryptionKey = async (input: { token: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialGetEncryptionKey(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetGlobalAuditor = async () => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialGetGlobalAuditor();
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetAuditor = async (input: { token: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialGetAuditor(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialTransfer = async (input: ConfidentialTransferInput) => {
     if (!walletCore) throw new Error("WalletCore is not initialized");
     try {
       return await walletCore.confidentialTransfer(input);
@@ -318,7 +356,7 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
-  const confidentialRegister = async (input: { token: string }) => {
+  const confidentialRegister = async (input: { token: string } & ConfidentialWriteOptions) => {
     if (!walletCore) throw new Error("WalletCore is not initialized");
     try {
       return await walletCore.confidentialRegister(input);
@@ -328,7 +366,9 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
-  const confidentialDeposit = async (input: { token: string; amount: string }) => {
+  const confidentialDeposit = async (
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ) => {
     if (!walletCore) throw new Error("WalletCore is not initialized");
     try {
       return await walletCore.confidentialDeposit(input);
@@ -338,7 +378,9 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
-  const confidentialWithdraw = async (input: { token: string; amount: string }) => {
+  const confidentialWithdraw = async (
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ) => {
     if (!walletCore) throw new Error("WalletCore is not initialized");
     try {
       return await walletCore.confidentialWithdraw(input);
@@ -348,7 +390,9 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
-  const confidentialRolloverPending = async (input: { token: string }) => {
+  const confidentialRolloverPending = async (
+    input: { token: string } & ConfidentialWriteOptions,
+  ) => {
     if (!walletCore) throw new Error("WalletCore is not initialized");
     try {
       return await walletCore.confidentialRolloverPending(input);
@@ -494,6 +538,10 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
         refetchMnsName,
         supportsConfidentialAssets,
         confidentialGetBalances,
+        confidentialIsRegistered,
+        confidentialGetEncryptionKey,
+        confidentialGetGlobalAuditor,
+        confidentialGetAuditor,
         confidentialTransfer,
         confidentialRegister,
         confidentialDeposit,

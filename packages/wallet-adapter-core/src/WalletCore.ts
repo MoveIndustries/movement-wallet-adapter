@@ -125,6 +125,82 @@ function getWalletFeature<T>(
   return (features[movementFeature] ?? features[aptosFeature]) as T | undefined;
 }
 
+// ---------------------------------------------------------------------------
+// Confidential Assets (MIP-001) — wallet <-> dApp interface types.
+//
+// Every `token` is a 32-byte fungible-asset metadata object address (hex
+// string), never a legacy `0x1::module::CoinType` string (conformance A5).
+// These methods are thin pass-throughs to the wallet's in-process `ca_*`
+// handlers: the adapter never derives a decryption key or builds a proof
+// (conformance A2/A4). All byte payloads cross the boundary as hex strings.
+// ---------------------------------------------------------------------------
+
+/** All confidential method names on the wallet-standard feature object. */
+const CONFIDENTIAL_ASSETS_METHODS = [
+  "getBalances",
+  "isRegistered",
+  "getEncryptionKey",
+  "getGlobalAuditor",
+  "getAuditor",
+  "register",
+  "deposit",
+  "withdraw",
+  "transfer",
+  "rolloverPending",
+] as const;
+
+/**
+ * Write mode. `"submit"` (default) builds the proof, confirms with the user,
+ * and submits on chain, resolving to a tx hash. `"buildOnly"` stops at proof
+ * construction and returns the unsigned BCS `EntryFunction` bytes (hex) for
+ * wrapping in a multisig proposal.
+ */
+export type ConfidentialWriteMode = "submit" | "buildOnly";
+
+/** Options accepted by every confidential write method. */
+export interface ConfidentialWriteOptions {
+  /**
+   * Address bound into the proof's Fiat–Shamir transcript. Defaults to the
+   * connected account. For multisig, pass the multisig address — which
+   * requires `mode: "buildOnly"` (the wallet rejects a non-self `sender` with
+   * `mode: "submit"`).
+   */
+  sender?: string;
+  /** Defaults to `"submit"`. A non-default `sender` requires `"buildOnly"`. */
+  mode?: ConfidentialWriteMode;
+}
+
+/**
+ * A confidential write resolves to a transaction hash (`mode: "submit"`) or
+ * the unsigned BCS `EntryFunction` bytes as a `0x`-prefixed hex string
+ * (`mode: "buildOnly"`).
+ */
+export type ConfidentialWriteResult =
+  | { hash: string }
+  | { entryFunctionBytes: string };
+
+/** A single token's confidential balance, decrypted inside the wallet. */
+export interface ConfidentialBalance {
+  token: string;
+  /** Spendable (rolled-over) balance. */
+  available: string;
+  /** Incoming funds awaiting an explicit rollover. */
+  pending: string;
+  registered: boolean;
+  error?: string;
+}
+
+/** Input to a confidential transfer. */
+export interface ConfidentialTransferInput extends ConfidentialWriteOptions {
+  token: string;
+  recipient: string;
+  amount: string;
+  /** Voluntary per-transfer auditor addresses; the chain/per-asset auditors are added by the wallet. */
+  auditorAddresses?: string[];
+  /** Opaque bytes (≤256) bound into the transfer's sigma transcript, as a hex string. */
+  senderAuditorHint?: string;
+}
+
 export interface DappConfig {
   network: Network;
   /**
@@ -1225,8 +1301,9 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
   }
 
   /**
-   * Whether the connected wallet exposes in-wallet Confidential Assets (`ca_*`–style) APIs.
-   * Requires balance reads, transfer, and pending rollover — some wallets may omit parts of the namespace.
+   * Whether the connected wallet exposes the full in-wallet Confidential Assets
+   * (`ca_*`) interface — every read and write method in {@link CONFIDENTIAL_ASSETS_METHODS}.
+   * A wallet that omits any method (e.g. an older partial implementation) reports `false`.
    */
   supportsConfidentialAssets(): boolean {
     if (!this._wallet) return false;
@@ -1236,143 +1313,165 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
       "aptos:confidentialAssets",
     );
     if (!feature || typeof feature !== "object") return false;
-    return (
-      typeof feature.getBalances === "function" &&
-      typeof feature.transfer === "function" &&
-      typeof feature.rolloverPending === "function"
+    return CONFIDENTIAL_ASSETS_METHODS.every(
+      (method) => typeof feature[method] === "function",
     );
+  }
+
+  /**
+   * Resolve the confidential-assets feature object, throwing a consistent
+   * "not supported" error when the connected wallet lacks the named method.
+   */
+  private getConfidentialFeature<T extends object>(method: keyof T, label: string): T {
+    this.ensureWalletExists(this._wallet);
+    this.ensureAccountExists(this._account);
+    const feature = getWalletFeature<T>(
+      this._wallet,
+      "movement:confidentialAssets",
+      "aptos:confidentialAssets",
+    );
+    if (!feature || typeof (feature as Record<string, unknown>)[method as string] !== "function") {
+      throw new WalletNotSupportedMethod(
+        `${this._wallet!.name} does not support ${label}`,
+      ).message;
+    }
+    return feature;
   }
 
   /**
    * Read decrypted confidential balances via the wallet (no decryption key in the dapp).
    */
-  async confidentialGetBalances(tokens: string[]): Promise<{
-    balances: Array<{
-      token: string;
-      available: string;
-      pending: string;
-      registered: boolean;
-      error?: string;
-    }>;
-  }> {
+  async confidentialGetBalances(
+    tokens: string[],
+  ): Promise<{ balances: ConfidentialBalance[] }> {
     try {
-      this.ensureWalletExists(this._wallet);
-      this.ensureAccountExists(this._account);
-      const feature = getWalletFeature<{
-        getBalances: (input: { tokens: string[] }) => Promise<{
-          balances: Array<{
-            token: string;
-            available: string;
-            pending: string;
-            registered: boolean;
-            error?: string;
-          }>;
-        }>;
-      }>(this._wallet, "movement:confidentialAssets", "aptos:confidentialAssets");
-      if (!feature?.getBalances) {
-        throw new WalletNotSupportedMethod(
-          `${this._wallet!.name} does not support confidential asset reads`,
-        ).message;
-      }
+      const feature = this.getConfidentialFeature<{
+        getBalances: (input: { tokens: string[] }) => Promise<{ balances: ConfidentialBalance[] }>;
+      }>("getBalances", "confidential asset reads");
       return await feature.getBalances({ tokens });
     } catch (error: any) {
       throw generalizedErrorMessage(error);
     }
   }
 
-  /** Confidential transfer built and signed inside the wallet. */
-  async confidentialTransfer(input: {
-    token: string;
-    recipient: string;
-    amount: string;
-  }): Promise<{ hash: string }> {
+  /** Whether the connected account is registered for confidential operations on `token`. */
+  async confidentialIsRegistered(input: { token: string }): Promise<{ registered: boolean }> {
     try {
-      this.ensureWalletExists(this._wallet);
-      this.ensureAccountExists(this._account);
-      const feature = getWalletFeature<{
-        transfer: (i: {
-          token: string;
-          recipient: string;
-          amount: string;
-        }) => Promise<{ hash: string }>;
-      }>(this._wallet, "movement:confidentialAssets", "aptos:confidentialAssets");
-      if (!feature?.transfer) {
-        throw new WalletNotSupportedMethod(
-          `${this._wallet!.name} does not support confidential transfer`,
-        ).message;
-      }
+      const feature = this.getConfidentialFeature<{
+        isRegistered: (i: { token: string }) => Promise<{ registered: boolean }>;
+      }>("isRegistered", "confidential registration reads");
+      return await feature.isRegistered(input);
+    } catch (error: any) {
+      throw generalizedErrorMessage(error);
+    }
+  }
+
+  /** The account's confidential encryption key for `token`, or `null` if unregistered. */
+  async confidentialGetEncryptionKey(input: {
+    token: string;
+  }): Promise<{ encryptionKey: string | null }> {
+    try {
+      const feature = this.getConfidentialFeature<{
+        getEncryptionKey: (i: { token: string }) => Promise<{ encryptionKey: string | null }>;
+      }>("getEncryptionKey", "confidential encryption-key reads");
+      return await feature.getEncryptionKey(input);
+    } catch (error: any) {
+      throw generalizedErrorMessage(error);
+    }
+  }
+
+  /** The chain-level (global) auditor encryption key; `auditorEncryptionKey` is omitted when unconfigured. */
+  async confidentialGetGlobalAuditor(): Promise<{ auditorEncryptionKey?: string }> {
+    try {
+      const feature = this.getConfidentialFeature<{
+        getGlobalAuditor: () => Promise<{ auditorEncryptionKey?: string }>;
+      }>("getGlobalAuditor", "confidential global-auditor reads");
+      return await feature.getGlobalAuditor();
+    } catch (error: any) {
+      throw generalizedErrorMessage(error);
+    }
+  }
+
+  /** The per-asset auditor encryption key for `token`; omitted when unconfigured. */
+  async confidentialGetAuditor(input: {
+    token: string;
+  }): Promise<{ auditorEncryptionKey?: string }> {
+    try {
+      const feature = this.getConfidentialFeature<{
+        getAuditor: (i: { token: string }) => Promise<{ auditorEncryptionKey?: string }>;
+      }>("getAuditor", "confidential auditor reads");
+      return await feature.getAuditor(input);
+    } catch (error: any) {
+      throw generalizedErrorMessage(error);
+    }
+  }
+
+  /** Confidential transfer built and signed inside the wallet. */
+  async confidentialTransfer(
+    input: ConfidentialTransferInput,
+  ): Promise<ConfidentialWriteResult> {
+    try {
+      const feature = this.getConfidentialFeature<{
+        transfer: (i: ConfidentialTransferInput) => Promise<ConfidentialWriteResult>;
+      }>("transfer", "confidential transfer");
       return await feature.transfer(input);
     } catch (error: any) {
       throw generalizedErrorMessage(error);
     }
   }
 
-  async confidentialRegister(input: { token: string }): Promise<{ hash: string }> {
+  async confidentialRegister(
+    input: { token: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult> {
     try {
-      this.ensureWalletExists(this._wallet);
-      this.ensureAccountExists(this._account);
-      const feature = getWalletFeature<{
-        register: (i: { token: string }) => Promise<{ hash: string }>;
-      }>(this._wallet, "movement:confidentialAssets", "aptos:confidentialAssets");
-      if (!feature?.register) {
-        throw new WalletNotSupportedMethod(
-          `${this._wallet!.name} does not support confidential register`,
-        ).message;
-      }
+      const feature = this.getConfidentialFeature<{
+        register: (i: { token: string } & ConfidentialWriteOptions) => Promise<ConfidentialWriteResult>;
+      }>("register", "confidential register");
       return await feature.register(input);
     } catch (error: any) {
       throw generalizedErrorMessage(error);
     }
   }
 
-  async confidentialDeposit(input: { token: string; amount: string }): Promise<{ hash: string }> {
+  async confidentialDeposit(
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult> {
     try {
-      this.ensureWalletExists(this._wallet);
-      this.ensureAccountExists(this._account);
-      const feature = getWalletFeature<{
-        deposit: (i: { token: string; amount: string }) => Promise<{ hash: string }>;
-      }>(this._wallet, "movement:confidentialAssets", "aptos:confidentialAssets");
-      if (!feature?.deposit) {
-        throw new WalletNotSupportedMethod(
-          `${this._wallet!.name} does not support confidential deposit`,
-        ).message;
-      }
+      const feature = this.getConfidentialFeature<{
+        deposit: (
+          i: { token: string; amount: string } & ConfidentialWriteOptions,
+        ) => Promise<ConfidentialWriteResult>;
+      }>("deposit", "confidential deposit");
       return await feature.deposit(input);
     } catch (error: any) {
       throw generalizedErrorMessage(error);
     }
   }
 
-  async confidentialWithdraw(input: { token: string; amount: string }): Promise<{ hash: string }> {
+  async confidentialWithdraw(
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult> {
     try {
-      this.ensureWalletExists(this._wallet);
-      this.ensureAccountExists(this._account);
-      const feature = getWalletFeature<{
-        withdraw: (i: { token: string; amount: string }) => Promise<{ hash: string }>;
-      }>(this._wallet, "movement:confidentialAssets", "aptos:confidentialAssets");
-      if (!feature?.withdraw) {
-        throw new WalletNotSupportedMethod(
-          `${this._wallet!.name} does not support confidential withdraw`,
-        ).message;
-      }
+      const feature = this.getConfidentialFeature<{
+        withdraw: (
+          i: { token: string; amount: string } & ConfidentialWriteOptions,
+        ) => Promise<ConfidentialWriteResult>;
+      }>("withdraw", "confidential withdraw");
       return await feature.withdraw(input);
     } catch (error: any) {
       throw generalizedErrorMessage(error);
     }
   }
 
-  async confidentialRolloverPending(input: { token: string }): Promise<{ hash: string }> {
+  async confidentialRolloverPending(
+    input: { token: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult> {
     try {
-      this.ensureWalletExists(this._wallet);
-      this.ensureAccountExists(this._account);
-      const feature = getWalletFeature<{
-        rolloverPending: (i: { token: string }) => Promise<{ hash: string }>;
-      }>(this._wallet, "movement:confidentialAssets", "aptos:confidentialAssets");
-      if (!feature?.rolloverPending) {
-        throw new WalletNotSupportedMethod(
-          `${this._wallet!.name} does not support confidential rollover`,
-        ).message;
-      }
+      const feature = this.getConfidentialFeature<{
+        rolloverPending: (
+          i: { token: string } & ConfidentialWriteOptions,
+        ) => Promise<ConfidentialWriteResult>;
+      }>("rolloverPending", "confidential rollover");
       return await feature.rolloverPending(input);
     } catch (error: any) {
       throw generalizedErrorMessage(error);
