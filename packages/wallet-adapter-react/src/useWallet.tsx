@@ -20,6 +20,8 @@ import {
   ConfidentialTransferInput,
   ConfidentialWriteOptions,
   ConfidentialWriteResult,
+  PublishedVaultEnvelopeKey,
+  VaultEnvelopeRecipient,
 } from "@moveindustries/wallet-adapter-core";
 
 export interface WalletContextState {
@@ -71,6 +73,15 @@ export interface WalletContextState {
   confidentialRolloverPending(
     input: { token: string } & ConfidentialWriteOptions,
   ): Promise<ConfidentialWriteResult>;
+  confidentialPublishVaultEnvelopeKey(): Promise<PublishedVaultEnvelopeKey>;
+  confidentialSealVaultDk(input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }): Promise<{ envelopeHex: string }>;
+  confidentialOpenVaultDk(input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }): Promise<{ ok: boolean }>;
   wallet: AdapterWallet | null;
   wallets: ReadonlyArray<AdapterWallet>;
   notDetectedWallets: ReadonlyArray<AdapterNotDetectedWallet>;

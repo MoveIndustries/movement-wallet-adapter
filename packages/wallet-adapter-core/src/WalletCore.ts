@@ -179,6 +179,20 @@ export type ConfidentialWriteResult =
   | { hash: string }
   | { entryFunctionBytes: string };
 
+/** A multisig owner's published vault-envelope key (MIP-001 §"Vault-envelope key"). */
+export interface PublishedVaultEnvelopeKey {
+  ownerAddress: string;
+  /** The owner's on-chain Ed25519 public key (hex), used to verify `ownerSigHex`. */
+  ownerEd25519PublicKeyHex: string;
+  /** The published X25519 vault-envelope public key (`vek_pub`, hex). */
+  vekPubHex: string;
+  /** Ed25519 ownership signature (hex) over the vek-ownership domain-separated message. */
+  ownerSigHex: string;
+}
+
+/** A verified recipient the dealer seals `dk[Vault]` to. */
+export type VaultEnvelopeRecipient = PublishedVaultEnvelopeKey;
+
 /** A single token's confidential balance, decrypted inside the wallet. */
 export interface ConfidentialBalance {
   token: string;
@@ -1473,6 +1487,55 @@ export class WalletCore extends EventEmitter<WalletCoreEvents> {
         ) => Promise<ConfidentialWriteResult>;
       }>("rolloverPending", "confidential rollover");
       return await feature.rolloverPending(input);
+    } catch (error: any) {
+      throw generalizedErrorMessage(error);
+    }
+  }
+
+  // --- Multisig vault-envelope-key sharing (MIP-001 §"Vault-envelope key") ---
+  // Optional methods (multisig only); a wallet without them throws "not
+  // supported" rather than being reported unsupported for core CA.
+
+  /** Derive + return the connected owner's publishable vault-envelope key. Public material only. */
+  async confidentialPublishVaultEnvelopeKey(): Promise<PublishedVaultEnvelopeKey> {
+    try {
+      const feature = this.getConfidentialFeature<{
+        publishVaultEnvelopeKey: () => Promise<PublishedVaultEnvelopeKey>;
+      }>("publishVaultEnvelopeKey", "vault-envelope-key publishing");
+      return await feature.publishVaultEnvelopeKey();
+    } catch (error: any) {
+      throw generalizedErrorMessage(error);
+    }
+  }
+
+  /** Seal `dk[Vault]` to on-chain-verified recipients; returns the envelope bytes (hex). */
+  async confidentialSealVaultDk(input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }): Promise<{ envelopeHex: string }> {
+    try {
+      const feature = this.getConfidentialFeature<{
+        sealVaultDk: (i: {
+          multisigAddress: string;
+          recipients: VaultEnvelopeRecipient[];
+        }) => Promise<{ envelopeHex: string }>;
+      }>("sealVaultDk", "vault-dk sealing");
+      return await feature.sealVaultDk(input);
+    } catch (error: any) {
+      throw generalizedErrorMessage(error);
+    }
+  }
+
+  /** Open a fetched envelope and persist `dk[Vault]` for the multisig. */
+  async confidentialOpenVaultDk(input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }): Promise<{ ok: boolean }> {
+    try {
+      const feature = this.getConfidentialFeature<{
+        openVaultDk: (i: { multisigAddress: string; envelopeHex: string }) => Promise<{ ok: boolean }>;
+      }>("openVaultDk", "vault-dk import");
+      return await feature.openVaultDk(input);
     } catch (error: any) {
       throw generalizedErrorMessage(error);
     }

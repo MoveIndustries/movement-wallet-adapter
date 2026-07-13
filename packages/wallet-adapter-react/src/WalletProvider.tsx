@@ -21,6 +21,7 @@ import {
   MovementSignInOutput,
   ConfidentialTransferInput,
   ConfidentialWriteOptions,
+  VaultEnvelopeRecipient,
 } from "@moveindustries/wallet-adapter-core";
 import { ReactNode, FC, useState, useEffect, useCallback, useRef } from "react";
 import { WalletContext } from "./useWallet";
@@ -402,6 +403,42 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
+  const confidentialPublishVaultEnvelopeKey = async () => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialPublishVaultEnvelopeKey();
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialSealVaultDk = async (input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialSealVaultDk(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialOpenVaultDk = async (input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialOpenVaultDk(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
   // Handle the adapter's connect event
   const handleConnect = (): void => {
     setState((state) => {
@@ -547,6 +584,9 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
         confidentialDeposit,
         confidentialWithdraw,
         confidentialRolloverPending,
+        confidentialPublishVaultEnvelopeKey,
+        confidentialSealVaultDk,
+        confidentialOpenVaultDk,
         account,
         network,
         connected,

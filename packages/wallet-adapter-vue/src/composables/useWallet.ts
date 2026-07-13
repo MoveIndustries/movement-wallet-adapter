@@ -19,6 +19,8 @@ import {
   ConfidentialTransferInput,
   ConfidentialWriteOptions,
   ConfidentialWriteResult,
+  PublishedVaultEnvelopeKey,
+  VaultEnvelopeRecipient,
 } from "@moveindustries/wallet-adapter-core";
 import {
   ref,
@@ -77,6 +79,15 @@ export interface WalletContextState {
   confidentialRolloverPending(
     input: { token: string } & ConfidentialWriteOptions,
   ): Promise<ConfidentialWriteResult>;
+  confidentialPublishVaultEnvelopeKey(): Promise<PublishedVaultEnvelopeKey>;
+  confidentialSealVaultDk(input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }): Promise<{ envelopeHex: string }>;
+  confidentialOpenVaultDk(input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }): Promise<{ ok: boolean }>;
 }
 
 export interface MovementWalletProviderProps {
@@ -332,6 +343,39 @@ export function useWallet(
     }
   };
 
+  const confidentialPublishVaultEnvelopeKey = async () => {
+    try {
+      return await walletCoreInstance.confidentialPublishVaultEnvelopeKey();
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialSealVaultDk = async (input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }) => {
+    try {
+      return await walletCoreInstance.confidentialSealVaultDk(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialOpenVaultDk = async (input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }) => {
+    try {
+      return await walletCoreInstance.confidentialOpenVaultDk(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
   const handleReadyStateChange = (updatedWallet: MaybeRef<AdapterWallet>) => {
     const _updatedWallet = unref(updatedWallet);
     const wallet = wallets.value.find(
@@ -529,5 +573,8 @@ export function useWallet(
     confidentialDeposit,
     confidentialWithdraw,
     confidentialRolloverPending,
+    confidentialPublishVaultEnvelopeKey,
+    confidentialSealVaultDk,
+    confidentialOpenVaultDk,
   };
 }
