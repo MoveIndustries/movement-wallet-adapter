@@ -730,6 +730,34 @@ importers:
         specifier: ^5.8.3
         version: 5.9.3
 
+  packages/wallet-adapter-keyless:
+    dependencies:
+      '@wallet-standard/core':
+        specifier: 1.1.0
+        version: 1.1.0
+    devDependencies:
+      '@moveindustries/keyless':
+        specifier: ^0.1.0
+        version: 0.1.0(@aptos-labs/ts-sdk@5.2.1(got@11.8.6))
+      '@moveindustries/ts-sdk':
+        specifier: ^5.1.6
+        version: 5.1.6(got@11.8.6)
+      '@moveindustries/wallet-standard':
+        specifier: ^0.6.0
+        version: 0.6.0(@moveindustries/ts-sdk@5.1.6(got@11.8.6))(@wallet-standard/core@1.1.0)
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.19.33
+      jsdom:
+        specifier: 25.0.1
+        version: 25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.4
+        version: 4.1.4(@types/node@20.19.33)(happy-dom@20.9.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(vite@6.4.1(@types/node@20.19.33)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
+
   packages/wallet-adapter-move-design:
     dependencies:
       '@moveindustries/wallet-adapter-react':
@@ -2053,6 +2081,11 @@ packages:
 
   '@mizuwallet-sdk/protocol@0.0.6':
     resolution: {integrity: sha512-I6ibbdPmPqsqc4JfCfI9qplZ2RcqeUxawyYBNb3TNhibMqQhoVUUaczt9kLuML20ODTvvZW/ja+5S6PXSzWPiw==}
+
+  '@moveindustries/keyless@0.1.0':
+    resolution: {integrity: sha512-Zw3/8LXI3H1TShaqs2zaeQEKoCnWbevLtP0y3vbeOXTmAcRomJCY3pKQTQPWQIQqTEzKqDXLL0Xg1wIn2eSjcw==}
+    peerDependencies:
+      '@aptos-labs/ts-sdk': '>=1.30.0 <5.1.5'
 
   '@moveindustries/movement-cli@1.1.0':
     resolution: {integrity: sha512-Kk0qIOJIRFglg1ntRwy92Qsb1WZORwq1H6XK6YG5ikBPipLLxBHJ8EhQqi4H5AUHgd1TbmTxUHCfEKsuHORaYg==}
@@ -8223,6 +8256,9 @@ packages:
   poseidon-lite@0.2.1:
     resolution: {integrity: sha512-xIr+G6HeYfOhCuswdqcFpSX47SPhm0EpisWJ6h7fHlWwaVIvH3dLnejpatrtw6Xc6HaLrpq05y7VRfvDmDGIog==}
 
+  poseidon-lite@0.3.0:
+    resolution: {integrity: sha512-ilJj4MIve4uBEG7SrtPqUUNkvpJ/pLVbndxa0WvebcQqeIhe+h72JR4g0EvwchUzm9sOQDlOjiDNmRAgxNZl4A==}
+
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
     engines: {node: '>= 0.4'}
@@ -12256,6 +12292,11 @@ snapshots:
       '@microsoft/fetch-event-source': 2.0.1
       tweetnacl: 1.0.3
       tweetnacl-util: 0.15.1
+
+  '@moveindustries/keyless@0.1.0(@aptos-labs/ts-sdk@5.2.1(got@11.8.6))':
+    dependencies:
+      '@aptos-labs/ts-sdk': 5.2.1(got@11.8.6)
+      poseidon-lite: 0.3.0
 
   '@moveindustries/movement-cli@1.1.0':
     dependencies:
@@ -19871,6 +19912,8 @@ snapshots:
       - supports-color
 
   poseidon-lite@0.2.1: {}
+
+  poseidon-lite@0.3.0: {}
 
   possible-typed-array-names@1.1.0: {}
 
