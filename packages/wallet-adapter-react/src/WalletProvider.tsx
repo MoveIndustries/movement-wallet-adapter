@@ -19,6 +19,9 @@ import {
   WalletReadyState,
   MovementSignInInput,
   MovementSignInOutput,
+  ConfidentialTransferInput,
+  ConfidentialWriteOptions,
+  VaultEnvelopeRecipient,
 } from "@moveindustries/wallet-adapter-core";
 import { ReactNode, FC, useState, useEffect, useCallback, useRef } from "react";
 import { WalletContext } from "./useWallet";
@@ -310,6 +313,154 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
     }
   };
 
+  const supportsConfidentialAssets = (): boolean => {
+    if (!walletCore) return false;
+    const fn = walletCore.supportsConfidentialAssets;
+    return typeof fn === "function" ? fn.call(walletCore) : false;
+  };
+
+  const confidentialGetBalances = async (tokens: string[]) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialGetBalances(tokens);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialIsRegistered = async (input: { token: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialIsRegistered(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetEncryptionKey = async (input: { token: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialGetEncryptionKey(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetGlobalAuditor = async () => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialGetGlobalAuditor();
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetAuditor = async (input: { token: string }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialGetAuditor(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialTransfer = async (input: ConfidentialTransferInput) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialTransfer(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialRegister = async (input: { token: string } & ConfidentialWriteOptions) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialRegister(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialDeposit = async (
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialDeposit(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialWithdraw = async (
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialWithdraw(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialRolloverPending = async (
+    input: { token: string } & ConfidentialWriteOptions,
+  ) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialRolloverPending(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialPublishVaultEnvelopeKey = async () => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialPublishVaultEnvelopeKey();
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialSealVaultDk = async (input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialSealVaultDk(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialOpenVaultDk = async (input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }) => {
+    if (!walletCore) throw new Error("WalletCore is not initialized");
+    try {
+      return await walletCore.confidentialOpenVaultDk(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
   // Handle the adapter's connect event
   const handleConnect = (): void => {
     setState((state) => {
@@ -444,6 +595,20 @@ export const MovementWalletAdapterProvider: FC<MovementWalletProviderProps> = ({
         changeNetwork,
         submitTransaction,
         refetchMnsName,
+        supportsConfidentialAssets,
+        confidentialGetBalances,
+        confidentialIsRegistered,
+        confidentialGetEncryptionKey,
+        confidentialGetGlobalAuditor,
+        confidentialGetAuditor,
+        confidentialTransfer,
+        confidentialRegister,
+        confidentialDeposit,
+        confidentialWithdraw,
+        confidentialRolloverPending,
+        confidentialPublishVaultEnvelopeKey,
+        confidentialSealVaultDk,
+        confidentialOpenVaultDk,
         account,
         network,
         connected,
