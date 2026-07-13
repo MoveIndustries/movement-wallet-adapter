@@ -6,6 +6,7 @@ import {
 } from "@moveindustries/wallet-adapter-react";
 import { setupAutomaticEthereumWalletDerivation } from "@moveindustries/derived-wallet-ethereum";
 import { setupAutomaticSolanaWalletDerivation } from "@moveindustries/derived-wallet-solana";
+import { registerPasskeyWallets } from "@moveindustries/wallet-adapter-passkey";
 import { PropsWithChildren } from "react";
 import { Network } from "@moveindustries/ts-sdk";
 // TODO: Re-enable when Movement supports social sign-in
@@ -25,6 +26,16 @@ if (deriveWalletsFrom?.includes("ethereum")) {
 }
 if (deriveWalletsFrom?.includes("solana")) {
   setupAutomaticSolanaWalletDerivation({ defaultNetwork: Network.TESTNET });
+}
+
+// Register the passkey wallets ("Create new passkey" / "Sign in with existing
+// passkey") into the global wallet-standard registry so they appear in the
+// connect modal. rpId auto-detects from window.location.hostname, so localhost
+// works in dev with no extra config. Idempotent — safe on re-render/HMR.
+// Browser-only: registerWallet dispatches a window CustomEvent, which throws
+// during Next's server prerender.
+if (typeof window !== "undefined") {
+  registerPasskeyWallets({ network: "testnet" });
 }
 
 // TODO: Re-enable when Movement supports social sign-in

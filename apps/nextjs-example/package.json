@@ -17,6 +17,7 @@
     "@moveindustries/wallet-adapter-core": "workspace:*",
     "@moveindustries/wallet-adapter-mui-design": "workspace:*",
     "@moveindustries/wallet-adapter-react": "workspace:*",
+    "@moveindustries/wallet-adapter-passkey": "workspace:*",
     "@moveindustries/derived-wallet-ethereum": "workspace:^",
     "@moveindustries/derived-wallet-solana": "workspace:^",
     "@moveindustries/wallet-standard": "^0.6.0",
