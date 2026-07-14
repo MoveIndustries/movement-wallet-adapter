@@ -160,11 +160,7 @@ export class KeylessWalletAdapter {
           // The prove request flows through `fetch` so it's visible in the
           // app's debug panel Network tab; the post-connect change event
           // shows up in the Wallet tab.
-          // @moveindustries/keyless is published against @aptos-labs/ts-sdk, so
-          // completeLogin() returns that SDK's KeylessAccount. It's structurally
-          // identical to @moveindustries/ts-sdk's (the latter is an Aptos fork),
-          // so bridge the nominally-distinct types at this boundary.
-          const account = (await this.keyless.completeLogin()) as unknown as KeylessAccount
+          const account = await this.keyless.completeLogin()
           this.account = account
           this.notifyAccountChange()
           const info = this.toAccountInfo(account)
