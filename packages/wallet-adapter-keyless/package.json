@@ -37,12 +37,12 @@
     "@wallet-standard/core": "1.1.0"
   },
   "peerDependencies": {
-    "@moveindustries/keyless": "^0.1.0",
+    "@moveindustries/keyless": "^0.1.1",
     "@moveindustries/ts-sdk": "^5.1.6",
     "@moveindustries/wallet-standard": "^0.6.0"
   },
   "devDependencies": {
-    "@moveindustries/keyless": "^0.1.0",
+    "@moveindustries/keyless": "^0.1.1",
     "@moveindustries/ts-sdk": "^5.1.6",
     "@moveindustries/wallet-standard": "^0.6.0",
     "@types/node": "^20.10.4",
