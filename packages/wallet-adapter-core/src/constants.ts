@@ -1,3 +1,5 @@
+import { Network } from "@moveindustries/ts-sdk";
+
 export enum WalletReadyState {
   /**
    * Wallet can only be in one of two states - installed or not installed
@@ -17,6 +19,12 @@ export enum NetworkName {
 export const ChainIdToMnsSupportedNetworkMap: Record<string, string> = {
   "126": "mainnet", // Movement mainnet
   "250": "testnet", // Movement testnet
+};
+
+// Recognizes Movement networks by chain id when a wallet reports a "custom" name / proxy RPC (e.g. Nightly).
+export const ChainIdToMovementNetworkMap: Record<string, Network> = {
+  "126": Network.MAINNET,
+  "250": Network.TESTNET,
 };
 
 // TODO: Re-enable when Movement supports social sign-in (Petra Web / Movement Connect)
