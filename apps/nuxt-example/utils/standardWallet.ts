@@ -158,7 +158,7 @@ export class MyWallet implements MovementWallet {
     return {
       name: Network.DEVNET,
       chainId: network.chain_id,
-      url: "https://fullnode.devnet.movementlabs.xyz/v1",
+      url: "https://devnet.movementnetwork.xyz/v1",
     };
   };
 

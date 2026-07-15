@@ -18,7 +18,7 @@
   "bugs": {
     "url": "https://github.com/MoveIndustries/movement-wallet-adapter/issues"
   },
-  "author": "movementlabs.xyz",
+  "author": "Move Industries",
   "scripts": {
     "build": "pnpm build:bundle && pnpm build:declarations",
     "build:bundle": "tsup --sourcemap",

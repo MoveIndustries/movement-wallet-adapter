@@ -201,9 +201,10 @@ export class MyWallet implements MovementWallet {
   constructor() {
     // Create a random signer for our stub implementations.
     this.signer = Account.generate();
-    // We will use DEVNET since we can fund our test account via a faucet there.
+    // Use TESTNET — the public Movement test network with a faucet to fund our
+    // test account. (There is no public devnet.)
     const movementConfig = new MovementConfig({
-      network: Network.DEVNET,
+      network: Network.TESTNET,
     });
     // Use the instance Aptos connection to process requests.
     this.aptos = new Movement(movementConfig);
@@ -269,11 +270,13 @@ export class MyWallet implements MovementWallet {
   network: MovementGetNetworkMethod = async (): Promise<NetworkInfo> => {
     // You may use getLedgerInfo() to determine which ledger your Wallet is connected to.
     const network = await this.aptos.getLedgerInfo();
+    // Report the network this wallet is actually on. This stub is configured
+    // for testnet in the constructor; a real wallet would return whichever
+    // network (testnet/mainnet) it's connected to.
     return {
-      // REVISION - Ensure the name and url match the chain_id your wallet responds with.
-      name: Network.DEVNET,
+      name: Network.TESTNET,
       chainId: network.chain_id,
-      url: "https://fullnode.devnet.movementlabs.xyz/v1",
+      url: "https://testnet.movementnetwork.xyz/v1",
     };
   };
 

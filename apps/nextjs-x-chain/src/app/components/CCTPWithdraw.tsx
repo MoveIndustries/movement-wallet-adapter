@@ -354,7 +354,7 @@ export function CCTPWithdraw({
             <p className="text-lg">Transaction submitted</p>
             {transferResponse.originChainTxnId && (
               <a
-                href={`https://explorer.movementlabs.xyz/txn/${transferResponse.originChainTxnId}?network=${
+                href={`https://explorer.movementnetwork.xyz/txn/${transferResponse.originChainTxnId}?network=${
                   dappNetwork === Network.MAINNET ? "mainnet" : "testnet"
                 }`}
                 target="_blank"

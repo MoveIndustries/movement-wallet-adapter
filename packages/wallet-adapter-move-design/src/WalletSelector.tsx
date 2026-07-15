@@ -223,7 +223,6 @@ export interface WalletSelectorProps {
 export function WalletSelector({ className }: WalletSelectorProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const [mounted, setMounted] = useState(false);
   const { connected, disconnect, account, wallet } = useWallet();
   const triggerButtonRef = useRef<HTMLButtonElement>(null);
@@ -280,10 +279,8 @@ export function WalletSelector({ className }: WalletSelectorProps) {
     <div className={cn("relative inline-block", className)}>
       <button
         ref={triggerButtonRef}
-        className="group flex h-10 w-24 cursor-pointer items-center justify-center gap-1 rounded-full border-none bg-white/8 pl-0 pr-0 text-white/64 transition-all duration-200 hover:bg-white hover:text-black md:h-12 md:w-50 md:pl-4 md:pr-4"
+        className="group flex h-10 w-24 cursor-pointer items-center justify-center gap-1 rounded-full border-none bg-black/8 pl-0 pr-0 text-black/64 transition-all duration-200 hover:bg-black hover:text-white dark:bg-white/8 dark:text-white/64 dark:hover:bg-white dark:hover:text-black md:h-12 md:w-50 md:pl-4 md:pr-4"
         onClick={() => setShowDropdown(!showDropdown)}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         <div className="relative group-hover:[&_svg]:text-black">
           {wallet?.icon ? (
@@ -328,7 +325,7 @@ export function WalletSelector({ className }: WalletSelectorProps) {
         <CaretDownIcon
           size={18}
           className={`transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}
-          color={isHovered ? "black" : "rgba(255, 255, 255, 0.64)"}
+          color="currentColor"
         />
       </button>
       {showDropdown && (

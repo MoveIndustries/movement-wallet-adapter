@@ -1,8 +1,6 @@
 import { movementClient, isSendableNetwork } from "@/utils";
-import {
-  InputTransactionData,
-  useWallet,
-} from "@moveindustries/wallet-adapter-react";
+import { InputTransactionData } from "@moveindustries/wallet-adapter-react";
+import { useConfirmedWallet } from "../transactionApproval/useConfirmedWallet";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { useToast } from "../ui/use-toast";
@@ -13,7 +11,7 @@ const MaxGasAMount = 10000;
 export function TransactionParameters() {
   const { toast } = useToast();
   const { connected, account, network, signAndSubmitTransaction, wallet } =
-    useWallet();
+    useConfirmedWallet();
   let sendable = isSendableNetwork(connected, network?.name);
 
   const onSignAndSubmitTransaction = async () => {

@@ -15,6 +15,7 @@ import { useAutoConnect } from "./AutoConnectProvider";
 import { useToast } from "./ui/use-toast";
 import { myTransactionSubmitter } from "@/utils/transactionSubmitter";
 import { useTransactionSubmitter } from "./TransactionSubmitterProvider";
+import { TransactionApprovalProvider } from "./transactionApproval/TransactionApprovalProvider";
 
 const searchParams =
   typeof window !== "undefined"
@@ -53,7 +54,6 @@ export const WalletProvider = ({ children }: PropsWithChildren) => {
     network: Network.TESTNET,
     movementApiKeys: {
       testnet: process.env.NEXT_PUBLIC_MOVEMENT_API_KEY_TESNET,
-      devnet: process.env.NEXT_PUBLIC_MOVEMENT_API_KEY_DEVNET,
     },
     // TODO: Re-enable when Movement supports social sign-in
     // movementConnect: {
@@ -79,7 +79,7 @@ export const WalletProvider = ({ children }: PropsWithChildren) => {
         });
       }}
     >
-      {children}
+      <TransactionApprovalProvider>{children}</TransactionApprovalProvider>
     </MovementWalletAdapterProvider>
   );
 };

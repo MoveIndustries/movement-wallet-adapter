@@ -273,7 +273,7 @@ export class MyWallet implements MovementWallet {
       // REVISION - Ensure the name and url match the chain_id your wallet responds with.
       name: Network.DEVNET,
       chainId: network.chain_id,
-      url: "https://fullnode.devnet.movementlabs.xyz/v1",
+      url: "https://devnet.movementnetwork.xyz/v1",
     };
   };
 
