@@ -10,7 +10,7 @@ import {
 import { HeadlessComponentProps, createHeadlessComponent } from "./utils";
 
 /** @deprecated Social sign-in disabled */
-export const EXPLORE_ECOSYSTEM_URL = "https://movementlabs.xyz/ecosystem";
+export const EXPLORE_ECOSYSTEM_URL = "https://www.movementnetwork.xyz/ecosystem";
 
 /** @deprecated Social sign-in disabled */
 export interface AboutPetraWebEducationScreen {

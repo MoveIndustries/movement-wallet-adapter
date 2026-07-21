@@ -137,12 +137,12 @@ export class MyWallet implements MovementWallet {
    * implement each function.
    *
    * signer - This stores the private keys for an account on-chain. (Example purposes only)
-   * aptos - This handles the network connection. (Your wallet may have a different way of handling the on-chain connection than this Aptos instance)
+   * movement - This handles the network connection. (Your wallet may have a different way of handling the on-chain connection than this Movement instance)
    *
    * Remember: These two variables SHOULD LIKELY BE DELETED after you replace your implementations of each feature with ones that use your Wallet.
    */
   signer: Account;
-  aptos: Movement;
+  movement: Movement;
 
   /**
    * In order to be compatible with the AIP-62 Wallet standard, ensure you are at least supporting all
@@ -201,12 +201,12 @@ export class MyWallet implements MovementWallet {
   constructor() {
     // Create a random signer for our stub implementations.
     this.signer = Account.generate();
-    // We will use DEVNET since we can fund our test account via a faucet there.
+    // We will use TESTNET since we can fund our test account via a faucet there.
     const movementConfig = new MovementConfig({
-      network: Network.DEVNET,
+      network: Network.TESTNET,
     });
-    // Use the instance Aptos connection to process requests.
-    this.aptos = new Movement(movementConfig);
+    // Use the Movement connection to process requests.
+    this.movement = new Movement(movementConfig);
 
     // Update our Wallet object to know that we are connected to this new signer.
     this.accounts = [new MyWalletAccount(this.signer)];
@@ -243,7 +243,7 @@ export class MyWallet implements MovementWallet {
     UserResponse<AccountInfo>
   > => {
     try {
-      await this.aptos.fundAccount({
+      await this.movement.fundAccount({
         accountAddress: this.signer.accountAddress,
         amount: 1_000_000_000_000,
         options: { waitForIndexer: false },
@@ -268,12 +268,12 @@ export class MyWallet implements MovementWallet {
    */
   network: MovementGetNetworkMethod = async (): Promise<NetworkInfo> => {
     // You may use getLedgerInfo() to determine which ledger your Wallet is connected to.
-    const network = await this.aptos.getLedgerInfo();
+    const network = await this.movement.getLedgerInfo();
     return {
       // REVISION - Ensure the name and url match the chain_id your wallet responds with.
-      name: Network.DEVNET,
+      name: Network.TESTNET,
       chainId: network.chain_id,
-      url: "https://fullnode.devnet.movementlabs.xyz/v1",
+      url: "https://testnet.movementnetwork.xyz/v1",
     };
   };
 
@@ -298,7 +298,7 @@ export class MyWallet implements MovementWallet {
   ): Promise<UserResponse<AccountAuthenticator>> => {
     // THIS LOGIC SHOULD BE REPLACED. IT IS FOR EXAMPLE PURPOSES ONLY.
     if (asFeePayer) {
-      const senderAuthenticator = this.aptos.transaction.signAsFeePayer({
+      const senderAuthenticator = this.movement.transaction.signAsFeePayer({
         signer: this.signer,
         transaction,
       });
@@ -308,7 +308,7 @@ export class MyWallet implements MovementWallet {
         args: senderAuthenticator,
       });
     }
-    const senderAuthenticator = this.aptos.transaction.sign({
+    const senderAuthenticator = this.movement.transaction.sign({
       signer: this.signer,
       transaction,
     });

@@ -64,7 +64,7 @@ export async function signAndSendTransaction(
 
   const transactionData: InputGenerateTransactionPayloadData = {
     // a custom function to withdraw tokens from the aptos chain, published here on testnet:
-    // https://explorer.movementlabs.xyz/account/0x5e2d961f06cd27aa07554a39d55f5ce1e58dff35d803c3529b1cd5c4fa3ab584/modules/code/withdraw?network=testnet
+    // https://explorer.movementnetwork.xyz/account/0x5e2d961f06cd27aa07554a39d55f5ce1e58dff35d803c3529b1cd5c4fa3ab584/modules/code/withdraw?network=testnet
     function: `${contractAddress}::withdraw::deposit_for_burn`,
     functionArguments,
   };

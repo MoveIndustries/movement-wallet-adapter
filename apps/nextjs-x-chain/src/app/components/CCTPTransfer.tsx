@@ -388,7 +388,7 @@ export function CCTPTransfer({
             )}
             {transferResponse.destinationChainTxnId && (
               <a
-                href={`https://explorer.movementlabs.xyz/txn/${transferResponse.destinationChainTxnId}?network=${
+                href={`https://explorer.movementnetwork.xyz/txn/${transferResponse.destinationChainTxnId}?network=${
                   dappNetwork === Network.MAINNET ? "mainnet" : "testnet"
                 }`}
                 target="_blank"

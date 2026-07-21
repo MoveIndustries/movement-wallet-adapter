@@ -14,7 +14,7 @@ const isMovementLink = computed(() => isMovementNetwork(network.value));
 
 const explorerLink = computed(() => {
   if (isMovementLink.value) {
-    return `https://explorer.movementlabs.xyz/txn/${hash.value}${
+    return `https://explorer.movementnetwork.xyz/txn/${hash.value}${
       network.value?.name ? `?network=${network.value?.name}` : ""
     }`;
   }

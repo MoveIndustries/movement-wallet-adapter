@@ -74,7 +74,7 @@ export class MyWallet implements MovementWallet {
 
   // Local MyWallet class variables
   signer: Account;
-  aptos: Movement;
+  movement: Movement;
 
   get features(): MovementFeatures {
     return {
@@ -117,9 +117,9 @@ export class MyWallet implements MovementWallet {
     // Local MyWallet class variables
     this.signer = Account.generate();
     const movementConfig = new MovementConfig({
-      network: Network.DEVNET,
+      network: Network.TESTNET,
     });
-    this.aptos = new Movement(movementConfig);
+    this.movement = new Movement(movementConfig);
 
     this.accounts = [new MyWalletAccount(this.signer)];
   }
@@ -136,7 +136,7 @@ export class MyWallet implements MovementWallet {
     UserResponse<AccountInfo>
   > => {
     try {
-      await this.aptos.fundAccount({
+      await this.movement.fundAccount({
         accountAddress: this.signer.accountAddress,
         amount: 1_000_000_000_000,
       });
@@ -154,11 +154,11 @@ export class MyWallet implements MovementWallet {
   };
 
   network: MovementGetNetworkMethod = async (): Promise<NetworkInfo> => {
-    const network = await this.aptos.getLedgerInfo();
+    const network = await this.movement.getLedgerInfo();
     return {
-      name: Network.DEVNET,
+      name: Network.TESTNET,
       chainId: network.chain_id,
-      url: "https://fullnode.devnet.movementlabs.xyz/v1",
+      url: "https://testnet.movementnetwork.xyz/v1",
     };
   };
 
@@ -171,7 +171,7 @@ export class MyWallet implements MovementWallet {
     asFeePayer?: boolean,
   ): Promise<UserResponse<AccountAuthenticator>> => {
     if (asFeePayer) {
-      const senderAuthenticator = this.aptos.transaction.signAsFeePayer({
+      const senderAuthenticator = this.movement.transaction.signAsFeePayer({
         signer: this.signer,
         transaction,
       });
@@ -181,7 +181,7 @@ export class MyWallet implements MovementWallet {
         args: senderAuthenticator,
       });
     }
-    const senderAuthenticator = this.aptos.transaction.sign({
+    const senderAuthenticator = this.movement.transaction.sign({
       signer: this.signer,
       transaction,
     });

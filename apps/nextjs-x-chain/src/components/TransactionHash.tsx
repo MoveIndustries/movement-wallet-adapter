@@ -7,7 +7,7 @@ export interface TransactionHashProps {
 
 export function TransactionHash({ hash, network }: TransactionHashProps) {
   if (isMovementNetwork(network)) {
-    const explorerLink = `https://explorer.movementlabs.xyz/txn/${hash}${network?.name ? `?network=${network.name}` : ""}`;
+    const explorerLink = `https://explorer.movementnetwork.xyz/txn/${hash}${network?.name ? `?network=${network.name}` : ""}`;
     return (
       <>
         View on Explorer:{" "}
