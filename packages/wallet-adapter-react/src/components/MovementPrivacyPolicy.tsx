@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { SmallMovementLogo } from "../graphics/SmallMovementLogo";
 import { HeadlessComponentProps, createHeadlessComponent } from "./utils";
 
-export const MOVEMENT_PRIVACY_POLICY_URL = "https://movementnetwork.xyz/privacy";
+export const MOVEMENT_PRIVACY_POLICY_URL = "https://www.movementnetwork.xyz/privacy-policy";
 
 const Root = createHeadlessComponent("MovementPrivacyPolicy.Root", "div");
 

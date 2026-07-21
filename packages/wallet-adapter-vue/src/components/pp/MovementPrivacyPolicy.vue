@@ -3,7 +3,7 @@ import Disclaimer from "./Disclaimer.vue";
 import Link from "./Link.vue";
 import PoweredBy from "./PoweredBy.vue";
 
-const MOVEMENT_PRIVACY_POLICY_URL = "https://movementnetwork.xyz/privacy";
+const MOVEMENT_PRIVACY_POLICY_URL = "https://www.movementnetwork.xyz/privacy-policy";
 </script>
 
 <template>

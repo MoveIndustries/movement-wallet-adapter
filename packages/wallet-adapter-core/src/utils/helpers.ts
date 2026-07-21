@@ -12,6 +12,7 @@ import {
 } from "@moveindustries/wallet-standard";
 
 import { DappConfig } from "../WalletCore";
+import { ChainIdToMovementNetworkMap } from "../constants";
 import { WalletSignAndSubmitMessageError } from "../error";
 import { InputTransactionData } from "./types";
 
@@ -81,6 +82,16 @@ export const getMovementConfig = (
 
     return new MovementConfig({
       network: currentNetwork,
+      pluginSettings,
+    });
+  }
+
+  // Recognize Movement by the reported chain id even when the wallet reports a "custom" name / proxy RPC (e.g. Nightly).
+  const networkByChainId = ChainIdToMovementNetworkMap[String(networkInfo.chainId)];
+  if (networkByChainId) {
+    return new MovementConfig({
+      network: networkByChainId,
+      fullnode: networkInfo.url,
       pluginSettings,
     });
   }
