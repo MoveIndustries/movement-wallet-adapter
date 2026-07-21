@@ -25,7 +25,7 @@ import type {
   StandardEventsListeners,
   StandardEventsNames,
 } from '@wallet-standard/core'
-import { Hex, Movement, MovementConfig, Network } from '@moveindustries/ts-sdk'
+import { AccountAddress, Hex, Movement, MovementConfig, Network } from '@moveindustries/ts-sdk'
 import {
   clearCredential,
   loadCredential,
@@ -213,9 +213,23 @@ export class PasskeyWalletAdapter {
           if (input.feePayer !== undefined) {
             throw new Error('Passkey adapter does not yet support fee-payer signing')
           }
+          // A passkey can only sign for its own account; a foreign sender would
+          // be rejected on submit anyway (sender ≠ authkey). Reject it up front
+          // rather than silently signing something that can never land. Compare
+          // canonicalized so a differently-formatted-but-equal address passes.
+          const requestedSender = input.sender?.address
+          if (
+            requestedSender !== undefined &&
+            AccountAddress.from(requestedSender).toString() !== this.credential.address
+          ) {
+            throw new Error(
+              `Passkey adapter can only sign for its own account (${this.credential.address}), ` +
+                `not ${requestedSender}`,
+            )
+          }
           const client = this.getMovementClient()
           const transaction = await client.transaction.build.simple({
-            sender: (input.sender?.address ?? this.credential.address) as never,
+            sender: this.credential.address as never,
             data: input.payload as never,
             ...(input.gasUnitPrice !== undefined ||
             input.maxGasAmount !== undefined ||

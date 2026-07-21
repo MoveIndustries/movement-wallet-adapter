@@ -154,6 +154,15 @@ Changing it later invalidates existing passkeys (they only show in the
 picker under the domain they were originally created on). Choose carefully
 on day one.
 
+**The rpId determines the on-chain address.** The public key — and therefore
+the derived Movement address — is bound to the rpId the passkey was created
+under. Because the auto-detect default uses the *bare* page hostname, serving
+the same app on `app.example.com` vs `www.example.com` vs `example.com`
+produces **different addresses** for the same user, which looks like a fund
+lockout. In production, pin `rpId` explicitly to your eTLD+1 (e.g.
+`example.com`) rather than relying on auto-detect, so the address is stable
+across every host you serve from.
+
 Recommended deploys:
 
 | Environment | rpId | Notes |

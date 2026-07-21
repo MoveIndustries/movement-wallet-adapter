@@ -44,11 +44,16 @@ export function loadCredential(): PasskeyCredential | null {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const data = JSON.parse(raw)
-    return {
-      credentialId: data.credentialId,
-      publicKey: Hex.fromHexInput(data.publicKeyHex).toUint8Array(),
-      address: data.address,
+    const publicKey = Hex.fromHexInput(data.publicKeyHex).toUint8Array()
+    // Defense-in-depth: the address is derived from the public key, so never
+    // trust the stored one. Re-derive and discard the credential on mismatch
+    // (a same-origin tamper could otherwise show a spoofed connected address).
+    const address = deriveAddress(publicKey)
+    if (address !== data.address) {
+      clearCredential()
+      return null
     }
+    return { credentialId: data.credentialId, publicKey, address }
   } catch {
     return null
   }
@@ -90,7 +95,10 @@ export async function registerPasskey(opts: RegisterPasskeyOptions): Promise<Pas
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
       authenticatorSelection: {
         userVerification: 'required',
-        residentKey: 'preferred',
+        // Sign-in recovery calls navigator.credentials.get() with no
+        // allowCredentials, which requires a discoverable credential — so the
+        // key must be resident, not merely preferred.
+        residentKey: 'required',
         authenticatorAttachment: 'platform',
       },
       timeout: 60000,
@@ -245,12 +253,18 @@ export async function signInWithExistingPasskey(
   const candidates2 = recoverPublicKeyCandidates(sig2, msgHash2)
 
   // ---- Intersection ----
-  const found = findCommonCandidate(candidates1, candidates2)
-  if (!found) {
+  // Each signature yields up to two candidate keys; the real key is the one
+  // common to both sets. Require *exactly* one common candidate — if the two
+  // "wrong" candidates happened to coincide we'd otherwise derive a wrong
+  // address (negligibly likely, but cheap to guard for security code).
+  const common = findCommonCandidates(candidates1, candidates2)
+  if (common.length !== 1) {
     throw new Error(
-      'Could not recover a unique public key — both signatures should come from the same passkey',
+      `Could not recover a unique public key (${common.length} common candidates) — ` +
+        'both signatures should come from the same passkey',
     )
   }
+  const found = common[0]!
 
   const address = deriveAddress(found)
   const cred: PasskeyCredential = { credentialId, publicKey: found, address }
@@ -266,7 +280,7 @@ export async function signInWithExistingPasskey(
  * Per the WebAuthn spec: signed payload = `authenticatorData || SHA-256(clientDataJSON)`.
  * ECDSA signs SHA-256 of that payload. For recovery we need that final hash.
  */
-function computeWebAuthnSignedHash(
+export function computeWebAuthnSignedHash(
   authenticatorData: Uint8Array,
   clientDataJSON: Uint8Array,
 ): Uint8Array {
@@ -282,7 +296,7 @@ function computeWebAuthnSignedHash(
  * signed, recover the (up to two) candidate public keys in uncompressed
  * SEC1 form (65 bytes, 0x04-prefixed).
  */
-function recoverPublicKeyCandidates(
+export function recoverPublicKeyCandidates(
   compactSig64: Uint8Array,
   messageHash32: Uint8Array,
 ): Uint8Array[] {
@@ -327,13 +341,14 @@ function writeBigInt32BE(buf: Uint8Array, offset: number, value: bigint): void {
   }
 }
 
-function findCommonCandidate(a: Uint8Array[], b: Uint8Array[]): Uint8Array | null {
+export function findCommonCandidates(a: Uint8Array[], b: Uint8Array[]): Uint8Array[] {
+  const common: Uint8Array[] = []
   for (const ca of a) {
-    for (const cb of b) {
-      if (uint8Equal(ca, cb)) return ca
+    if (b.some((cb) => uint8Equal(ca, cb)) && !common.some((c) => uint8Equal(c, ca))) {
+      common.push(ca)
     }
   }
-  return null
+  return common
 }
 
 function uint8Equal(a: Uint8Array, b: Uint8Array): boolean {
@@ -346,7 +361,7 @@ function uint8Equal(a: Uint8Array, b: Uint8Array): boolean {
 
 // ---- COSE / Authenticator Data Parsing ----
 
-function extractPublicKeyFromAuthData(authData: Uint8Array): Uint8Array {
+export function extractPublicKeyFromAuthData(authData: Uint8Array): Uint8Array {
   const flagsByte = authData[32]
   if (flagsByte === undefined || !(flagsByte & 0x40)) {
     throw new Error('No attested credential data in authenticator data')
@@ -360,7 +375,7 @@ function extractPublicKeyFromAuthData(authData: Uint8Array): Uint8Array {
   return parseCoseP256Key(authData.slice(offset))
 }
 
-function parseCoseP256Key(cbor: Uint8Array): Uint8Array {
+export function parseCoseP256Key(cbor: Uint8Array): Uint8Array {
   let offset = 0
   let x: Uint8Array | null = null
   let y: Uint8Array | null = null
@@ -434,7 +449,7 @@ function parseCoseP256Key(cbor: Uint8Array): Uint8Array {
 
 const P256_N = BigInt('0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551')
 
-function derToCompactNormalized(der: Uint8Array): Uint8Array {
+export function derToCompactNormalized(der: Uint8Array): Uint8Array {
   let o = 2 // skip 0x30 + length
   if (der[o++] !== 0x02) throw new Error('Bad DER')
   const rLen = der[o++]
