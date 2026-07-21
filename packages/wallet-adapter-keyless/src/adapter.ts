@@ -1,5 +1,4 @@
 import type {
-  AccountInfo,
   MovementChangeNetworkFeature,
   MovementConnectFeature,
   MovementConnectOutput,
@@ -22,7 +21,7 @@ import type {
   NetworkInfo,
   UserResponse,
 } from '@moveindustries/wallet-standard'
-import { MOVEMENT_TESTNET_CHAIN, UserResponseStatus } from '@moveindustries/wallet-standard'
+import { AccountInfo, MOVEMENT_TESTNET_CHAIN, UserResponseStatus } from '@moveindustries/wallet-standard'
 import type {
   StandardEventsFeature,
   StandardEventsListeners,
@@ -33,7 +32,7 @@ import { Movement, MovementConfig, Network } from '@moveindustries/ts-sdk'
 import { MovementKeyless } from '@moveindustries/keyless'
 import type { KeylessAdapterConfig } from './types'
 import { GOOGLE_ICON_DATA_URI } from './icon'
-import { saveReturnTo, takeJwt } from './session'
+import { saveReturnTo } from './session'
 
 const TESTNET_INFO: NetworkInfo = {
   name: 'testnet' as unknown as NetworkInfo['name'],
@@ -179,7 +178,6 @@ export class KeylessWalletAdapter {
       disconnect: async () => {
         this.keyless.logout()
         this.account = null
-        takeJwt()
         this.notifyAccountChange()
       },
     } satisfies MovementDisconnectFeature['movement:disconnect'] as MovementDisconnectFeature['movement:disconnect'],
@@ -202,7 +200,7 @@ export class KeylessWalletAdapter {
         const lines: string[] = []
         if (input.address) lines.push(`address: ${this.account.accountAddress.toString()}`)
         if (input.application && typeof window !== 'undefined') lines.push(`application: ${window.location.origin}`)
-        if (input.chainId) lines.push(`chainId: 177`)
+        if (input.chainId) lines.push(`chainId: ${TESTNET_INFO.chainId}`)
         lines.push(`nonce: ${input.nonce}`)
         lines.push(`message: ${input.message}`)
         const fullMessage = `MOVEMENT\n${lines.join('\n')}`
@@ -220,7 +218,7 @@ export class KeylessWalletAdapter {
           ...(input.application && typeof window !== 'undefined'
             ? { application: window.location.origin }
             : {}),
-          ...(input.chainId ? { chainId: 177 } : {}),
+          ...(input.chainId ? { chainId: TESTNET_INFO.chainId } : {}),
         }
         return { status: UserResponseStatus.APPROVED, args }
       },
@@ -266,7 +264,6 @@ export class KeylessWalletAdapter {
 
         const acc = this.account as unknown as {
           signTransactionWithAuthenticator(tx: unknown): unknown
-          signWithFeePayerAuthenticator(tx: unknown): unknown
         }
 
         // v1.1: single input object with `payload`
@@ -293,8 +290,10 @@ export class KeylessWalletAdapter {
             ...(input.feePayer !== undefined ? { withFeePayer: true } : {}),
           } as never)
           const isFeePayer = input.feePayer !== undefined && input.feePayer.address.toString() === this.account.accountAddress.toString()
+          // Fee-payer signing lives on the client, not the account — KeylessAccount
+          // has no signWithFeePayerAuthenticator. The tx is already built withFeePayer.
           const authenticator = isFeePayer
-            ? acc.signWithFeePayerAuthenticator(transaction)
+            ? client.transaction.signAsFeePayer({ signer: this.account as never, transaction: transaction as never })
             : acc.signTransactionWithAuthenticator(transaction)
           const args11: MovementSignTransactionOutputV1_1 = {
             authenticator: authenticator as never,
@@ -306,7 +305,7 @@ export class KeylessWalletAdapter {
         // v1.0: positional (transaction, asFeePayer?)
         const [transaction, asFeePayer] = args as [unknown, boolean | undefined]
         const auth = asFeePayer
-          ? acc.signWithFeePayerAuthenticator(transaction)
+          ? this.getMovementClient().transaction.signAsFeePayer({ signer: this.account as never, transaction: transaction as never })
           : acc.signTransactionWithAuthenticator(transaction)
         return { status: UserResponseStatus.APPROVED, args: auth as never }
       }) as never,
@@ -344,11 +343,13 @@ export class KeylessWalletAdapter {
   }
 
   private toAccountInfo(acc: KeylessAccount): AccountInfo {
-    return {
-      address: acc.accountAddress.toString(),
-      publicKey: acc.publicKey.toString(),
-      ansName: undefined,
-    } as unknown as AccountInfo
+    // AccountInfo is a class expecting real AccountAddress / PublicKey objects —
+    // it stores publicKey as-is and later calls publicKey.verifySignature(...)
+    // and serialize(). Passing strings would crash both paths.
+    return new AccountInfo({
+      address: acc.accountAddress,
+      publicKey: acc.publicKey as never,
+    })
   }
 
   private notifyAccountChange(): void {

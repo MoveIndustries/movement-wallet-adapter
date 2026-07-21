@@ -178,9 +178,12 @@ Keyless sessions are **bounded by the ephemeral key's lifetime — about 1
 hour** from sign-in. After expiry, signing operations fail and the user must
 re-authenticate.
 
-The adapter stores the JWT in `sessionStorage` so a page reload within the
-EPK lifetime rehydrates the account without re-prompting Google. Tab close
-(or after expiry) drops the session and the user signs in fresh.
+The connected account lives in memory only. A page reload (or tab close)
+drops it and the user signs in again — the OAuth round-trip re-derives the
+same on-chain address, so no state is lost. There is no `sessionStorage`
+rehydration today: restoring across a reload needs the ephemeral key that
+`beginLogin` stores internally, and the keyless SDK exposes no getter to
+retrieve it for `completeLoginWithJwt`.
 
 There's no automatic silent re-authentication in the current version — it's
 deliberate, to keep the threat model simple. Hosts that want to surface
