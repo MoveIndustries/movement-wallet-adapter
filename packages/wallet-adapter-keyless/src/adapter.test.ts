@@ -108,6 +108,16 @@ describe('KeylessWalletAdapter — connect', () => {
     expect(mockKeyless.beginLogin).toHaveBeenCalledOnce()
   })
 
+  it('initiate path: preserves the hash fragment in the saved return path', async () => {
+    window.history.replaceState(null, '', '/claim?ref=x#sk=0xabc&n=1')
+
+    const adapter = new KeylessWalletAdapter(config)
+    void adapter.features['movement:connect']!.connect()
+    await new Promise(r => setTimeout(r, 0))
+
+    expect(sessionStorage.getItem('keyless_return_to')).toBe('/claim?ref=x#sk=0xabc&n=1')
+  })
+
   it('completion path: with id_token in hash, completes login and resolves with AccountInfo', async () => {
     mockKeyless.completeLogin.mockResolvedValue(keylessAccount())
     window.history.replaceState(null, '', '/callback#id_token=fakejwt')
