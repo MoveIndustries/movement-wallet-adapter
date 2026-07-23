@@ -5,7 +5,7 @@ import {
   AccountAuthenticator,
   AnyRawTransaction,
 } from "@moveindustries/ts-sdk";
-import { useWallet } from "@moveindustries/wallet-adapter-react";
+import { useConfirmedWallet } from "../transactionApproval/useConfirmedWallet";
 import { useState } from "react";
 import { TransactionHash } from "../TransactionHash";
 import { Button } from "../ui/button";
@@ -15,7 +15,7 @@ import { useToast } from "../ui/use-toast";
 export function Sponsor() {
   const { toast } = useToast();
   const { connected, account, network, signTransaction, submitTransaction } =
-    useWallet();
+    useConfirmedWallet();
   const [transactionToSubmit, setTransactionToSubmit] =
     useState<AnyRawTransaction | null>(null);
 

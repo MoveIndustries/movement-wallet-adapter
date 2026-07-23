@@ -1,0 +1,53 @@
+{
+  "name": "@moveindustries/wallet-adapter-passkey",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "Apache-2.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter.git"
+  },
+  "homepage": "https://github.com/MoveIndustries/movement-wallet-adapter",
+  "bugs": {
+    "url": "https://github.com/MoveIndustries/movement-wallet-adapter/issues"
+  },
+  "author": "Move Industries",
+  "files": [
+    "dist",
+    "src",
+    "!src/**.test.ts",
+    "!src/**/__tests__"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "echo 'no-op for now'"
+  },
+  "dependencies": {
+    "@noble/curves": "2.0.1",
+    "@noble/hashes": "2.2.0",
+    "@wallet-standard/core": "1.1.0"
+  },
+  "peerDependencies": {
+    "@moveindustries/ts-sdk": "^5.1.6",
+    "@moveindustries/wallet-standard": "^0.6.0"
+  },
+  "devDependencies": {
+    "@moveindustries/ts-sdk": "^5.1.6",
+    "@moveindustries/wallet-standard": "^0.6.0",
+    "@types/node": "^20.10.4",
+    "jsdom": "25.0.1",
+    "typescript": "^5.8.3",
+    "vitest": "4.1.4"
+  }
+}

@@ -1,7 +1,7 @@
 import { isSendableNetwork, movementClient } from "@/utils";
 import { parseTypeTag, AccountAddress, U64 } from "@moveindustries/ts-sdk";
 import { InputTransactionData } from "@moveindustries/wallet-adapter-core";
-import { useWallet } from "@moveindustries/wallet-adapter-react";
+import { useConfirmedWallet } from "../transactionApproval/useConfirmedWallet";
 import { Button } from "../ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "../ui/card";
 import { useToast } from "../ui/use-toast";
@@ -29,7 +29,7 @@ export function SingleSigner() {
     signMessage,
     signTransaction,
     signIn,
-  } = useWallet();
+  } = useConfirmedWallet();
   let sendable = isSendableNetwork(connected, network?.name);
 
   const onSignIn = async () => {
@@ -145,7 +145,10 @@ export function SingleSigner() {
         bytecode:
           "0xa11ceb0b0700000a06010002030206050806070e2508334010731f010200030001000103060c050300083c53454c463e5f30046d61696e0d6170746f735f6163636f756e74087472616e73666572ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000114636f6d70696c6174696f6e5f6d65746164617461090003322e3003322e31000001050b000b010b02110002",
         typeArguments: [],
-        functionArguments: [account.address, new U64(1)], // 1 is in Octas
+        // Script args must be BCS-typed instances, not raw strings — wrap the
+        // address as AccountAddress (the SDK doesn't coerce it for scripts the
+        // way it does for entry functions).
+        functionArguments: [AccountAddress.from(account.address), new U64(1)], // 1 is in Octas
       },
     };
     try {

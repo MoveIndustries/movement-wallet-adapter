@@ -8,7 +8,7 @@ import {
   parseTypeTag,
   U64,
 } from "@moveindustries/ts-sdk";
-import { useWallet } from "@moveindustries/wallet-adapter-react";
+import { useConfirmedWallet } from "../transactionApproval/useConfirmedWallet";
 import { useState } from "react";
 import { TransactionHash } from "../TransactionHash";
 import { Button } from "../ui/button";
@@ -29,7 +29,7 @@ const TRANSFER_SCRIPT =
 export function MultiAgent() {
   const { toast } = useToast();
   const { connected, account, network, signTransaction, submitTransaction } =
-    useWallet();
+    useConfirmedWallet();
 
   const [secondarySignerAccount, setSecondarySignerAccount] =
     useState<Ed25519Account>();

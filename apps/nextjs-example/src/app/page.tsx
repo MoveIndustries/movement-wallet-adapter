@@ -318,10 +318,6 @@ function WalletConnection({
             disabled={!isNetworkChangeSupported}
           >
             <div className="flex items-center space-x-2">
-              <RadioGroupItem value={Network.DEVNET} id="devnet-radio" />
-              <Label htmlFor="devnet-radio">Devnet</Label>
-            </div>
-            <div className="flex items-center space-x-2">
               <RadioGroupItem value={Network.TESTNET} id="testnet-radio" />
               <Label htmlFor="testnet-radio">Testnet</Label>
             </div>
