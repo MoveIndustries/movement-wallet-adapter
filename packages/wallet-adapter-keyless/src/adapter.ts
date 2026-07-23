@@ -167,7 +167,11 @@ export class KeylessWalletAdapter {
         }
 
         // Initiate path — save where the user was, kick off OAuth redirect.
-        saveReturnTo(window.location.pathname + window.location.search)
+        // Include the hash: fragment-only state (e.g. a claim page's
+        // `#sk=…`) is otherwise lost across the full-page OAuth round-trip.
+        saveReturnTo(
+          window.location.pathname + window.location.search + window.location.hash,
+        )
         this.keyless.beginLogin()
         // beginLogin redirects the page; this Promise will never resolve.
         return new Promise(() => {})
