@@ -83,16 +83,6 @@ export class KeylessWalletAdapter {
   }
 
   /**
-   * Expose the underlying KeylessAccount so callers that need its OIDC pepper
-   * (e.g. to derive a confidential-asset decryption key per Aptos Labs'
-   * confidential-payments-example pattern) can read it without us shipping
-   * that derivation here. Returns null when not connected.
-   */
-  getKeylessAccount(): KeylessAccount | null {
-    return this.account
-  }
-
-  /**
    * Update the adapter config at runtime. If the prover URL or client_id
    * changes while connected, auto-disconnects first because a different
    * prover means a different pepper means a different on-chain address.
@@ -167,14 +157,24 @@ export class KeylessWalletAdapter {
         }
 
         // Initiate path — save where the user was, kick off OAuth redirect.
-        // Include the hash: fragment-only state (e.g. a claim page's
-        // `#sk=…`) is otherwise lost across the full-page OAuth round-trip.
-        saveReturnTo(
-          window.location.pathname + window.location.search + window.location.hash,
-        )
+        // Persist pathname + search only: the fragment is script-readable
+        // sessionStorage and can carry secrets (e.g. a claim page's `#sk=…`),
+        // so we never round-trip it through storage.
+        saveReturnTo(window.location.pathname + window.location.search)
         this.keyless.beginLogin()
-        // beginLogin redirects the page; this Promise will never resolve.
-        return new Promise(() => {})
+        // beginLogin triggers a full-page redirect, so this normally never
+        // settles — the page unloads first. Guard against a redirect that
+        // silently no-ops (misconfigured clientId / redirectUri) so connect()
+        // can't hang forever.
+        return new Promise((_resolve, reject) => {
+          setTimeout(() => {
+            reject(
+              new Error(
+                'Keyless login did not redirect within 15s — check the clientId / redirectUri configuration',
+              ),
+            )
+          }, 15_000)
+        })
       },
     } satisfies MovementConnectFeature['movement:connect'] as MovementConnectFeature['movement:connect'],
     'movement:disconnect': {

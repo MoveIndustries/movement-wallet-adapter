@@ -108,14 +108,16 @@ describe('KeylessWalletAdapter — connect', () => {
     expect(mockKeyless.beginLogin).toHaveBeenCalledOnce()
   })
 
-  it('initiate path: preserves the hash fragment in the saved return path', async () => {
+  it('initiate path: strips the hash fragment from the saved return path', async () => {
+    // The fragment can carry secrets (e.g. a claim page's `#sk=…`); it must
+    // not be persisted to script-readable sessionStorage.
     window.history.replaceState(null, '', '/claim?ref=x#sk=0xabc&n=1')
 
     const adapter = new KeylessWalletAdapter(config)
     void adapter.features['movement:connect']!.connect()
     await new Promise(r => setTimeout(r, 0))
 
-    expect(sessionStorage.getItem('keyless_return_to')).toBe('/claim?ref=x#sk=0xabc&n=1')
+    expect(sessionStorage.getItem('keyless_return_to')).toBe('/claim?ref=x')
   })
 
   it('completion path: with id_token in hash, completes login and resolves with AccountInfo', async () => {
@@ -130,6 +132,19 @@ describe('KeylessWalletAdapter — connect', () => {
     expect((res as any).args.address.toString()).toBe(acctAddr.toString())
     expect(adapter.accounts.length).toBe(1)
     expect(mockKeyless.completeLogin).toHaveBeenCalledOnce()
+  })
+
+  it('initiate path: rejects if the redirect never happens (watchdog)', async () => {
+    vi.useFakeTimers()
+    try {
+      const adapter = new KeylessWalletAdapter(config)
+      const p = adapter.features['movement:connect']!.connect()
+      const assertion = expect(p).rejects.toThrow(/did not redirect/i)
+      await vi.advanceTimersByTimeAsync(15_000)
+      await assertion
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })
 

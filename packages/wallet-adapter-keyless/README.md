@@ -132,6 +132,12 @@ must match `redirectUri` exactly — Google does string equality, not prefix
 matching. Add an entry per environment (e.g. `http://localhost:3000/callback`,
 `https://yourdomain.com/callback`).
 
+The saved return path (`keyless_return_to`) is `pathname + search` only — the
+URL fragment is deliberately dropped. `sessionStorage` is script-readable and
+the fragment can carry secrets (e.g. a claim link's `#sk=…`), so it is never
+round-tripped through storage. If a flow needs fragment state to survive the
+redirect, carry it explicitly rather than relying on the return path.
+
 ## Wallet standard features implemented
 
 The `standard:events` row is the wallet-standard primitive — not namespaced.
@@ -189,6 +195,14 @@ There's no automatic silent re-authentication in the current version — it's
 deliberate, to keep the threat model simple. Hosts that want to surface
 "session expiring soon" warnings can read `account.ephemeralKeyPair.expiryDateSecs`
 and watch the clock client-side.
+
+## Accessing the raw account
+
+The adapter holds the `KeylessAccount` internally and never hands it out. It
+carries the ephemeral secret key, the pepper, and the raw Google `id_token`, so
+there's no accessor for it — signing goes through the wallet-standard features
+instead. If a future flow needs a specific derived value, it should get that
+value, not the account.
 
 ## Runtime reconfiguration
 
