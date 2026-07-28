@@ -3,6 +3,8 @@ import { KeylessWalletAdapter } from './adapter'
 import type { KeylessAdapterConfig } from './types'
 
 export { KeylessWalletAdapter }
+// connect() saves the pre-OAuth path; the callback route needs this to read it back.
+export { takeReturnTo } from './session'
 export type { KeylessAdapterConfig }
 
 let registered: KeylessWalletAdapter | null = null

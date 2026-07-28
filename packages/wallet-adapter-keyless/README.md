@@ -102,6 +102,7 @@ completes the login.
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useWallet } from '@moveindustries/wallet-adapter-react'
+import { takeReturnTo } from '@moveindustries/wallet-adapter-keyless'
 
 const KEYLESS_WALLET_NAME = 'Sign in with Google'
 
@@ -116,9 +117,7 @@ export default function CallbackPage() {
 
     Promise.resolve(connect(KEYLESS_WALLET_NAME))
       .then(() => {
-        const returnTo = sessionStorage.getItem('keyless_return_to') ?? '/'
-        sessionStorage.removeItem('keyless_return_to')
-        router.replace(returnTo)
+        router.replace(takeReturnTo() ?? '/')
       })
       .catch(() => router.replace('/?error=keyless_failed'))
   }, [connect, router])
@@ -149,9 +148,9 @@ The `standard:events` row is the wallet-standard primitive — not namespaced.
 | `movement:disconnect` | Clears in-memory account, fires account-change event. |
 | `movement:account` | Returns address + public key. Throws if not connected. |
 | `movement:network` | Returns Movement testnet info (chain ID 177, Movement RPC). |
-| `movement:signMessage` | Builds the AIP-62 `fullMessage` (with optional address/application/chainId) and signs with the keyless account. Returns `{ signature, fullMessage, prefix: 'MOVEMENT', ... }`. |
+| `movement:signMessage` | Builds the AIP-62 `fullMessage` (with optional address/application/chainId) and signs with the keyless account. Returns `{ signature, fullMessage, prefix: 'MOVEMENT', ... }`, plus a non-standard `type` naming the signing scheme — `MovementSignMessageOutput` has no such field, and without it a keyless signature is indistinguishable from an ed25519 one. |
 | `movement:signTransaction` (v1.1) | Dispatches both v1.0 (positional `(transaction, asFeePayer?)`) and v1.1 (`{ payload, sender?, feePayer?, gasUnitPrice?, maxGasAmount?, expirationSecondsFromNow? }`) calling conventions on the same method. v1.0 returns an `AccountAuthenticator`; v1.1 returns `{ authenticator, rawTransaction }`. Honors `asFeePayer`/`feePayer` to call `signWithFeePayerAuthenticator` instead of `signTransactionWithAuthenticator`. |
-| `movement:signIn` | Sign-In With Movement (AIP-116). Builds a structured SIWM message from `{ domain, nonce, statement?, uri?, version?, chainId?, issuedAt?, expirationTime?, notBefore?, requestId?, resources? }`, signs it with the keyless account, returns `{ account, input, signature, type: 'ed25519' }`. Lets dApps offer one-click "sign in with Google → authenticated session" with no on-chain transaction. |
+| `movement:signIn` | Sign-In With Movement (AIP-116). Builds a structured SIWM message from `{ domain, nonce, statement?, uri?, version?, chainId?, issuedAt?, expirationTime?, notBefore?, requestId?, resources? }`, signs it with the keyless account, returns `{ account, input, signature, type }` where `type` is read from the account (`'keyless'` here, not `'ed25519'` — a keyless signature does not verify under Ed25519 rules). `domain` must be the origin actually serving the page or the request is rejected unsigned. Lets dApps offer one-click "sign in with Google → authenticated session" with no on-chain transaction. |
 | `movement:signAndSubmitTransaction` | Builds the transaction via `@moveindustries/ts-sdk`, signs + submits, returns `{ hash }`. |
 | `movement:onAccountChange` | Listener registry — fires on connect/disconnect. |
 | `movement:onNetworkChange` | Registered but never fires (testnet only). |
@@ -177,6 +176,10 @@ When mainnet support arrives, this becomes a constructor option:
 ```ts
 registerKeylessWallet({ ..., network: 'mainnet' })
 ```
+
+`config.network` selects the endpoint set in `networks.ts`. Widening the union
+without adding an entry there is a compile error, so a `'mainnet'` request can
+never silently resolve to testnet.
 
 ## Session lifetime
 

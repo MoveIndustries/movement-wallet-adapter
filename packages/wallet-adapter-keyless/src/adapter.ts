@@ -15,6 +15,7 @@ import type {
   MovementSignInInput,
   MovementSignInOutput,
   MovementSignMessageFeature,
+  MovementSignMessageOutput,
   MovementSignTransactionFeatureV1_1,
   MovementSignTransactionInputV1_1,
   MovementSignTransactionOutputV1_1,
@@ -28,16 +29,45 @@ import type {
   StandardEventsNames,
 } from '@wallet-standard/core'
 import type { KeylessAccount } from '@moveindustries/ts-sdk'
-import { Movement, MovementConfig, Network } from '@moveindustries/ts-sdk'
+import {
+  Ed25519PublicKey,
+  FederatedKeylessPublicKey,
+  KeylessPublicKey,
+  Movement,
+  MovementConfig,
+  Network,
+} from '@moveindustries/ts-sdk'
 import { MovementKeyless } from '@moveindustries/keyless'
 import type { KeylessAdapterConfig } from './types'
 import { GOOGLE_ICON_DATA_URI } from './icon'
+import { NETWORKS } from './networks'
 import { saveReturnTo } from './session'
 
-const TESTNET_INFO: NetworkInfo = {
-  name: 'testnet' as unknown as NetworkInfo['name'],
-  chainId: 177,
-  url: 'https://testnet.movementnetwork.xyz/v1',
+/**
+ * Whether a caller-supplied SIWM `domain` is the origin actually serving the
+ * page. Compares `host`, so the port is part of the identity. Unverifiable
+ * (no `window`) counts as a mismatch — there is nothing to bind against.
+ */
+function domainMatchesOrigin(domain: string): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    const requested = domain.includes('://') ? new URL(domain).host : domain
+    return requested === window.location.host
+  } catch {
+    return false
+  }
+}
+
+/** SIWA signing-scheme tags, keyed off what the account's public key actually is. */
+function signatureTypeOf(account: KeylessAccount): string {
+  // Widened: the declared type is KeylessPublicKey, but this reads what the
+  // account actually carries rather than trusting the annotation.
+  const pk: unknown = account.publicKey
+  if (pk instanceof KeylessPublicKey || pk instanceof FederatedKeylessPublicKey) {
+    return 'keyless'
+  }
+  if (pk instanceof Ed25519PublicKey) return 'ed25519'
+  return 'single_key'
 }
 
 /**
@@ -97,6 +127,10 @@ export class KeylessWalletAdapter {
       this.notifyAccountChange()
     }
 
+    if (patch.network !== undefined && patch.network !== this.config.network) {
+      this._movement = null
+    }
+
     this.config = { ...this.config, ...patch }
     this.keyless = new MovementKeyless({
       proverUrl: this.config.proverUrl,
@@ -136,7 +170,7 @@ export class KeylessWalletAdapter {
     } satisfies MovementGetAccountFeature['movement:account'] as MovementGetAccountFeature['movement:account'],
     'movement:network': {
       version: '1.0.0',
-      network: async () => TESTNET_INFO,
+      network: async () => this.net().info,
     } satisfies MovementGetNetworkFeature['movement:network'] as MovementGetNetworkFeature['movement:network'],
     'movement:connect': {
       version: '1.0.0',
@@ -204,7 +238,7 @@ export class KeylessWalletAdapter {
         const lines: string[] = []
         if (input.address) lines.push(`address: ${this.account.accountAddress.toString()}`)
         if (input.application && typeof window !== 'undefined') lines.push(`application: ${window.location.origin}`)
-        if (input.chainId) lines.push(`chainId: ${TESTNET_INFO.chainId}`)
+        if (input.chainId) lines.push(`chainId: ${this.net().info.chainId}`)
         lines.push(`nonce: ${input.nonce}`)
         lines.push(`message: ${input.message}`)
         const fullMessage = `MOVEMENT\n${lines.join('\n')}`
@@ -212,7 +246,11 @@ export class KeylessWalletAdapter {
         const sigObj = (this.account as unknown as { sign: (m: Uint8Array) => unknown }).sign(
           new TextEncoder().encode(fullMessage),
         )
-        const args = {
+        // MovementSignMessageOutput has no `type` field (unlike SignInOutput),
+        // so this widens it: an untagged keyless signature is indistinguishable
+        // from an ed25519 one to a consumer that only reads the standard shape.
+        const args: MovementSignMessageOutput & { type: string } = {
+          type: signatureTypeOf(this.account),
           message: input.message,
           nonce: input.nonce,
           prefix: 'MOVEMENT' as const,
@@ -222,7 +260,7 @@ export class KeylessWalletAdapter {
           ...(input.application && typeof window !== 'undefined'
             ? { application: window.location.origin }
             : {}),
-          ...(input.chainId ? { chainId: TESTNET_INFO.chainId } : {}),
+          ...(input.chainId ? { chainId: this.net().info.chainId } : {}),
         }
         return { status: UserResponseStatus.APPROVED, args }
       },
@@ -231,6 +269,15 @@ export class KeylessWalletAdapter {
       version: '1.0.0',
       signIn: async (input: MovementSignInInput) => {
         if (!this.account) throw new Error('Keyless adapter is not connected')
+
+        // The dApp names the domain but the wallet is what attests to it, and
+        // this adapter runs in the page — so window.location is the only real
+        // source of truth. Signing an unverified domain would hand any script
+        // on the page a signature that replays against another origin.
+        if (!domainMatchesOrigin(input.domain)) {
+          return { status: UserResponseStatus.REJECTED }
+        }
+
         const address = this.account.accountAddress.toString()
         const uri = input.uri ?? (typeof window !== 'undefined' ? window.location.origin : '')
         const version = input.version ?? '1'
@@ -256,7 +303,10 @@ export class KeylessWalletAdapter {
             domain: string; address: string; uri: string; version: string; chainId: string
           },
           signature: signature as never,
-          type: 'ed25519',
+          // Read from the account, not assumed: a keyless signature is a
+          // zkProof over the ephemeral key, and a verifier told 'ed25519'
+          // picks the wrong verification path and rejects a valid sign-in.
+          type: signatureTypeOf(this.account),
         }
         return { status: UserResponseStatus.APPROVED, args }
       },
@@ -367,13 +417,19 @@ export class KeylessWalletAdapter {
     }
   }
 
+  /** Endpoints for the configured network. */
+  private net() {
+    return NETWORKS[this.config.network]
+  }
+
   private getMovementClient(): Movement {
     if (!this._movement) {
+      const net = this.net()
       this._movement = new Movement(
         new MovementConfig({
           network: Network.CUSTOM,
-          fullnode: 'https://testnet.movementnetwork.xyz/v1',
-          indexer: 'https://indexer.testnet.movementnetwork.xyz/v1/graphql',
+          fullnode: net.fullnode,
+          indexer: net.indexer,
         }),
       )
     }

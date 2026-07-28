@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { AccountAddress, Ed25519PublicKey, Serializer } from '@moveindustries/ts-sdk'
+import { AccountAddress, Ed25519PublicKey, KeylessPublicKey, Serializer } from '@moveindustries/ts-sdk'
 import { AccountInfo } from '@moveindustries/wallet-standard'
 import { KeylessWalletAdapter } from './adapter'
 
@@ -52,6 +52,11 @@ function keylessAccount(extra: Record<string, unknown> = {}) {
     publicKey: new Ed25519PublicKey(PUBKEY),
     ...extra,
   }
+}
+
+/** A real KeylessPublicKey, for asserting the reported signing scheme. */
+function keylessPublicKey() {
+  return new KeylessPublicKey('https://accounts.google.com', '0x' + '22'.repeat(32))
 }
 
 const resetMocks = () => {
@@ -231,6 +236,23 @@ describe('KeylessWalletAdapter — signMessage', () => {
     expect((res as any).args.fullMessage).toContain('abc123')
   })
 
+  it('tags the signing scheme so a keyless signature is not read as ed25519', async () => {
+    mockKeyless.completeLogin.mockResolvedValue(keylessAccount({
+      publicKey: keylessPublicKey(),
+      sign: vi.fn().mockReturnValue({ toUint8Array: () => new Uint8Array([1]) }),
+    }))
+
+    window.history.replaceState(null, '', '/callback#id_token=x')
+    const adapter = new KeylessWalletAdapter(config)
+    await adapter.features['movement:connect']!.connect()
+
+    const res = await adapter.features['movement:signMessage']!.signMessage({
+      message: 'hello',
+      nonce: 'abc123',
+    })
+    expect((res as any).args.type).toBe('keyless')
+  })
+
   it('rejects with not-connected when no account', async () => {
     const adapter = new KeylessWalletAdapter(config)
     await expect(adapter.features['movement:signMessage']!.signMessage({
@@ -329,7 +351,7 @@ describe('KeylessWalletAdapter — signIn', () => {
     await adapter.features['movement:connect']!.connect()
 
     const res = await adapter.features['movement:signIn']!.signIn({
-      domain: 'example.com',
+      domain: window.location.host,
       nonce: 'random123',
       statement: 'Sign in to Example.',
     })
@@ -342,6 +364,53 @@ describe('KeylessWalletAdapter — signIn', () => {
     expect(args.input.chainId).toBe('movement:testnet')
     expect(args.input.version).toBe('1')
     expect(args.type).toBe('ed25519')
+  })
+
+  it('accepts a domain given with a scheme', async () => {
+    mockKeyless.completeLogin.mockResolvedValue(keylessAccount({
+      sign: vi.fn().mockReturnValue({ toUint8Array: () => new Uint8Array([1]) }),
+    }))
+    window.history.replaceState(null, '', '/callback#id_token=x')
+    const adapter = new KeylessWalletAdapter(config)
+    await adapter.features['movement:connect']!.connect()
+
+    const res = await adapter.features['movement:signIn']!.signIn({
+      domain: `${window.location.protocol}//${window.location.host}`,
+      nonce: 'x',
+    })
+    expect((res as any).status).toBe('Approved')
+  })
+
+  it('rejects a domain that is not the serving origin, without signing', async () => {
+    const sign = vi.fn().mockReturnValue({ toUint8Array: () => new Uint8Array([1]) })
+    mockKeyless.completeLogin.mockResolvedValue(keylessAccount({ sign }))
+    window.history.replaceState(null, '', '/callback#id_token=x')
+    const adapter = new KeylessWalletAdapter(config)
+    await adapter.features['movement:connect']!.connect()
+
+    const res = await adapter.features['movement:signIn']!.signIn({
+      domain: 'app.some-other-protocol.xyz',
+      nonce: 'x',
+    })
+
+    expect((res as any).status).toBe('Rejected')
+    expect(sign).not.toHaveBeenCalled()
+  })
+
+  it('reports a keyless account as type "keyless", not ed25519', async () => {
+    mockKeyless.completeLogin.mockResolvedValue(keylessAccount({
+      publicKey: keylessPublicKey(),
+      sign: vi.fn().mockReturnValue({ toUint8Array: () => new Uint8Array([1]) }),
+    }))
+    window.history.replaceState(null, '', '/callback#id_token=x')
+    const adapter = new KeylessWalletAdapter(config)
+    await adapter.features['movement:connect']!.connect()
+
+    const res = await adapter.features['movement:signIn']!.signIn({
+      domain: window.location.host,
+      nonce: 'x',
+    })
+    expect((res as any).args.type).toBe('keyless')
   })
 
   it('rejects when not connected', async () => {
