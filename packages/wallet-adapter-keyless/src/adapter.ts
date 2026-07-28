@@ -58,6 +58,27 @@ function domainMatchesOrigin(domain: string): boolean {
   }
 }
 
+/**
+ * Whether the SIWM time fields are coherent. They appear in the signed message
+ * as wallet-attested facts, so a malformed or already-dead one is rejected
+ * rather than signed. A future `notBefore` is allowed: pre-signing a message
+ * that becomes valid later is legitimate, and the verifier enforces it.
+ */
+function timeFieldsValid(
+  input: { issuedAt?: string; notBefore?: string; expirationTime?: string },
+  now: number,
+): boolean {
+  const stamps = [input.issuedAt, input.notBefore, input.expirationTime]
+  if (stamps.some((v) => v !== undefined && Number.isNaN(Date.parse(v)))) return false
+
+  const expires = input.expirationTime !== undefined ? Date.parse(input.expirationTime) : undefined
+  if (expires !== undefined) {
+    if (expires <= now) return false
+    if (input.notBefore !== undefined && expires <= Date.parse(input.notBefore)) return false
+  }
+  return true
+}
+
 /** SIWA signing-scheme tags, keyed off what the account's public key actually is. */
 function signatureTypeOf(account: KeylessAccount): string {
   // Widened: the declared type is KeylessPublicKey, but this reads what the
@@ -275,6 +296,10 @@ export class KeylessWalletAdapter {
         // source of truth. Signing an unverified domain would hand any script
         // on the page a signature that replays against another origin.
         if (!domainMatchesOrigin(input.domain)) {
+          return { status: UserResponseStatus.REJECTED }
+        }
+
+        if (!timeFieldsValid(input, Date.now())) {
           return { status: UserResponseStatus.REJECTED }
         }
 

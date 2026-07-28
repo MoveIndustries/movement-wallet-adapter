@@ -397,6 +397,55 @@ describe('KeylessWalletAdapter — signIn', () => {
     expect(sign).not.toHaveBeenCalled()
   })
 
+  describe('time fields', () => {
+    const connected = async () => {
+      const sign = vi.fn().mockReturnValue({ toUint8Array: () => new Uint8Array([1]) })
+      mockKeyless.completeLogin.mockResolvedValue(keylessAccount({ sign }))
+      window.history.replaceState(null, '', '/callback#id_token=x')
+      const adapter = new KeylessWalletAdapter(config)
+      await adapter.features['movement:connect']!.connect()
+      return { adapter, sign }
+    }
+    const base = () => ({ domain: window.location.host, nonce: 'x' })
+
+    it('rejects an unparseable timestamp without signing', async () => {
+      const { adapter, sign } = await connected()
+      const res = await adapter.features['movement:signIn']!.signIn({
+        ...base(), expirationTime: 'not-a-date',
+      })
+      expect((res as any).status).toBe('Rejected')
+      expect(sign).not.toHaveBeenCalled()
+    })
+
+    it('rejects an already-expired message', async () => {
+      const { adapter } = await connected()
+      const res = await adapter.features['movement:signIn']!.signIn({
+        ...base(), expirationTime: new Date(Date.now() - 60_000).toISOString(),
+      })
+      expect((res as any).status).toBe('Rejected')
+    })
+
+    it('rejects an expirationTime at or before notBefore', async () => {
+      const { adapter } = await connected()
+      const res = await adapter.features['movement:signIn']!.signIn({
+        ...base(),
+        notBefore: new Date(Date.now() + 120_000).toISOString(),
+        expirationTime: new Date(Date.now() + 60_000).toISOString(),
+      })
+      expect((res as any).status).toBe('Rejected')
+    })
+
+    it('allows a future notBefore — pre-signing is legitimate', async () => {
+      const { adapter } = await connected()
+      const res = await adapter.features['movement:signIn']!.signIn({
+        ...base(),
+        notBefore: new Date(Date.now() + 60_000).toISOString(),
+        expirationTime: new Date(Date.now() + 120_000).toISOString(),
+      })
+      expect((res as any).status).toBe('Approved')
+    })
+  })
+
   it('reports a keyless account as type "keyless", not ed25519', async () => {
     mockKeyless.completeLogin.mockResolvedValue(keylessAccount({
       publicKey: keylessPublicKey(),
