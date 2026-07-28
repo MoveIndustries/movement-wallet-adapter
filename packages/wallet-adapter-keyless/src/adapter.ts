@@ -1,0 +1,499 @@
+import type {
+  MovementChangeNetworkFeature,
+  MovementConnectFeature,
+  MovementConnectOutput,
+  MovementDisconnectFeature,
+  MovementFeatures,
+  MovementGetAccountFeature,
+  MovementGetNetworkFeature,
+  MovementOnAccountChangeFeature,
+  MovementOnAccountChangeInput,
+  MovementOnNetworkChangeFeature,
+  MovementOnNetworkChangeInput,
+  MovementSignAndSubmitTransactionFeature,
+  MovementSignInFeature,
+  MovementSignInInput,
+  MovementSignInOutput,
+  MovementSignMessageFeature,
+  MovementSignMessageOutput,
+  MovementSignTransactionFeatureV1_1,
+  MovementSignTransactionInputV1_1,
+  MovementSignTransactionOutputV1_1,
+  NetworkInfo,
+  UserResponse,
+} from '@moveindustries/wallet-standard'
+import { AccountInfo, MOVEMENT_TESTNET_CHAIN, UserResponseStatus } from '@moveindustries/wallet-standard'
+import type {
+  StandardEventsFeature,
+  StandardEventsListeners,
+  StandardEventsNames,
+} from '@wallet-standard/core'
+import type { KeylessAccount } from '@moveindustries/ts-sdk'
+import {
+  Ed25519PublicKey,
+  FederatedKeylessPublicKey,
+  KeylessPublicKey,
+  Movement,
+  MovementConfig,
+  Network,
+} from '@moveindustries/ts-sdk'
+import { MovementKeyless } from '@moveindustries/keyless'
+import type { KeylessAdapterConfig } from './types'
+import { GOOGLE_ICON_DATA_URI } from './icon'
+import { NETWORKS } from './networks'
+import { saveReturnTo } from './session'
+
+/**
+ * Whether a caller-supplied SIWM `domain` is the origin actually serving the
+ * page. Compares `host`, so the port is part of the identity. Unverifiable
+ * (no `window`) counts as a mismatch — there is nothing to bind against.
+ */
+function domainMatchesOrigin(domain: string): boolean {
+  if (typeof window === 'undefined') return false
+  try {
+    const requested = domain.includes('://') ? new URL(domain).host : domain
+    return requested === window.location.host
+  } catch {
+    return false
+  }
+}
+
+/**
+ * Whether the SIWM time fields are coherent. They appear in the signed message
+ * as wallet-attested facts, so a malformed or already-dead one is rejected
+ * rather than signed. A future `notBefore` is allowed: pre-signing a message
+ * that becomes valid later is legitimate, and the verifier enforces it.
+ */
+function timeFieldsValid(
+  input: { issuedAt?: string; notBefore?: string; expirationTime?: string },
+  now: number,
+): boolean {
+  const stamps = [input.issuedAt, input.notBefore, input.expirationTime]
+  if (stamps.some((v) => v !== undefined && Number.isNaN(Date.parse(v)))) return false
+
+  const expires = input.expirationTime !== undefined ? Date.parse(input.expirationTime) : undefined
+  if (expires !== undefined) {
+    if (expires <= now) return false
+    if (input.notBefore !== undefined && expires <= Date.parse(input.notBefore)) return false
+  }
+  return true
+}
+
+/** SIWA signing-scheme tags, keyed off what the account's public key actually is. */
+function signatureTypeOf(account: KeylessAccount): string {
+  // Widened: the declared type is KeylessPublicKey, but this reads what the
+  // account actually carries rather than trusting the annotation.
+  const pk: unknown = account.publicKey
+  if (pk instanceof KeylessPublicKey || pk instanceof FederatedKeylessPublicKey) {
+    return 'keyless'
+  }
+  if (pk instanceof Ed25519PublicKey) return 'ed25519'
+  return 'single_key'
+}
+
+/**
+ * Movement keyless wallet adapter — implements the Movement wallet standard
+ * so keyless (Google sign-in) accounts plug into @moveindustries/wallet-adapter-react
+ * the same way Petra / Motion / Nightly do.
+ *
+ * Wraps @moveindustries/keyless internally; users of this package never
+ * import that SDK directly.
+ */
+export class KeylessWalletAdapter {
+  readonly id = 'movement-keyless'
+  readonly name = 'Sign in with Google'
+  readonly icon = GOOGLE_ICON_DATA_URI as `data:image/svg+xml;${string}`
+  readonly version = '1.0.0' as const
+  readonly chains = [MOVEMENT_TESTNET_CHAIN] as const
+  readonly url = 'https://github.com/moveindustries/wallet-adapter-keyless'
+
+  private config: KeylessAdapterConfig
+  private account: KeylessAccount | null = null
+  private keyless: MovementKeyless
+  private accountListeners: MovementOnAccountChangeInput[] = []
+  private networkListeners: MovementOnNetworkChangeInput[] = []
+  // Wallet-standard `standard:events` listeners. Wallet-adapter libraries
+  // (wallet-adapter-react, both Movement and Aptos flavors) subscribe to
+  // these to refresh their cached view of `wallet.accounts` after connect.
+  // Without firing `change` here, the library keeps the empty pre-connect
+  // accounts array and useWallet() never flips to `connected`.
+  private standardChangeListeners: StandardEventsListeners['change'][] = []
+  private _movement: Movement | null = null
+
+  constructor(config: KeylessAdapterConfig) {
+    this.config = config
+    this.keyless = new MovementKeyless({
+      proverUrl: config.proverUrl,
+      clientId: config.clientId,
+      redirectUri: config.redirectUri,
+    })
+  }
+
+  get accounts(): readonly AccountInfo[] {
+    return this.account ? [this.toAccountInfo(this.account)] : []
+  }
+
+  /**
+   * Update the adapter config at runtime. If the prover URL or client_id
+   * changes while connected, auto-disconnects first because a different
+   * prover means a different pepper means a different on-chain address.
+   */
+  setConfig(patch: Partial<KeylessAdapterConfig>): void {
+    const proverChanged = patch.proverUrl !== undefined && patch.proverUrl !== this.config.proverUrl
+    const clientChanged = patch.clientId !== undefined && patch.clientId !== this.config.clientId
+
+    if ((proverChanged || clientChanged) && this.account) {
+      this.keyless.logout()
+      this.account = null
+      this.notifyAccountChange()
+    }
+
+    if (patch.network !== undefined && patch.network !== this.config.network) {
+      this._movement = null
+    }
+
+    this.config = { ...this.config, ...patch }
+    this.keyless = new MovementKeyless({
+      proverUrl: this.config.proverUrl,
+      clientId: this.config.clientId,
+      redirectUri: this.config.redirectUri,
+    })
+  }
+
+  readonly features: Partial<MovementFeatures> & StandardEventsFeature = {
+    // Cross-chain wallet-standard event emitter. Required for wallet-adapter
+    // libraries to notice connect/disconnect — they cache `wallet.accounts`
+    // and only re-read it when this fires `change`.
+    'standard:events': {
+      version: '1.0.0',
+      on: <E extends StandardEventsNames>(
+        event: E,
+        listener: StandardEventsListeners[E],
+      ): (() => void) => {
+        if (event === 'change') {
+          this.standardChangeListeners.push(listener as StandardEventsListeners['change'])
+          return () => {
+            this.standardChangeListeners = this.standardChangeListeners.filter(
+              (l) => l !== (listener as StandardEventsListeners['change']),
+            )
+          }
+        }
+        // Unknown event — return a no-op unsubscribe.
+        return () => {}
+      },
+    },
+    'movement:account': {
+      version: '1.0.0',
+      account: async () => {
+        if (!this.account) throw new Error('Keyless adapter is not connected')
+        return this.toAccountInfo(this.account)
+      },
+    } satisfies MovementGetAccountFeature['movement:account'] as MovementGetAccountFeature['movement:account'],
+    'movement:network': {
+      version: '1.0.0',
+      network: async () => this.net().info,
+    } satisfies MovementGetNetworkFeature['movement:network'] as MovementGetNetworkFeature['movement:network'],
+    'movement:connect': {
+      version: '1.0.0',
+      connect: async (): Promise<UserResponse<MovementConnectOutput>> => {
+        const hash = typeof window !== 'undefined' ? window.location.hash : ''
+        const hasIdToken = hash.includes('id_token=')
+
+        if (hasIdToken) {
+          // Completion path — runs on /callback after Google redirect.
+          // The prove request flows through `fetch` so it's visible in the
+          // app's debug panel Network tab; the post-connect change event
+          // shows up in the Wallet tab.
+          const account = await this.keyless.completeLogin()
+          this.account = account
+          this.notifyAccountChange()
+          const info = this.toAccountInfo(account)
+          return { status: UserResponseStatus.APPROVED, args: info }
+        }
+
+        // Initiate path — save where the user was, kick off OAuth redirect.
+        // Persist pathname + search only: the fragment is script-readable
+        // sessionStorage and can carry secrets (e.g. a claim page's `#sk=…`),
+        // so we never round-trip it through storage.
+        saveReturnTo(window.location.pathname + window.location.search)
+        this.keyless.beginLogin()
+        // beginLogin triggers a full-page redirect, so this normally never
+        // settles — the page unloads first. Guard against a redirect that
+        // silently no-ops (misconfigured clientId / redirectUri) so connect()
+        // can't hang forever.
+        return new Promise((_resolve, reject) => {
+          setTimeout(() => {
+            reject(
+              new Error(
+                'Keyless login did not redirect within 15s — check the clientId / redirectUri configuration',
+              ),
+            )
+          }, 15_000)
+        })
+      },
+    } satisfies MovementConnectFeature['movement:connect'] as MovementConnectFeature['movement:connect'],
+    'movement:disconnect': {
+      version: '1.0.0',
+      disconnect: async () => {
+        this.keyless.logout()
+        this.account = null
+        this.notifyAccountChange()
+      },
+    } satisfies MovementDisconnectFeature['movement:disconnect'] as MovementDisconnectFeature['movement:disconnect'],
+    'movement:onAccountChange': {
+      version: '1.0.0',
+      onAccountChange: async (cb) => {
+        this.accountListeners.push(cb)
+      },
+    } satisfies MovementOnAccountChangeFeature['movement:onAccountChange'] as MovementOnAccountChangeFeature['movement:onAccountChange'],
+    'movement:onNetworkChange': {
+      version: '1.0.0',
+      onNetworkChange: async (cb) => {
+        this.networkListeners.push(cb)
+      },
+    } satisfies MovementOnNetworkChangeFeature['movement:onNetworkChange'] as MovementOnNetworkChangeFeature['movement:onNetworkChange'],
+    'movement:signMessage': {
+      version: '1.0.0',
+      signMessage: async (input) => {
+        if (!this.account) throw new Error('Keyless adapter is not connected')
+        const lines: string[] = []
+        if (input.address) lines.push(`address: ${this.account.accountAddress.toString()}`)
+        if (input.application && typeof window !== 'undefined') lines.push(`application: ${window.location.origin}`)
+        if (input.chainId) lines.push(`chainId: ${this.net().info.chainId}`)
+        lines.push(`nonce: ${input.nonce}`)
+        lines.push(`message: ${input.message}`)
+        const fullMessage = `MOVEMENT\n${lines.join('\n')}`
+
+        const sigObj = (this.account as unknown as { sign: (m: Uint8Array) => unknown }).sign(
+          new TextEncoder().encode(fullMessage),
+        )
+        // MovementSignMessageOutput has no `type` field (unlike SignInOutput),
+        // so this widens it: an untagged keyless signature is indistinguishable
+        // from an ed25519 one to a consumer that only reads the standard shape.
+        const args: MovementSignMessageOutput & { type: string } = {
+          type: signatureTypeOf(this.account),
+          message: input.message,
+          nonce: input.nonce,
+          prefix: 'MOVEMENT' as const,
+          fullMessage,
+          signature: sigObj as never,
+          ...(input.address ? { address: this.account.accountAddress.toString() } : {}),
+          ...(input.application && typeof window !== 'undefined'
+            ? { application: window.location.origin }
+            : {}),
+          ...(input.chainId ? { chainId: this.net().info.chainId } : {}),
+        }
+        return { status: UserResponseStatus.APPROVED, args }
+      },
+    } satisfies MovementSignMessageFeature['movement:signMessage'] as MovementSignMessageFeature['movement:signMessage'],
+    'movement:signIn': {
+      version: '1.0.0',
+      signIn: async (input: MovementSignInInput) => {
+        if (!this.account) throw new Error('Keyless adapter is not connected')
+
+        // The dApp names the domain but the wallet is what attests to it, and
+        // this adapter runs in the page — so window.location is the only real
+        // source of truth. Signing an unverified domain would hand any script
+        // on the page a signature that replays against another origin.
+        if (!domainMatchesOrigin(input.domain)) {
+          return { status: UserResponseStatus.REJECTED }
+        }
+
+        if (!timeFieldsValid(input, Date.now())) {
+          return { status: UserResponseStatus.REJECTED }
+        }
+
+        const address = this.account.accountAddress.toString()
+        const uri = input.uri ?? (typeof window !== 'undefined' ? window.location.origin : '')
+        const version = input.version ?? '1'
+        const chainId = input.chainId ?? 'movement:testnet'
+        const issuedAt = input.issuedAt ?? new Date().toISOString()
+
+        const fullInput = {
+          ...input,
+          address: input.address ?? address,
+          uri,
+          version,
+          chainId,
+          issuedAt,
+        }
+
+        const message = buildSignInMessage(fullInput, address, 'Movement')
+        const acc = this.account as unknown as { sign(bytes: Uint8Array): unknown }
+        const signature = acc.sign(new TextEncoder().encode(message))
+
+        const args: MovementSignInOutput = {
+          account: this.toAccountInfo(this.account),
+          input: fullInput as MovementSignInInput & {
+            domain: string; address: string; uri: string; version: string; chainId: string
+          },
+          signature: signature as never,
+          // Read from the account, not assumed: a keyless signature is a
+          // zkProof over the ephemeral key, and a verifier told 'ed25519'
+          // picks the wrong verification path and rejects a valid sign-in.
+          type: signatureTypeOf(this.account),
+        }
+        return { status: UserResponseStatus.APPROVED, args }
+      },
+    } satisfies MovementSignInFeature['movement:signIn'] as MovementSignInFeature['movement:signIn'],
+    'movement:signTransaction': {
+      version: '1.1.0',
+      signTransaction: (async (...args: unknown[]) => {
+        if (!this.account) throw new Error('Keyless adapter is not connected')
+
+        const acc = this.account as unknown as {
+          signTransactionWithAuthenticator(tx: unknown): unknown
+        }
+
+        // v1.1: single input object with `payload`
+        const first = args[0] as Record<string, unknown> | undefined
+        if (first && typeof first === 'object' && 'payload' in first) {
+          const input = first as unknown as MovementSignTransactionInputV1_1
+          const client = this.getMovementClient()
+          const transaction = await client.transaction.build.simple({
+            sender: (input.sender?.address ?? this.account.accountAddress) as never,
+            data: input.payload as never,
+            ...(input.gasUnitPrice !== undefined ||
+                input.maxGasAmount !== undefined ||
+                input.expirationSecondsFromNow !== undefined
+              ? {
+                  options: {
+                    ...(input.gasUnitPrice !== undefined ? { gasUnitPrice: input.gasUnitPrice } : {}),
+                    ...(input.maxGasAmount !== undefined ? { maxGasAmount: input.maxGasAmount } : {}),
+                    ...(input.expirationSecondsFromNow !== undefined
+                      ? { expireTimestamp: Math.floor(Date.now() / 1000) + input.expirationSecondsFromNow }
+                      : {}),
+                  },
+                }
+              : {}),
+            ...(input.feePayer !== undefined ? { withFeePayer: true } : {}),
+          } as never)
+          const isFeePayer = input.feePayer !== undefined && input.feePayer.address.toString() === this.account.accountAddress.toString()
+          // Fee-payer signing lives on the client, not the account — KeylessAccount
+          // has no signWithFeePayerAuthenticator. The tx is already built withFeePayer.
+          const authenticator = isFeePayer
+            ? client.transaction.signAsFeePayer({ signer: this.account as never, transaction: transaction as never })
+            : acc.signTransactionWithAuthenticator(transaction)
+          const args11: MovementSignTransactionOutputV1_1 = {
+            authenticator: authenticator as never,
+            rawTransaction: transaction as never,
+          }
+          return { status: UserResponseStatus.APPROVED, args: args11 }
+        }
+
+        // v1.0: positional (transaction, asFeePayer?)
+        const [transaction, asFeePayer] = args as [unknown, boolean | undefined]
+        const auth = asFeePayer
+          ? this.getMovementClient().transaction.signAsFeePayer({ signer: this.account as never, transaction: transaction as never })
+          : acc.signTransactionWithAuthenticator(transaction)
+        return { status: UserResponseStatus.APPROVED, args: auth as never }
+      }) as never,
+    } satisfies MovementSignTransactionFeatureV1_1['movement:signTransaction'] as MovementSignTransactionFeatureV1_1['movement:signTransaction'],
+    'movement:signAndSubmitTransaction': {
+      version: '1.1.0',
+      signAndSubmitTransaction: async (input) => {
+        if (!this.account) throw new Error('Keyless adapter is not connected')
+        const client = this.getMovementClient()
+        const transaction = await client.transaction.build.simple({
+          sender: this.account.accountAddress as never,
+          data: input.payload,
+          ...(input.gasUnitPrice || input.maxGasAmount
+            ? {
+                options: {
+                  ...(input.gasUnitPrice ? { gasUnitPrice: input.gasUnitPrice } : {}),
+                  ...(input.maxGasAmount ? { maxGasAmount: input.maxGasAmount } : {}),
+                },
+              }
+            : {}),
+        })
+        const submitted = await client.signAndSubmitTransaction({
+          signer: this.account as never,
+          transaction,
+        })
+        return { status: UserResponseStatus.APPROVED, args: { hash: submitted.hash } }
+      },
+    } satisfies MovementSignAndSubmitTransactionFeature['movement:signAndSubmitTransaction'] as MovementSignAndSubmitTransactionFeature['movement:signAndSubmitTransaction'],
+    'movement:changeNetwork': {
+      version: '1.0.0',
+      changeNetwork: async () => {
+        return { status: UserResponseStatus.REJECTED }
+      },
+    } satisfies MovementChangeNetworkFeature['movement:changeNetwork'] as MovementChangeNetworkFeature['movement:changeNetwork'],
+  }
+
+  private toAccountInfo(acc: KeylessAccount): AccountInfo {
+    // AccountInfo is a class expecting real AccountAddress / PublicKey objects —
+    // it stores publicKey as-is and later calls publicKey.verifySignature(...)
+    // and serialize(). Passing strings would crash both paths.
+    return new AccountInfo({
+      address: acc.accountAddress,
+      publicKey: acc.publicKey as never,
+    })
+  }
+
+  private notifyAccountChange(): void {
+    const info = this.account ? this.toAccountInfo(this.account) : undefined
+    // Chain-specific listeners (registered via movement:onAccountChange).
+    for (const cb of this.accountListeners) cb(info as never)
+    // Wallet-standard `change` event — what wallet-adapter-react actually
+    // listens to. Pass the new `accounts` array so the library re-reads it.
+    for (const cb of this.standardChangeListeners) {
+      cb({ accounts: this.accounts as never })
+    }
+  }
+
+  /** Endpoints for the configured network. */
+  private net() {
+    return NETWORKS[this.config.network]
+  }
+
+  private getMovementClient(): Movement {
+    if (!this._movement) {
+      const net = this.net()
+      this._movement = new Movement(
+        new MovementConfig({
+          network: Network.CUSTOM,
+          fullnode: net.fullnode,
+          indexer: net.indexer,
+        }),
+      )
+    }
+    return this._movement
+  }
+}
+
+function buildSignInMessage(
+  input: { domain: string; statement?: string; uri: string; version: string; chainId: string; nonce: string; issuedAt: string; expirationTime?: string; notBefore?: string; requestId?: string; resources?: string[] },
+  address: string,
+  chainName: 'Movement' | 'Aptos',
+): string {
+  const origin = input.domain.includes('://') ? input.domain : `https://${input.domain}`
+  const lines: string[] = [
+    `${origin} wants you to sign in with your ${chainName} account:`,
+    address,
+  ]
+  if (input.statement) {
+    lines.push('', input.statement)
+  }
+  const fields: Array<[string, string | undefined]> = [
+    ['URI', input.uri],
+    ['Version', input.version],
+    ['Chain ID', input.chainId],
+    ['Nonce', input.nonce],
+    ['Issued At', input.issuedAt],
+    ['Expiration Time', input.expirationTime],
+    ['Not Before', input.notBefore],
+    ['Request ID', input.requestId],
+  ]
+  if (fields.some(([_, v]) => v !== undefined)) {
+    lines.push('')
+    for (const [label, value] of fields) {
+      if (value !== undefined) lines.push(`${label}: ${value}`)
+    }
+  }
+  if (input.resources && input.resources.length > 0) {
+    lines.push('Resources:')
+    for (const r of input.resources) lines.push(`- ${r}`)
+  }
+  return lines.join('\n')
+}
