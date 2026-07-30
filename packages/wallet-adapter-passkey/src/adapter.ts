@@ -39,7 +39,7 @@ import type { PasskeyAdapterConfig } from './types'
 
 const TESTNET_INFO: NetworkInfo = {
   name: 'testnet' as unknown as NetworkInfo['name'],
-  chainId: 177,
+  chainId: 250,
   url: 'https://testnet.movementnetwork.xyz/v1',
 }
 

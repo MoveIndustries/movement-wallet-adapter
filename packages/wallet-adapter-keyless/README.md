@@ -142,12 +142,12 @@ redirect, carry it explicitly rather than relying on the return path.
 The `standard:events` row is the wallet-standard primitive — not namespaced.
 
 | Namespace | Implementation |
-|---|---|
+| --- | --- |
 | `standard:events` | Change-event emitter from `@wallet-standard/core`. Fires `change` with the new `accounts` array on connect / disconnect. Required — wallet-adapter libraries cache `wallet.accounts` and only re-read it when this fires; without it the consumer's `useWallet()` never sees connect succeed. |
 | `movement:connect` | Detects `id_token` in URL hash → completes login. Otherwise initiates OAuth redirect. |
 | `movement:disconnect` | Clears in-memory account, fires account-change event. |
 | `movement:account` | Returns address + public key. Throws if not connected. |
-| `movement:network` | Returns Movement testnet info (chain ID 177, Movement RPC). |
+| `movement:network` | Returns Movement testnet info (chain ID 250, Movement RPC). |
 | `movement:signMessage` | Builds the AIP-62 `fullMessage` (with optional address/application/chainId) and signs with the keyless account. Returns `{ signature, fullMessage, prefix: 'MOVEMENT', ... }`, plus a non-standard `type` naming the signing scheme — `MovementSignMessageOutput` has no such field, and without it a keyless signature is indistinguishable from an ed25519 one. |
 | `movement:signTransaction` (v1.1) | Dispatches both v1.0 (positional `(transaction, asFeePayer?)`) and v1.1 (`{ payload, sender?, feePayer?, gasUnitPrice?, maxGasAmount?, expirationSecondsFromNow? }`) calling conventions on the same method. v1.0 returns an `AccountAuthenticator`; v1.1 returns `{ authenticator, rawTransaction }`. Honors `asFeePayer`/`feePayer` to call `signWithFeePayerAuthenticator` instead of `signTransactionWithAuthenticator`. |
 | `movement:signIn` | Sign-In With Movement (AIP-116). Builds a structured SIWM message from `{ domain, nonce, statement?, uri?, version?, chainId?, issuedAt?, expirationTime?, notBefore?, requestId?, resources? }`, signs it with the keyless account, returns `{ account, input, signature, type }` where `type` is read from the account (`'keyless'` here, not `'ed25519'` — a keyless signature does not verify under Ed25519 rules). `domain` must be the origin actually serving the page or the request is rejected unsigned; the same goes for an unparseable timestamp, an already-past `expirationTime`, or an `expirationTime` at or before `notBefore` (a future `notBefore` is allowed — pre-signing is legitimate). Lets dApps offer one-click "sign in with Google → authenticated session" with no on-chain transaction. |
@@ -162,12 +162,12 @@ The adapter is discovered via `getMovementWallets()` from
 `@moveindustries/wallet-standard`.
 
 **The `chains` array is `['movement:testnet']` only** — the keyless
-verification key is deployed on Movement testnet (chain ID 177).
+verification key is deployed on Movement testnet (chain ID 250).
 
 ## Network
 
 **Testnet only.** The keyless verification key is currently deployed on
-Movement testnet (Porto, chain ID 177); mainnet support requires the chain's
+Movement testnet (Bardock, chain ID 250); mainnet support requires the chain's
 governance to publish a matching VK. The adapter advertises only
 `movement:testnet` in its `chains` array and rejects `changeNetwork` calls.
 

@@ -88,7 +88,7 @@ describe('KeylessWalletAdapter — metadata', () => {
     const adapter = new KeylessWalletAdapter(config)
     const result = await adapter.features['movement:network']!.network()
     expect(result.name).toBe('testnet')
-    expect(result.chainId).toBe(177)
+    expect(result.chainId).toBe(250)
     expect(result.url).toBe('https://testnet.movementnetwork.xyz/v1')
   })
 
