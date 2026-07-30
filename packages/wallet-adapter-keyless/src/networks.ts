@@ -16,7 +16,7 @@ export const NETWORKS = {
   testnet: {
     info: {
       name: 'testnet' as unknown as NetworkInfo['name'],
-      chainId: 177,
+      chainId: 250,
       url: 'https://testnet.movementnetwork.xyz/v1',
     },
     fullnode: 'https://testnet.movementnetwork.xyz/v1',

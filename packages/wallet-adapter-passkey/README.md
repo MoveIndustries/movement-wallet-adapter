@@ -181,7 +181,7 @@ The `standard:events` row is the wallet-standard primitive — not namespaced.
 | `movement:connect` | If a credential is cached in `localStorage`, restores it immediately. Otherwise calls `navigator.credentials.create()` to register a new platform-authenticator passkey. |
 | `movement:disconnect` | Clears the cached credential, fires the change event. The OS-level passkey is left intact — the user can reconnect later (or remove it via OS settings). |
 | `movement:account` | Returns address + 65-byte uncompressed P-256 public key. Throws if not connected. |
-| `movement:network` | Returns Movement testnet info (chain ID 177, Movement RPC). |
+| `movement:network` | Returns Movement testnet info (chain ID 250, Movement RPC). |
 | `movement:signTransaction` (v1.1) | Dispatches both v1.0 (positional `(transaction, asFeePayer?)`) and v1.1 (`{ payload, sender?, gasUnitPrice?, maxGasAmount?, expirationSecondsFromNow? }`) calling conventions. v1.0 returns an `AccountAuthenticatorSingleKey`; v1.1 returns `{ authenticator, rawTransaction }`. Triggers a biometric prompt to sign each transaction. |
 | `movement:signAndSubmitTransaction` | Builds the transaction via `@moveindustries/ts-sdk`, signs with the passkey, and submits via `client.transaction.submit.simple`. Returns `{ hash }`. |
 | `movement:onAccountChange` | Listener registry — fires on connect/disconnect. |
@@ -195,7 +195,7 @@ The adapter is discovered via `getMovementWallets()` from
 `@moveindustries/wallet-standard`.
 
 The `chains` array is `['movement:testnet']` only — AIP-66 verification is
-rolled out on Movement testnet (chain ID 177).
+rolled out on Movement testnet (chain ID 250).
 
 ## Network
 
