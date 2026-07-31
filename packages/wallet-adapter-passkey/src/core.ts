@@ -119,6 +119,46 @@ export async function registerPasskey(opts: RegisterPasskeyOptions): Promise<Pas
   return cred
 }
 
+// ---- Reauthentication (single-prompt reconnect) ----
+
+export interface ReauthenticateOptions {
+  rpId: string
+}
+
+/**
+ * One user-verification prompt bound to a known credential. Used when
+ * reconnecting with a cached credential: the public key is already cached so
+ * no recovery is needed, but connect should still prove the user is present.
+ * Scoped via `allowCredentials`, so the OS authenticates this specific
+ * passkey directly (no picker). Throws if the prompt is cancelled or the
+ * passkey no longer exists on the device.
+ */
+export async function reauthenticateCredential(
+  credential: PasskeyCredential,
+  opts: ReauthenticateOptions,
+): Promise<void> {
+  const challenge = new Uint8Array(32)
+  crypto.getRandomValues(challenge)
+
+  const assertion = (await navigator.credentials.get({
+    publicKey: {
+      challenge: challenge.buffer as ArrayBuffer,
+      rpId: opts.rpId,
+      allowCredentials: [
+        {
+          type: 'public-key',
+          id: base64ToUint8(credential.credentialId),
+          transports: ['internal'],
+        },
+      ],
+      userVerification: 'required',
+      timeout: 60000,
+    },
+  })) as PublicKeyCredential | null
+
+  if (!assertion) throw new Error('Passkey authentication was cancelled')
+}
+
 // ---- Transaction Signing ----
 
 export interface SignTransactionOptions {
@@ -186,7 +226,8 @@ export interface SignInOptions {
  * matching key is the real one.
  *
  * Cost: two biometric prompts per first sign-in. Subsequent sessions on
- * this device skip both (credential cached in localStorage).
+ * this device reuse the localStorage cache and cost a single
+ * reauthentication prompt (see `reauthenticateCredential`).
  *
  * The first prompt uses no `allowCredentials` so the OS shows a picker for
  * any passkey at this rpId. The second prompt is bound to the credential

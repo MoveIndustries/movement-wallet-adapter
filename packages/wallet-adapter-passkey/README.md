@@ -97,8 +97,9 @@ When the user picks **Create new passkey**, the platform's biometric prompt
 fires (Touch ID / Face ID / Windows Hello / Android biometric) and a new
 passkey is registered. When they pick **Sign in with existing passkey**, the
 recovery flow runs (see below). Either way, after success the credential
-caches in `localStorage` and subsequent calls to `connect()` reload it
-without any prompt.
+caches in `localStorage` and subsequent calls to `connect()` reload it with
+a single re-authentication prompt bound to that credential — no picker, no
+recovery.
 
 ## Sign-in recovery flow
 
@@ -124,7 +125,7 @@ The `'signin'` mode does this:
    `{C, D}`. Derive the address, cache, done.
 
 After this, both modes behave identically — credential is in `localStorage`,
-subsequent connects skip the biometric prompts.
+and subsequent connects cost one biometric prompt instead of two.
 
 `onRecoveryStep` is invoked with `'authenticating-1' | 'authenticating-2'
 | 'complete'` so the host app can show progress UI.
@@ -178,8 +179,8 @@ The `standard:events` row is the wallet-standard primitive — not namespaced.
 | Namespace | Implementation |
 |---|---|
 | `standard:events` | Change-event emitter from `@wallet-standard/core`. Fires `change` with the new `accounts` array on connect / disconnect. Required — wallet-adapter libraries cache `wallet.accounts` and only re-read it when this fires; without it the consumer's `useWallet()` never sees connect succeed. |
-| `movement:connect` | If a credential is cached in `localStorage`, restores it immediately. Otherwise calls `navigator.credentials.create()` to register a new platform-authenticator passkey. |
-| `movement:disconnect` | Clears the in-memory account and fires the change event. The `localStorage` credential cache is kept, so reconnecting is prompt-free; call `adapter.forgetCredential()` to also drop the cache (next connect re-runs registration / sign-in recovery). The OS-level passkey is left intact either way — remove it via OS settings. |
+| `movement:connect` | If a credential is cached in `localStorage`, re-authenticates it with one user-verification prompt bound to that credential (no picker), then restores it — a passkey deleted from the OS fails here instead of at first signing. Otherwise calls `navigator.credentials.create()` to register a new platform-authenticator passkey. |
+| `movement:disconnect` | Clears the in-memory account and fires the change event. The `localStorage` credential cache is kept, so reconnecting costs a single re-authentication prompt instead of the two-prompt recovery; call `adapter.forgetCredential()` to also drop the cache (next connect re-runs registration / sign-in recovery). The OS-level passkey is left intact either way — remove it via OS settings. |
 | `movement:account` | Returns address + 65-byte uncompressed P-256 public key. Throws if not connected. |
 | `movement:network` | Returns Movement testnet info (chain ID 250, Movement RPC). |
 | `movement:signTransaction` (v1.1) | Dispatches both v1.0 (positional `(transaction, asFeePayer?)`) and v1.1 (`{ payload, sender?, gasUnitPrice?, maxGasAmount?, expirationSecondsFromNow? }`) calling conventions. v1.0 returns an `AccountAuthenticatorSingleKey`; v1.1 returns `{ authenticator, rawTransaction }`. Triggers a biometric prompt to sign each transaction. |
@@ -210,17 +211,17 @@ registerPasskeyWallet({ ..., network: 'mainnet' })
 ## Storage
 
 The credential ID, public key, and derived address persist in
-`localStorage` under the key `movement_passkey_credential`. Closing the tab
-does not drop the cache — only `disconnect()` (or clearing site data
-manually) removes it. The platform-authenticator passkey itself lives in
-the OS keystore and is unaffected by clearing the cache; the user can
-reconnect by calling `connect()` again, which re-prompts for biometric
-verification and re-loads the public key from the assertion response.
+`localStorage` under the key `movement_passkey_credential`. Neither closing
+the tab nor `disconnect()` drops the cache — only `forgetCredential()` (or
+clearing site data manually) removes it. The platform-authenticator passkey
+itself lives in the OS keystore and is unaffected by clearing the cache; the
+user can reconnect by calling `connect()` again, which re-runs registration
+or sign-in recovery.
 
-There is no session timeout — once a credential is cached, the adapter
-considers itself connected. Each individual signing operation triggers a
+There is no session timeout — connecting from the cache re-verifies the user
+with one biometric prompt, and each individual signing operation triggers a
 fresh biometric prompt (handled by the OS), so the user is never
-authenticated for transactions purely by virtue of localStorage state.
+authenticated purely by virtue of localStorage state.
 
 ## Roadmap
 

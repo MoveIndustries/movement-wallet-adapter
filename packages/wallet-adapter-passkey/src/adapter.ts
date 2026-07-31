@@ -29,6 +29,7 @@ import { AccountAddress, Hex, Movement, MovementConfig, Network } from '@moveind
 import {
   clearCredential,
   loadCredential,
+  reauthenticateCredential,
   registerPasskey,
   signInWithExistingPasskey,
   signTransactionWithPasskey,
@@ -100,14 +101,29 @@ export class PasskeyWalletAdapter {
   }
 
   /**
-   * Resolve the active credential for `connect()`. Cached credential always
-   * wins — it skips the biometric prompt entirely. If nothing's cached the
-   * mode determines whether we register a new passkey or recover an
-   * existing one via dual-signature ECDSA point recovery.
+   * Resolve the active credential for `connect()`. A cached credential skips
+   * public-key recovery but still costs one user-verification prompt bound to
+   * that credential — connect stays an explicit authorization moment, and a
+   * passkey deleted from the OS fails here instead of at first signing. If
+   * nothing's cached the mode determines whether we register a new passkey or
+   * recover an existing one via dual-signature ECDSA point recovery.
    */
   private async performConnect(): Promise<PasskeyCredential> {
     const existing = loadCredential()
-    if (existing) return existing
+    if (existing) {
+      try {
+        await reauthenticateCredential(existing, { rpId: this.config.rpId ?? autoDetectRpId() })
+      } catch {
+        // NotAllowedError is deliberately opaque (cancel and missing-passkey
+        // look identical), so cover both. Keep the cache: a cancel must not
+        // cost the user their two-prompt-free reconnect path.
+        throw new Error(
+          'Passkey authentication failed — the prompt was cancelled or this passkey ' +
+            'no longer exists on the device. Call forgetCredential() to reset it.',
+        )
+      }
+      return existing
+    }
 
     if (this.config.mode === 'signin') {
       return signInWithExistingPasskey({
@@ -182,9 +198,9 @@ export class PasskeyWalletAdapter {
     'movement:disconnect': {
       version: '1.0.0',
       disconnect: async () => {
-        // In-memory only — the cached credential survives so reconnect is
-        // prompt-free. Sign-in recovery costs two user-verification prompts,
-        // so wiping the cache here would re-incur them on every reconnect.
+        // In-memory only — the cached credential survives so reconnect costs
+        // one reauthentication prompt instead of the two-prompt sign-in
+        // recovery that wiping the cache would re-incur every time.
         // Use forgetCredential() to actually drop the cached key.
         this.credential = null
         this.notifyAccountChange()
