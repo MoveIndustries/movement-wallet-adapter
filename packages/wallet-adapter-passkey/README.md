@@ -179,7 +179,7 @@ The `standard:events` row is the wallet-standard primitive — not namespaced.
 |---|---|
 | `standard:events` | Change-event emitter from `@wallet-standard/core`. Fires `change` with the new `accounts` array on connect / disconnect. Required — wallet-adapter libraries cache `wallet.accounts` and only re-read it when this fires; without it the consumer's `useWallet()` never sees connect succeed. |
 | `movement:connect` | If a credential is cached in `localStorage`, restores it immediately. Otherwise calls `navigator.credentials.create()` to register a new platform-authenticator passkey. |
-| `movement:disconnect` | Clears the cached credential, fires the change event. The OS-level passkey is left intact — the user can reconnect later (or remove it via OS settings). |
+| `movement:disconnect` | Clears the in-memory account and fires the change event. The `localStorage` credential cache is kept, so reconnecting is prompt-free; call `adapter.forgetCredential()` to also drop the cache (next connect re-runs registration / sign-in recovery). The OS-level passkey is left intact either way — remove it via OS settings. |
 | `movement:account` | Returns address + 65-byte uncompressed P-256 public key. Throws if not connected. |
 | `movement:network` | Returns Movement testnet info (chain ID 250, Movement RPC). |
 | `movement:signTransaction` (v1.1) | Dispatches both v1.0 (positional `(transaction, asFeePayer?)`) and v1.1 (`{ payload, sender?, gasUnitPrice?, maxGasAmount?, expirationSecondsFromNow? }`) calling conventions. v1.0 returns an `AccountAuthenticatorSingleKey`; v1.1 returns `{ authenticator, rawTransaction }`. Triggers a biometric prompt to sign each transaction. |

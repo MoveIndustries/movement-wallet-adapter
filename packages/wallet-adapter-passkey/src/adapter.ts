@@ -121,6 +121,18 @@ export class PasskeyWalletAdapter {
     })
   }
 
+  /**
+   * Drop the cached credential and disconnect. The next connect re-runs
+   * passkey registration or sign-in recovery (with its verification
+   * prompts). The OS-level passkey itself is untouched — only this
+   * origin's localStorage cache is cleared.
+   */
+  forgetCredential(): void {
+    clearCredential()
+    this.credential = null
+    this.notifyAccountChange()
+  }
+
   get accounts(): readonly AccountInfo[] {
     return this.credential ? [this.toAccountInfo(this.credential)] : []
   }
@@ -170,7 +182,10 @@ export class PasskeyWalletAdapter {
     'movement:disconnect': {
       version: '1.0.0',
       disconnect: async () => {
-        clearCredential()
+        // In-memory only — the cached credential survives so reconnect is
+        // prompt-free. Sign-in recovery costs two user-verification prompts,
+        // so wiping the cache here would re-incur them on every reconnect.
+        // Use forgetCredential() to actually drop the cached key.
         this.credential = null
         this.notifyAccountChange()
       },
