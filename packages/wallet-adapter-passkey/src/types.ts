@@ -37,6 +37,20 @@ export interface PasskeyAdapterConfig {
   rpName?: string
 
   /**
+   * Require a user-verification prompt when `connect()` restores a cached
+   * credential. Defaults to `false`: cached connect stays silent, which is
+   * what `autoConnect` depends on (wallet-adapter-react calls `connect()`
+   * from a mount effect with no user gesture, and some browsers reject
+   * WebAuthn ceremonies outside a user activation entirely).
+   *
+   * Set to `true` only when connect is always user-initiated. It makes
+   * connect an explicit authorization moment and surfaces a passkey deleted
+   * from the OS at connect time rather than at first signing, at the cost of
+   * one prompt per connect.
+   */
+  reauthenticateOnConnect?: boolean
+
+  /**
    * Optional callback fired during the `'signin'` mode recovery flow so
    * the host app can show progress UI (toast, modal, etc.). Not invoked
    * for `'create'` mode (single biometric prompt — no recovery needed).
