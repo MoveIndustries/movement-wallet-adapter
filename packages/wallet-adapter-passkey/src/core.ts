@@ -157,6 +157,31 @@ export async function reauthenticateCredential(
   })) as PublicKeyCredential | null
 
   if (!assertion) throw new Error('Passkey authentication was cancelled')
+
+  // Verify what the ceremony actually produced. Without these checks the call
+  // only proves "a WebAuthn ceremony completed", not "the user was verified
+  // with this specific passkey". A compromised page can bypass this either
+  // way, so it is not an authorization boundary; it makes the guarantee this
+  // function advertises real.
+  if (uint8ToBase64(new Uint8Array(assertion.rawId)) !== credential.credentialId) {
+    throw new Error('Passkey authentication returned a different credential')
+  }
+
+  const response = assertion.response as AuthenticatorAssertionResponse
+  const authData = new Uint8Array(response.authenticatorData)
+  // authData: rpIdHash(32) || flags(1) || counter(4) || …; flags bit 2 is UV.
+  const UV_FLAG = 0x04
+  const flags = authData[32]
+  if (flags === undefined || (flags & UV_FLAG) === 0) {
+    throw new Error('Passkey authentication did not verify the user')
+  }
+
+  const signedHash = computeWebAuthnSignedHash(authData, new Uint8Array(response.clientDataJSON))
+  const signature = derToCompactNormalized(new Uint8Array(response.signature))
+  // signedHash is already a digest, so prehash must be off.
+  if (!p256.verify(signature, signedHash, credential.publicKey, { prehash: false })) {
+    throw new Error('Passkey authentication signature did not verify')
+  }
 }
 
 // ---- Transaction Signing ----
