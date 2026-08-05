@@ -27,6 +27,9 @@ jobs:
       - name: Install global dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Test wallet adapters
+        run: pnpm run test --filter=@moveindustries/wallet-adapter-keyless --filter=@moveindustries/wallet-adapter-passkey
+
       - name: Build global project
         env:
           GAID: ${{ vars.APTOS_WALLET_ADAPTER_GAID }}

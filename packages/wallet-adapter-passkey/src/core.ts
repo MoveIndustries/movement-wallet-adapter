@@ -119,6 +119,71 @@ export async function registerPasskey(opts: RegisterPasskeyOptions): Promise<Pas
   return cred
 }
 
+// ---- Reauthentication (single-prompt reconnect) ----
+
+export interface ReauthenticateOptions {
+  rpId: string
+}
+
+/**
+ * One user-verification prompt bound to a known credential. Used when
+ * reconnecting with a cached credential: the public key is already cached so
+ * no recovery is needed, but connect should still prove the user is present.
+ * Scoped via `allowCredentials`, so the OS authenticates this specific
+ * passkey directly (no picker). Throws if the prompt is cancelled or the
+ * passkey no longer exists on the device.
+ */
+export async function reauthenticateCredential(
+  credential: PasskeyCredential,
+  opts: ReauthenticateOptions,
+): Promise<void> {
+  const challenge = new Uint8Array(32)
+  crypto.getRandomValues(challenge)
+
+  const assertion = (await navigator.credentials.get({
+    publicKey: {
+      challenge: challenge.buffer as ArrayBuffer,
+      rpId: opts.rpId,
+      allowCredentials: [
+        {
+          type: 'public-key',
+          id: base64ToUint8(credential.credentialId),
+          transports: ['internal'],
+        },
+      ],
+      userVerification: 'required',
+      timeout: 60000,
+    },
+  })) as PublicKeyCredential | null
+
+  if (!assertion) throw new Error('Passkey authentication was cancelled')
+
+  // Verify what the ceremony actually produced. Without these checks the call
+  // only proves "a WebAuthn ceremony completed", not "the user was verified
+  // with this specific passkey". A compromised page can bypass this either
+  // way, so it is not an authorization boundary; it makes the guarantee this
+  // function advertises real.
+  if (uint8ToBase64(new Uint8Array(assertion.rawId)) !== credential.credentialId) {
+    throw new Error('Passkey authentication returned a different credential')
+  }
+
+  const response = assertion.response as AuthenticatorAssertionResponse
+  const authData = new Uint8Array(response.authenticatorData)
+  // authData: rpIdHash(32) || flags(1) || counter(4) || …; flags bit 2 is UV.
+  const UV_FLAG = 0x04
+  const flags = authData[32]
+  if (flags === undefined || (flags & UV_FLAG) === 0) {
+    throw new Error('Passkey authentication did not verify the user')
+  }
+
+  const signedHash = computeWebAuthnSignedHash(authData, new Uint8Array(response.clientDataJSON))
+  const signature = derToCompactNormalized(new Uint8Array(response.signature))
+  // signedHash is already a digest, so prehash must be off.
+  if (!p256.verify(signature, signedHash, credential.publicKey, { prehash: false })) {
+    throw new Error('Passkey authentication signature did not verify')
+  }
+}
+
 // ---- Transaction Signing ----
 
 export interface SignTransactionOptions {
@@ -186,7 +251,8 @@ export interface SignInOptions {
  * matching key is the real one.
  *
  * Cost: two biometric prompts per first sign-in. Subsequent sessions on
- * this device skip both (credential cached in localStorage).
+ * this device reuse the localStorage cache and cost a single
+ * reauthentication prompt (see `reauthenticateCredential`).
  *
  * The first prompt uses no `allowCredentials` so the OS shows a picker for
  * any passkey at this rpId. The second prompt is bound to the credential

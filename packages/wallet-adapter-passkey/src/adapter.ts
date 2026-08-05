@@ -29,6 +29,7 @@ import { AccountAddress, Hex, Movement, MovementConfig, Network } from '@moveind
 import {
   clearCredential,
   loadCredential,
+  reauthenticateCredential,
   registerPasskey,
   signInWithExistingPasskey,
   signTransactionWithPasskey,
@@ -66,6 +67,19 @@ function autoDetectRpId(): string {
  * AIP-66 (`WebAuthnSignature` + `Secp256r1PublicKey` under `AnyPublicKey`).
  * Users of this package never call `navigator.credentials.*` directly.
  */
+// The `create` and `signin` adapters registered by registerPasskeyWallets()
+// represent the same passkey and share one localStorage slot, so the active
+// credential is module state rather than per-instance: connecting, disconnecting
+// or forgetting on either instance must not leave the other reporting a
+// connected account whose cache is gone.
+let activeCredential: PasskeyCredential | null = null
+const liveAdapters = new Set<PasskeyWalletAdapter>()
+
+function setActiveCredential(cred: PasskeyCredential | null): void {
+  activeCredential = cred
+  for (const adapter of liveAdapters) adapter.emitAccountChange()
+}
+
 export class PasskeyWalletAdapter {
   readonly id: string
   readonly name: string
@@ -75,7 +89,6 @@ export class PasskeyWalletAdapter {
   readonly url = 'https://github.com/moveindustries/wallet-adapter-passkey'
 
   private config: PasskeyAdapterConfig
-  private credential: PasskeyCredential | null = null
   private accountListeners: MovementOnAccountChangeInput[] = []
   private networkListeners: MovementOnNetworkChangeInput[] = []
   // Wallet-standard `standard:events` listeners. Wallet-adapter libraries
@@ -86,8 +99,14 @@ export class PasskeyWalletAdapter {
   private standardChangeListeners: StandardEventsListeners['change'][] = []
   private _movement: Movement | null = null
 
+  /** Shared across every registered instance; see activeCredential above. */
+  private get credential(): PasskeyCredential | null {
+    return activeCredential
+  }
+
   constructor(config: PasskeyAdapterConfig) {
     this.config = config
+    liveAdapters.add(this)
     // The two modes register as distinct wallet entries in the connect modal.
     // The id must be unique per registered wallet; the name is what users see.
     if (config.mode === 'signin') {
@@ -100,14 +119,35 @@ export class PasskeyWalletAdapter {
   }
 
   /**
-   * Resolve the active credential for `connect()`. Cached credential always
-   * wins — it skips the biometric prompt entirely. If nothing's cached the
-   * mode determines whether we register a new passkey or recover an
-   * existing one via dual-signature ECDSA point recovery.
+   * Resolve the active credential for `connect()`. A cached credential is
+   * returned without any prompt unless `reauthenticateOnConnect` is set, since
+   * `autoConnect` calls `connect()` from a mount effect with no user gesture.
+   * If nothing's cached the mode determines whether we register a new passkey
+   * or recover an existing one via dual-signature ECDSA point recovery.
    */
   private async performConnect(): Promise<PasskeyCredential> {
     const existing = loadCredential()
-    if (existing) return existing
+    if (existing) {
+      if (this.config.reauthenticateOnConnect) {
+        try {
+          await reauthenticateCredential(existing, { rpId: this.config.rpId ?? autoDetectRpId() })
+        } catch (err) {
+          // NotAllowedError is deliberately opaque (cancel and missing-passkey
+          // look identical), so cover both. Other DOMException names are
+          // specific, so surface them instead of blaming the passkey. Keep the
+          // cache either way: a cancel must not cost the user their
+          // two-prompt-free reconnect path.
+          throw new Error(
+            err instanceof DOMException && err.name !== 'NotAllowedError'
+              ? `Passkey authentication failed (${err.name})`
+              : 'Passkey authentication failed. The prompt was cancelled or this passkey ' +
+                  'no longer exists on the device. Call forgetCredential() to reset it.',
+            { cause: err },
+          )
+        }
+      }
+      return existing
+    }
 
     if (this.config.mode === 'signin') {
       return signInWithExistingPasskey({
@@ -119,6 +159,17 @@ export class PasskeyWalletAdapter {
       rpId: this.config.rpId ?? autoDetectRpId(),
       rpName: this.config.rpName ?? 'Movement Network',
     })
+  }
+
+  /**
+   * Drop the cached credential and disconnect. The next connect re-runs
+   * passkey registration or sign-in recovery (with its verification
+   * prompts). The OS-level passkey itself is untouched — only this
+   * origin's localStorage cache is cleared.
+   */
+  forgetCredential(): void {
+    clearCredential()
+    setActiveCredential(null)
   }
 
   get accounts(): readonly AccountInfo[] {
@@ -162,17 +213,18 @@ export class PasskeyWalletAdapter {
       version: '1.0.0',
       connect: async (): Promise<UserResponse<MovementConnectOutput>> => {
         const cred = await this.performConnect()
-        this.credential = cred
-        this.notifyAccountChange()
+        setActiveCredential(cred)
         return { status: UserResponseStatus.APPROVED, args: this.toAccountInfo(cred) }
       },
     } satisfies MovementConnectFeature['movement:connect'] as MovementConnectFeature['movement:connect'],
     'movement:disconnect': {
       version: '1.0.0',
       disconnect: async () => {
-        clearCredential()
-        this.credential = null
-        this.notifyAccountChange()
+        // In-memory only — the cached credential survives so reconnect costs
+        // one reauthentication prompt instead of the two-prompt sign-in
+        // recovery that wiping the cache would re-incur every time.
+        // Use forgetCredential() to actually drop the cached key.
+        setActiveCredential(null)
       },
     } satisfies MovementDisconnectFeature['movement:disconnect'] as MovementDisconnectFeature['movement:disconnect'],
     'movement:onAccountChange': {
@@ -322,7 +374,8 @@ export class PasskeyWalletAdapter {
     } as unknown as AccountInfo
   }
 
-  private notifyAccountChange(): void {
+  /** Internal: invoked for every live instance when the shared credential changes. */
+  emitAccountChange(): void {
     const info = this.credential ? this.toAccountInfo(this.credential) : undefined
     // Chain-specific listeners (registered via movement:onAccountChange).
     for (const cb of this.accountListeners) cb(info as never)
