@@ -32,10 +32,10 @@ importers:
         version: link:packages/eslint-config-adapter
       prettier:
         specifier: latest
-        version: 3.8.1
+        version: 3.9.6
       turbo:
         specifier: latest
-        version: 2.8.10
+        version: 2.10.9
 
   apps/nextjs-example:
     dependencies:
@@ -633,7 +633,7 @@ importers:
         version: 8.10.2(eslint@8.57.1)
       eslint-config-turbo:
         specifier: latest
-        version: 2.8.10(eslint@8.57.1)(turbo@2.8.10)
+        version: 2.10.9(eslint@8.57.1)(turbo@2.10.9)
       eslint-plugin-react:
         specifier: 7.31.8
         version: 7.31.8(eslint@8.57.1)
@@ -729,6 +729,40 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.9.3
+
+  packages/wallet-adapter-deeplink:
+    dependencies:
+      '@noble/ciphers':
+        specifier: 1.3.0
+        version: 1.3.0
+      '@noble/curves':
+        specifier: 2.0.1
+        version: 2.0.1
+      '@noble/hashes':
+        specifier: 2.2.0
+        version: 2.2.0
+      '@wallet-standard/core':
+        specifier: 1.1.0
+        version: 1.1.0
+    devDependencies:
+      '@moveindustries/ts-sdk':
+        specifier: ^5.1.6
+        version: 5.1.6(got@11.8.6)
+      '@moveindustries/wallet-standard':
+        specifier: ^0.6.0
+        version: 0.6.0(@moveindustries/ts-sdk@5.1.6(got@11.8.6))(@wallet-standard/core@1.1.0)
+      '@types/node':
+        specifier: ^20.10.4
+        version: 20.19.33
+      jsdom:
+        specifier: 25.0.1
+        version: 25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      typescript:
+        specifier: ^5.8.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.4
+        version: 4.1.4(@types/node@20.19.33)(happy-dom@20.9.0(bufferutil@4.1.0)(utf-8-validate@5.0.10))(jsdom@25.0.1(bufferutil@4.1.0)(utf-8-validate@5.0.10))(vite@6.4.1(@types/node@20.19.33)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
 
   packages/wallet-adapter-keyless:
     dependencies:
@@ -1077,6 +1111,7 @@ packages:
   '@aptos-labs/ts-sdk@1.39.0':
     resolution: {integrity: sha512-VFEWZsqb8Mto8XbLK8lDRdUvyHjp+geiwFxRzRcQK6HftMGB4bYuEsOI2Vy6u/TqkUft8DvmpV5yX027R5/SMQ==}
     engines: {node: '>=20.0.0'}
+    deprecated: This version is deprecated, please upgrade to 5.2.1, or the latest version
 
   '@aptos-labs/ts-sdk@5.2.1':
     resolution: {integrity: sha512-kazYjqfsPCBx2UJI+nYUOb6Ov7q7brSgYEfxp2sP27IeJWdDNa50lfs0WIpDJ92kQxdtlm9q3ZWw7Toh9f1gxQ==}
@@ -1090,15 +1125,18 @@ packages:
 
   '@aptos-labs/wallet-standard@0.0.11':
     resolution: {integrity: sha512-8dygyPBby7TaMJjUSyeVP4R1WC9D/FPpX9gVMMLaqTKCXrSbkzhGDxcuwbMZ3ziEwRmx3zz+d6BIJbDhd0hm5g==}
+    deprecated: Please
 
   '@aptos-labs/wallet-standard@0.1.0-ms.1':
     resolution: {integrity: sha512-3aWEmdqMcll8D2lzhBZuYUW1o49TDpqw4QRAkHk00tSC3SwAkuukoW8g/M9lB5nHFxaX7UzuxeaYv8l6/mhJVQ==}
+    deprecated: Please
     peerDependencies:
       '@aptos-labs/ts-sdk': ^1.17.0
       '@wallet-standard/core': ^1.0.3
 
   '@aptos-labs/wallet-standard@0.2.0':
     resolution: {integrity: sha512-4aoO4MlqzrW+CtO83MwbHMMtu91DL5B7YKRvhJbRnVB4R+QCOwBI/aQTkNZbKBDfOplLlqWTTl6Li0l6e02YLQ==}
+    deprecated: Please
     peerDependencies:
       '@aptos-labs/ts-sdk': ^1.17.0
       '@wallet-standard/core': ^1.0.3
@@ -4051,6 +4089,36 @@ packages:
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
 
+  '@turbo/darwin-64@2.10.9':
+    resolution: {integrity: sha512-Jh+pTGXLNz8+1tkUU13TI/f+ZOI+OvC4YbHi1H+57iSpLt5DR3xgptd+4sA07RdjdRR/RX/01uQQu2OkbzIefA==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@turbo/darwin-arm64@2.10.9':
+    resolution: {integrity: sha512-aqtpPkiIC4IUas8Vv27oJ3aDfTuP1d5wofd01dZ7gfhHRrIKuFdqQb4imvNnVFahcOViF9Jh8Oi7feDoz8/ciA==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@turbo/linux-64@2.10.9':
+    resolution: {integrity: sha512-XyAneUBsS5uNOUOjBSs81zyigMVwwhVUd3u7F2JFMKGQk6F7eNAiOEBASJ+aHLldjYsOEjhfW+5gWIqwziyFFw==}
+    cpu: [x64]
+    os: [android, linux]
+
+  '@turbo/linux-arm64@2.10.9':
+    resolution: {integrity: sha512-5jAcldLnkuWIjujGhCn2MGIeUwW8IVNOq9Sce4EEzzgLcxmhTasbV0RiW6ZkaRdOjmOCGzeNXPLkDJEOIucOLw==}
+    cpu: [arm64]
+    os: [android, linux]
+
+  '@turbo/windows-64@2.10.9':
+    resolution: {integrity: sha512-u1xGpGlefzuhBedbt/VR2nWdftfFVZwPeDg9e5uZl68sV1fL3HNYTNr5VyHkzgtPK2VTYg1x4OKZuGrh1Gvhtg==}
+    cpu: [x64]
+    os: [win32]
+
+  '@turbo/windows-arm64@2.10.9':
+    resolution: {integrity: sha512-W2Ub165Qv0iMFljbYKxxbZN+2dVSngnzEjQNEFXtnz5oJVx9XSypmNmUvMtuYMeZ3kdVC1zI7yd/rtuX+SDnbg==}
+    cpu: [arm64]
+    os: [win32]
+
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
@@ -4324,6 +4392,7 @@ packages:
 
   '@ungap/structured-clone@1.3.0':
     resolution: {integrity: sha512-WmoN8qaIAo7WTYWbAZuG8PYEhn5fkz7dZrqTBZ7dtt//lL2Gwms1IcnQ5yHqjDfX8Ft5j4YzDM23f87zBfDe9g==}
+    deprecated: Potential CWE-502 - Update to 1.3.1 or higher
 
   '@unhead/vue@2.1.4':
     resolution: {integrity: sha512-MFvywgkHMt/AqbhmKOqRuzvuHBTcmmmnUa7Wm/Sg11leXAeRShv2PcmY7IiYdeeJqBMCm1jwhcs6201jj6ggZg==}
@@ -6084,8 +6153,8 @@ packages:
       eslint-plugin-n: '^15.0.0 || ^16.0.0 '
       eslint-plugin-promise: ^6.0.0
 
-  eslint-config-turbo@2.8.10:
-    resolution: {integrity: sha512-qMCeIQQfJN6ZlWOEiM9VZ7XWiz5aVQ+5UYGgqzfhdupEBfJdA0LtU3c/3Im6k0IGeG0W8K/8Ny0w+QxOvy5z+w==}
+  eslint-config-turbo@2.10.9:
+    resolution: {integrity: sha512-UskkV02SOEm/k6KJfF3tPwyWCxUGCM2cGfD6ko2WQ+xSa5o8v7QcKbFMU6Qg2d7dwHD+L3dbg5Pp+mb1iPETYA==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -6204,8 +6273,8 @@ packages:
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
 
-  eslint-plugin-turbo@2.8.10:
-    resolution: {integrity: sha512-IeXO+znCnyQgy28TxqjvABC5DQOr+BzbhV6arDN+najkuEJ8czGeEni9qOInxoLFgNUJcy9kAVUqmGm2X93ZXw==}
+  eslint-plugin-turbo@2.10.9:
+    resolution: {integrity: sha512-OOo50d6UEXN1qK61PPi7O7+Rx117zjumYqatKqReUNCYbi5OBnAtPudnDTuKhpgEbutG3wF0ApqeWjRKj95vxA==}
     peerDependencies:
       eslint: '>6.6.0'
       turbo: '>2.0.0'
@@ -7643,6 +7712,7 @@ packages:
 
   lucide-vue-next@0.396.0:
     resolution: {integrity: sha512-fY2FbKWVlAH6KyGHLWQvjPmDAbAh5UH6eqakDYB815UG5wPLtDQmhSYQlZvDLvhkahLdUZt5f+IWKwSANaS0Zw==}
+    deprecated: Package deprecated. Please use @lucide/vue instead.
     peerDependencies:
       vue: '>=3.0.1'
 
@@ -8497,6 +8567,11 @@ packages:
 
   prettier@3.8.1:
     resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
+    engines: {node: '>=14'}
+    hasBin: true
+
+  prettier@3.9.6:
+    resolution: {integrity: sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -9750,38 +9825,8 @@ packages:
     peerDependencies:
       typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
 
-  turbo-darwin-64@2.8.10:
-    resolution: {integrity: sha512-A03fXh+B7S8mL3PbdhTd+0UsaGrhfyPkODvzBDpKRY7bbeac4MDFpJ7I+Slf2oSkCEeSvHKR7Z4U71uKRUfX7g==}
-    cpu: [x64]
-    os: [darwin]
-
-  turbo-darwin-arm64@2.8.10:
-    resolution: {integrity: sha512-sidzowgWL3s5xCHLeqwC9M3s9M0i16W1nuQF3Mc7fPHpZ+YPohvcbVFBB2uoRRHYZg6yBnwD4gyUHKTeXfwtXA==}
-    cpu: [arm64]
-    os: [darwin]
-
-  turbo-linux-64@2.8.10:
-    resolution: {integrity: sha512-YK9vcpL3TVtqonB021XwgaQhY9hJJbKKUhLv16osxV0HkcQASQWUqR56yMge7puh6nxU67rQlTq1b7ksR1T3KA==}
-    cpu: [x64]
-    os: [linux]
-
-  turbo-linux-arm64@2.8.10:
-    resolution: {integrity: sha512-3+j2tL0sG95iBJTm+6J8/45JsETQABPqtFyYjVjBbi6eVGdtNTiBmHNKrbvXRlQ3ZbUG75bKLaSSDHSEEN+btQ==}
-    cpu: [arm64]
-    os: [linux]
-
-  turbo-windows-64@2.8.10:
-    resolution: {integrity: sha512-hdeF5qmVY/NFgiucf8FW0CWJWtyT2QPm5mIsX0W1DXAVzqKVXGq+Zf+dg4EUngAFKjDzoBeN6ec2Fhajwfztkw==}
-    cpu: [x64]
-    os: [win32]
-
-  turbo-windows-arm64@2.8.10:
-    resolution: {integrity: sha512-QGdr/Q8LWmj+ITMkSvfiz2glf0d7JG0oXVzGL3jxkGqiBI1zXFj20oqVY0qWi+112LO9SVrYdpHS0E/oGFrMbQ==}
-    cpu: [arm64]
-    os: [win32]
-
-  turbo@2.8.10:
-    resolution: {integrity: sha512-OxbzDES66+x7nnKGg2MwBA1ypVsZoDTLHpeaP4giyiHSixbsiTaMyeJqbEyvBdp5Cm28fc+8GG6RdQtic0ijwQ==}
+  turbo@2.10.9:
+    resolution: {integrity: sha512-Yl9+ukxH+UmPtKidpDkjn82tvPoEvFNb9UACd9vUomN1Ft0cwl3rx0P8yC1D93W9EOsWRMjllvIDG8y25sFOog==}
     hasBin: true
 
   tw-animate-css@1.4.0:
@@ -9928,6 +9973,7 @@ packages:
 
   unplugin-vue-router@0.19.2:
     resolution: {integrity: sha512-u5dgLBarxE5cyDK/hzJGfpCTLIAyiTXGlo85COuD4Nssj6G7NxS+i9mhCWz/1p/ud1eMwdcUbTXehQe41jYZUA==}
+    deprecated: 'Merged into vuejs/router. Migrate: https://router.vuejs.org/guide/migration/v4-to-v5.html'
     peerDependencies:
       '@vue/compiler-sfc': ^3.5.17
       vue-router: ^4.6.0
@@ -10060,10 +10106,12 @@ packages:
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   uuid@9.0.1:
     resolution: {integrity: sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   v8-to-istanbul@9.3.0:
@@ -12655,7 +12703,7 @@ snapshots:
     dependencies:
       '@nuxt/kit': 4.3.1(magicast@0.5.2)
       execa: 8.0.1
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
     transitivePeerDependencies:
       - magicast
 
@@ -12700,7 +12748,7 @@ snapshots:
       sirv: 3.0.2
       structured-clone-es: 1.0.0
       tinyglobby: 0.2.15
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vite-plugin-inspect: 11.3.3(@nuxt/kit@4.3.1(magicast@0.5.2))(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
       vite-plugin-vue-tracer: 1.2.0(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.28(typescript@5.9.3))
       which: 5.0.0
@@ -12875,7 +12923,7 @@ snapshots:
       std-env: 3.10.0
       ufo: 1.6.3
       unenv: 2.0.0-rc.24
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vite-node: 5.3.0(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vite-plugin-checker: 0.12.0(eslint@8.57.1)(optionator@0.9.4)(typescript@5.9.3)(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vue-tsc@2.2.12(typescript@5.9.3))
       vue: 3.5.28(typescript@5.9.3)
@@ -14413,6 +14461,24 @@ snapshots:
     dependencies:
       '@testing-library/dom': 9.3.4
 
+  '@turbo/darwin-64@2.10.9':
+    optional: true
+
+  '@turbo/darwin-arm64@2.10.9':
+    optional: true
+
+  '@turbo/linux-64@2.10.9':
+    optional: true
+
+  '@turbo/linux-arm64@2.10.9':
+    optional: true
+
+  '@turbo/windows-64@2.10.9':
+    optional: true
+
+  '@turbo/windows-arm64@2.10.9':
+    optional: true
+
   '@tybys/wasm-util@0.10.1':
     dependencies:
       tslib: 2.8.1
@@ -14838,7 +14904,7 @@ snapshots:
       '@babel/plugin-transform-typescript': 7.28.6(@babel/core@7.29.0)
       '@rolldown/pluginutils': 1.0.0-rc.5
       '@vue/babel-plugin-jsx': 2.0.1(@babel/core@7.29.0)
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vue: 3.5.28(typescript@5.9.3)
     transitivePeerDependencies:
       - supports-color
@@ -14851,7 +14917,7 @@ snapshots:
   '@vitejs/plugin-vue@6.0.4(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))(vue@3.5.28(typescript@5.9.3))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-rc.2
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vue: 3.5.28(typescript@5.9.3)
 
   '@vitest/expect@2.1.9':
@@ -17001,7 +17067,7 @@ snapshots:
       eslint: 8.57.1
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@8.57.1))(eslint@8.57.1)
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
       eslint-plugin-jsx-a11y: 6.10.2(eslint@8.57.1)
       eslint-plugin-react: 7.37.5(eslint@8.57.1)
       eslint-plugin-react-hooks: 5.0.0-canary-7118f5dd7-20230705(eslint@8.57.1)
@@ -17023,11 +17089,11 @@ snapshots:
       eslint-plugin-n: 15.7.0(eslint@8.57.1)
       eslint-plugin-promise: 6.6.0(eslint@8.57.1)
 
-  eslint-config-turbo@2.8.10(eslint@8.57.1)(turbo@2.8.10):
+  eslint-config-turbo@2.10.9(eslint@8.57.1)(turbo@2.10.9):
     dependencies:
       eslint: 8.57.1
-      eslint-plugin-turbo: 2.8.10(eslint@8.57.1)(turbo@2.8.10)
-      turbo: 2.8.10
+      eslint-plugin-turbo: 2.10.9(eslint@8.57.1)(turbo@2.10.9)
+      turbo: 2.10.9
 
   eslint-import-resolver-node@0.3.9:
     dependencies:
@@ -17060,7 +17126,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1)
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -17182,7 +17248,7 @@ snapshots:
       - eslint-import-resolver-webpack
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@8.57.1))(eslint@8.57.1))(eslint@8.57.1):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@7.2.0(eslint@8.57.1)(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@8.57.1):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -17304,11 +17370,11 @@ snapshots:
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
 
-  eslint-plugin-turbo@2.8.10(eslint@8.57.1)(turbo@2.8.10):
+  eslint-plugin-turbo@2.10.9(eslint@8.57.1)(turbo@2.10.9):
     dependencies:
       dotenv: 16.0.3
       eslint: 8.57.1
-      turbo: 2.8.10
+      turbo: 2.10.9
 
   eslint-plugin-unicorn@44.0.2(eslint@8.57.1):
     dependencies:
@@ -20136,6 +20202,8 @@ snapshots:
 
   prettier@3.8.1: {}
 
+  prettier@3.9.6: {}
+
   pretty-bytes@7.1.0: {}
 
   pretty-format@27.5.1:
@@ -21613,32 +21681,14 @@ snapshots:
       tslib: 1.14.1
       typescript: 5.9.3
 
-  turbo-darwin-64@2.8.10:
-    optional: true
-
-  turbo-darwin-arm64@2.8.10:
-    optional: true
-
-  turbo-linux-64@2.8.10:
-    optional: true
-
-  turbo-linux-arm64@2.8.10:
-    optional: true
-
-  turbo-windows-64@2.8.10:
-    optional: true
-
-  turbo-windows-arm64@2.8.10:
-    optional: true
-
-  turbo@2.8.10:
+  turbo@2.10.9:
     optionalDependencies:
-      turbo-darwin-64: 2.8.10
-      turbo-darwin-arm64: 2.8.10
-      turbo-linux-64: 2.8.10
-      turbo-linux-arm64: 2.8.10
-      turbo-windows-64: 2.8.10
-      turbo-windows-arm64: 2.8.10
+      '@turbo/darwin-64': 2.10.9
+      '@turbo/darwin-arm64': 2.10.9
+      '@turbo/linux-64': 2.10.9
+      '@turbo/linux-arm64': 2.10.9
+      '@turbo/windows-64': 2.10.9
+      '@turbo/windows-arm64': 2.10.9
 
   tw-animate-css@1.4.0: {}
 
@@ -21971,12 +22021,12 @@ snapshots:
   vite-dev-rpc@1.1.0(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)):
     dependencies:
       birpc: 2.9.0
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vite-hot-client: 2.1.0(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
 
   vite-hot-client@2.1.0(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)):
     dependencies:
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
 
   vite-node@2.1.9(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2):
     dependencies:
@@ -22028,7 +22078,7 @@ snapshots:
       picomatch: 4.0.3
       tiny-invariant: 1.3.3
       tinyglobby: 0.2.15
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vscode-uri: 3.1.0
     optionalDependencies:
       eslint: 8.57.1
@@ -22072,7 +22122,7 @@ snapshots:
       '@types/eslint': 8.56.12
       eslint: 8.57.1
       rollup: 2.79.2
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
 
   vite-plugin-inspect@11.3.3(@nuxt/kit@4.3.1(magicast@0.5.2))(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)):
     dependencies:
@@ -22084,7 +22134,7 @@ snapshots:
       perfect-debounce: 2.1.0
       sirv: 3.0.2
       unplugin-utils: 0.3.1
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vite-dev-rpc: 1.1.0(vite@6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2))
     optionalDependencies:
       '@nuxt/kit': 4.3.1(magicast@0.5.2)
@@ -22098,7 +22148,7 @@ snapshots:
       magic-string: 0.30.21
       pathe: 2.0.3
       source-map-js: 1.2.1
-      vite: 6.4.1(@types/node@22.7.5)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
+      vite: 6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2)
       vue: 3.5.28(typescript@5.9.3)
 
   vite@6.4.1(@types/node@20.19.33)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2):
@@ -22113,6 +22163,22 @@ snapshots:
       '@types/node': 20.19.33
       fsevents: 2.3.3
       jiti: 2.6.1
+      lightningcss: 1.31.1
+      terser: 5.46.0
+      yaml: 2.8.2
+
+  vite@6.4.1(@types/node@22.7.5)(jiti@1.21.7)(lightningcss@1.31.1)(terser@5.46.0)(yaml@2.8.2):
+    dependencies:
+      esbuild: 0.27.3
+      fdir: 6.5.0(picomatch@4.0.3)
+      picomatch: 4.0.3
+      postcss: 8.5.6
+      rollup: 4.58.0
+      tinyglobby: 0.2.15
+    optionalDependencies:
+      '@types/node': 22.7.5
+      fsevents: 2.3.3
+      jiti: 1.21.7
       lightningcss: 1.31.1
       terser: 5.46.0
       yaml: 2.8.2
