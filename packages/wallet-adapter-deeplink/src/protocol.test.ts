@@ -16,7 +16,7 @@ import {
   open,
   seal,
   sharedKey,
-} from './protocol'
+} from './protocol.js'
 
 describe('channel crypto', () => {
   it('agrees on a key from either side', () => {

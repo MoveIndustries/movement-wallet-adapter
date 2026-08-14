@@ -10,7 +10,7 @@ import {
   takeResponseFromUrl,
   REQUEST_ID_PARAM,
   RESPONSE_PARAM,
-} from './session'
+} from './session.js'
 
 function setUrl(url: string): void {
   window.history.replaceState({}, '', url)

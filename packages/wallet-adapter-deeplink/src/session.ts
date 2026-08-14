@@ -1,6 +1,6 @@
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils.js'
-import type { ConnectData, Method } from './protocol'
-import { generateKeyPair } from './protocol'
+import type { ConnectData, Method } from './protocol.js'
+import { generateKeyPair } from './protocol.js'
 
 /**
  * Session state that has to outlive the page.

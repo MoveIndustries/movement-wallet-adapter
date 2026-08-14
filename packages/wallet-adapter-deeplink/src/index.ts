@@ -1,17 +1,17 @@
 import { registerWallet } from '@moveindustries/wallet-standard'
-import { DeeplinkWalletAdapter } from './adapter'
+import { DeeplinkWalletAdapter } from './adapter.js'
 import {
   DEFAULT_WALLETS,
   isInjectedProviderPresent,
   isMobileBrowser,
   MOTION_WALLET,
   type DeeplinkWallet,
-} from './wallets'
+} from './wallets.js'
 
-export { DeeplinkWalletAdapter } from './adapter'
-export { DEFAULT_WALLETS, MOTION_WALLET, isMobileBrowser } from './wallets'
-export type { DeeplinkWallet } from './wallets'
-export type { ConnectData, Method } from './protocol'
+export { DeeplinkWalletAdapter } from './adapter.js'
+export { DEFAULT_WALLETS, MOTION_WALLET, isMobileBrowser } from './wallets.js'
+export type { DeeplinkWallet } from './wallets.js'
+export type { ConnectData, Method } from './protocol.js'
 
 let registered: DeeplinkWalletAdapter[] | null = null
 

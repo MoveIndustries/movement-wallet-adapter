@@ -27,7 +27,7 @@ import {
   base64Encode,
   type ConnectData,
   type Method,
-} from './protocol'
+} from './protocol.js'
 import {
   beginSession,
   clearSession,
@@ -39,8 +39,8 @@ import {
   takeResponseFromUrl,
   REQUEST_ID_PARAM,
   type StoredSession,
-} from './session'
-import type { DeeplinkWallet } from './wallets'
+} from './session.js'
+import type { DeeplinkWallet } from './wallets.js'
 
 /**
  * Methods every build of the wallet has answered. Used when the connect
@@ -94,13 +94,6 @@ export class DeeplinkWalletAdapter {
   private accountListeners: MovementOnAccountChangeInput[] = []
   private networkListeners: MovementOnNetworkChangeInput[] = []
   private standardChangeListeners: StandardEventsListeners['change'][] = []
-
-  /** Resolvers for the call that is currently out at the wallet app. */
-  private inflight: {
-    method: Method
-    resolve: (value: never) => void
-    reject: (reason: Error) => void
-  } | null = null
 
   constructor(wallet: DeeplinkWallet) {
     this.wallet = wallet

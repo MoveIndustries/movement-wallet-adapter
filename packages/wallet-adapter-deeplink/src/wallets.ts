@@ -1,4 +1,4 @@
-import { MOTION_ICON_DATA_URI } from './icon'
+import { MOTION_ICON_DATA_URI } from './icon.js'
 
 /**
  * A mobile wallet reachable by deeplink.
