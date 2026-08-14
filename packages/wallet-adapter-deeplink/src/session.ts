@@ -7,9 +7,17 @@ import { generateKeyPair } from './protocol.js'
  *
  * Every request here is a full-page navigation: the browser leaves for the
  * wallet app and comes back through the redirect URL, so nothing in memory
- * survives. `sessionStorage` is the store because the session is per-tab and
- * should not outlive it — a connection left in `localStorage` would silently
- * reappear in a new tab where the user never connected.
+ * survives.
+ *
+ * `localStorage`, not `sessionStorage`, and that is load-bearing. The wallet
+ * app frequently returns into a *new* browser tab rather than the one that
+ * left, and `sessionStorage` is per-tab: the returning tab would find no
+ * pending request and drop a perfectly good response on the floor, leaving the
+ * user looking disconnected after approving. The reference dApp in the wallet
+ * repo hit this and made the same choice.
+ *
+ * The cost is that a session outlives its tab, so `clearSession` on disconnect
+ * matters more than it otherwise would.
  */
 
 const STORAGE_KEY = 'movement.deeplink.session.v1'
@@ -40,7 +48,7 @@ export interface PendingRequest {
 
 function storage(): Storage | null {
   try {
-    return typeof sessionStorage === 'undefined' ? null : sessionStorage
+    return typeof localStorage === 'undefined' ? null : localStorage
   } catch {
     // Blocked by cookie policy in some embedded browsers; degrade rather than
     // throw at import time.
@@ -126,7 +134,11 @@ export function newRequestId(): string {
  * Strips both parameters from the address bar afterwards via `replaceState`, so
  * a reload or a shared link does not carry a spent response.
  */
-export function takeResponseFromUrl(): { encoded: string; pending: PendingRequest } | null {
+export type TakenResponse =
+  | { ok: true; encoded: string; pending: PendingRequest }
+  | { ok: false; reason: string }
+
+export function takeResponseFromUrl(): TakenResponse | null {
   if (typeof window === 'undefined') return null
   const url = new URL(window.location.href)
   const encoded = url.searchParams.get(RESPONSE_PARAM)
@@ -140,7 +152,14 @@ export function takeResponseFromUrl(): { encoded: string; pending: PendingReques
   url.searchParams.delete(REQUEST_ID_PARAM)
   window.history.replaceState({}, '', url.toString())
 
-  if (!pending || !requestId || pending.id !== requestId) return null
+  // Each mismatch gets its own reason. Dropping a response silently is what
+  // made this class of bug expensive to diagnose: the user approves, comes
+  // back, and the page simply looks like nothing happened.
+  if (!requestId) return { ok: false, reason: 'response carried no request id' }
+  if (!pending) return { ok: false, reason: 'no pending request found in storage' }
+  if (pending.id !== requestId) {
+    return { ok: false, reason: 'response is for an older request' }
+  }
   clearPending()
-  return { encoded, pending }
+  return { ok: true, encoded, pending }
 }

@@ -18,7 +18,7 @@ function setUrl(url: string): void {
 
 describe('session storage', () => {
   beforeEach(() => {
-    sessionStorage.clear()
+    localStorage.clear()
     setUrl('https://dapp.example/app')
   })
 
@@ -46,7 +46,7 @@ describe('session storage', () => {
 
 describe('taking a response off the URL', () => {
   beforeEach(() => {
-    sessionStorage.clear()
+    localStorage.clear()
     setUrl('https://dapp.example/app')
   })
 
@@ -60,14 +60,33 @@ describe('taking a response off the URL', () => {
     setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=${id}`)
 
     const taken = takeResponseFromUrl()
-    expect(taken?.encoded).toBe('abc')
-    expect(taken?.pending.method).toBe('connect')
+    expect(taken?.ok).toBe(true)
+    expect(taken?.ok && taken.encoded).toBe('abc')
+    expect(taken?.ok && taken.pending.method).toBe('connect')
   })
 
-  it('ignores a response whose id does not match the pending request', () => {
+  it('ignores a response whose id does not match, and says why', () => {
     savePending({ id: 'expected', walletId: 'w', method: 'connect', returnTo: 'x' })
     setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=stale`)
-    expect(takeResponseFromUrl()).toBeNull()
+    const taken = takeResponseFromUrl()
+    expect(taken?.ok).toBe(false)
+    expect(taken?.ok === false && taken.reason).toMatch(/older request/)
+  })
+
+  it('explains a response arriving with no pending request', () => {
+    // The shape of the new-tab failure: sessionStorage would have lost the
+    // pending request here, and the response would vanish without a word.
+    setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=x`)
+    const taken = takeResponseFromUrl()
+    expect(taken?.ok).toBe(false)
+    expect(taken?.ok === false && taken.reason).toMatch(/no pending request/)
+  })
+
+  it('survives a session started in another tab', () => {
+    // localStorage, not sessionStorage: the wallet often returns into a new
+    // tab, which must still find the request that was made.
+    savePending({ id: 'x', walletId: 'w', method: 'connect', returnTo: 'x' })
+    expect(JSON.parse(localStorage.getItem('movement.deeplink.pending.v1')!).id).toBe('x')
   })
 
   it('strips both parameters so a reload cannot replay a spent response', () => {
@@ -86,7 +105,7 @@ describe('taking a response off the URL', () => {
 
   it('consumes a stale response instead of leaving it to re-fire', () => {
     setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=orphan`)
-    expect(takeResponseFromUrl()).toBeNull()
+    expect(takeResponseFromUrl()?.ok).toBe(false)
     expect(new URL(window.location.href).searchParams.get(RESPONSE_PARAM)).toBeNull()
   })
 

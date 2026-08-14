@@ -95,6 +95,9 @@ export class DeeplinkWalletAdapter {
   private networkListeners: MovementOnNetworkChangeInput[] = []
   private standardChangeListeners: StandardEventsListeners['change'][] = []
 
+  /** Why the last response was dropped, if one was. Diagnostics only. */
+  lastIgnoredResponse: string | null = null
+
   constructor(wallet: DeeplinkWallet) {
     this.wallet = wallet
     this.id = wallet.id
@@ -189,7 +192,15 @@ export class DeeplinkWalletAdapter {
    */
   consumeResponse(): { method: Method; result: unknown } | null {
     const taken = takeResponseFromUrl()
-    if (!taken || taken.pending.walletId !== this.wallet.id) return null
+    if (!taken) return null
+    if (!taken.ok) {
+      // Loud on purpose. A response that arrives but cannot be matched is
+      // indistinguishable, on screen, from never having come back at all.
+      console.warn(`[deeplink] ignoring wallet response: ${taken.reason}`)
+      this.lastIgnoredResponse = taken.reason
+      return null
+    }
+    if (taken.pending.walletId !== this.wallet.id) return null
 
     const { encoded, pending } = taken
     if (pending.method === 'connect') {
