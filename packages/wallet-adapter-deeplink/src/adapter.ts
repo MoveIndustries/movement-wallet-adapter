@@ -296,16 +296,16 @@ export class DeeplinkWalletAdapter {
     'movement:disconnect': {
       version: '1.0.0',
       disconnect: async () => {
-        const session = this.session
-        // Tell the wallet, so its stored grant goes too — but only if we can
-        // still address it. Local state is cleared either way.
-        if (session?.walletPublicKeyHex) {
-          const key = sharedKey(secretKeyOf(session), session.walletPublicKeyHex)
-          void this.navigate('disconnect', {
-            dappEncryptionPublicKey: session.publicKeyHex,
-            payload: seal({}, key),
-          })
-        }
+        // Local only, deliberately. The wire has a `disconnect` method, but
+        // reaching it means navigating to the wallet app, and the wallet sends
+        // nothing back for it — so telling the wallet would dump the user into
+        // another app with no way home, every time they disconnect. Leaving
+        // quietly is the better trade.
+        //
+        // The cost is that the wallet keeps listing this dApp until the user
+        // revokes it there. That is a stale entry in a list, not a live
+        // permission: a request from us would need our session key, which is
+        // gone.
         clearSession()
         this.emitChange()
       },
