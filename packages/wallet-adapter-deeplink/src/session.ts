@@ -27,6 +27,31 @@ const PENDING_KEY = 'movement.deeplink.pending.v1'
 export const RESPONSE_PARAM = 'response'
 export const REQUEST_ID_PARAM = 'movement_request_id'
 
+/**
+ * The document the user is actually looking at.
+ *
+ * A subframe cannot hand off to an external app: a custom-scheme navigation
+ * made from one is ignored, silently, so the tap does nothing at all. Both
+ * halves of the round trip therefore run against the top-level document, the
+ * handoff and the response that comes back on its URL.
+ *
+ * Returns null when an ancestor is cross-origin, which the browser will not
+ * let us read or navigate. That case cannot work, and callers say so rather
+ * than appearing to do nothing.
+ */
+export function hostWindow(): Window | null {
+  if (typeof window === 'undefined') return null
+  const top = window.top
+  if (!top || top === window) return window
+  try {
+    // Throws for a cross-origin ancestor; reading is the only way to ask.
+    void top.location.href
+    return top
+  } catch {
+    return null
+  }
+}
+
 export interface StoredSession {
   walletId: string
   /** Our X25519 secret, hex. Per connection, never reused across wallets. */
@@ -139,8 +164,11 @@ export type TakenResponse =
   | { ok: false; reason: string }
 
 export function takeResponseFromUrl(): TakenResponse | null {
-  if (typeof window === 'undefined') return null
-  const url = new URL(window.location.href)
+  // The response lands on whichever document made the request, which is the
+  // top-level one whenever we are framed.
+  const host = hostWindow()
+  if (!host) return null
+  const url = new URL(host.location.href)
   const encoded = url.searchParams.get(RESPONSE_PARAM)
   const requestId = url.searchParams.get(REQUEST_ID_PARAM)
   if (!encoded) return null
@@ -150,7 +178,7 @@ export function takeResponseFromUrl(): TakenResponse | null {
   // cannot sit in the URL and re-fire on every subsequent request.
   url.searchParams.delete(RESPONSE_PARAM)
   url.searchParams.delete(REQUEST_ID_PARAM)
-  window.history.replaceState({}, '', url.toString())
+  host.history.replaceState({}, '', url.toString())
 
   // Each mismatch gets its own reason. Dropping a response silently is what
   // made this class of bug expensive to diagnose: the user approves, comes

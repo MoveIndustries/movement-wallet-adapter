@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   beginSession,
   clearSession,
@@ -8,12 +8,23 @@ import {
   savePending,
   secretKeyOf,
   takeResponseFromUrl,
+  hostWindow,
   REQUEST_ID_PARAM,
   RESPONSE_PARAM,
 } from './session.js'
 
 function setUrl(url: string): void {
   window.history.replaceState({}, '', url)
+}
+
+/** Puts this window inside a frame owned by `top`, until the returned undo. */
+function frameUnder(top: unknown): () => void {
+  const original = Object.getOwnPropertyDescriptor(window, 'top')
+  Object.defineProperty(window, 'top', { value: top, configurable: true })
+  return () => {
+    if (original) Object.defineProperty(window, 'top', original)
+    else Reflect.deleteProperty(window, 'top')
+  }
 }
 
 describe('session storage', () => {
@@ -117,5 +128,71 @@ describe('taking a response off the URL', () => {
     takeResponseFromUrl()
 
     expect(loadPending()).toBeNull()
+  })
+})
+
+describe('framed hosts', () => {
+  let undo: (() => void) | null = null
+
+  beforeEach(() => {
+    localStorage.clear()
+    setUrl('https://dapp.example/app')
+  })
+
+  afterEach(() => {
+    undo?.()
+    undo = null
+  })
+
+  it('uses this window when the page is not framed', () => {
+    expect(hostWindow()).toBe(window)
+  })
+
+  it('uses the top document when framed by a same-origin page', () => {
+    const top = { location: { href: 'https://dapp.example/shell' }, history: {} }
+    undo = frameUnder(top)
+    expect(hostWindow()).toBe(top)
+  })
+
+  it('reports no host when an ancestor is cross-origin', () => {
+    undo = frameUnder({
+      get location(): never {
+        throw new Error('cross-origin')
+      },
+    })
+    expect(hostWindow()).toBeNull()
+  })
+
+  it('takes the response off the top URL, not the frame it is read from', () => {
+    const id = newRequestId()
+    savePending({ id, walletId: 'w', method: 'connect', returnTo: 'https://dapp.example/shell' })
+
+    let replacedWith = ''
+    undo = frameUnder({
+      location: {
+        href: `https://dapp.example/shell?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=${id}`,
+      },
+      history: {
+        replaceState: (_s: unknown, _t: string, url: string) => {
+          replacedWith = url
+        },
+      },
+    })
+
+    const taken = takeResponseFromUrl()
+
+    expect(taken?.ok).toBe(true)
+    // Cleaned up on the top document, so a reload cannot re-fire it.
+    expect(new URL(replacedWith).searchParams.get(RESPONSE_PARAM)).toBeNull()
+    expect(new URL(replacedWith).searchParams.get(REQUEST_ID_PARAM)).toBeNull()
+  })
+
+  it('finds nothing when a cross-origin ancestor hides the URL', () => {
+    undo = frameUnder({
+      get location(): never {
+        throw new Error('cross-origin')
+      },
+    })
+    expect(takeResponseFromUrl()).toBeNull()
   })
 })

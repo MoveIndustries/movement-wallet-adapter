@@ -37,6 +37,7 @@ import {
   savePending,
   secretKeyOf,
   takeResponseFromUrl,
+  hostWindow,
   REQUEST_ID_PARAM,
   type StoredSession,
 } from './session.js'
@@ -157,15 +158,26 @@ export class DeeplinkWalletAdapter {
     if (typeof window === 'undefined') {
       return Promise.reject(new Error('Deeplink wallets require a browser'))
     }
+    // Framed hosts hand off from the top document: a subframe's custom-scheme
+    // navigation is ignored, and the redirect has to name the page the user
+    // will be returned to, not the frame inside it.
+    const host = hostWindow()
+    if (!host) {
+      return Promise.reject(
+        new Error(
+          'Cannot reach the wallet from a cross-origin frame: the browser will not let this page navigate its parent.',
+        ),
+      )
+    }
     const requestId = newRequestId()
-    const redirect = new URL(window.location.href)
+    const redirect = new URL(host.location.href)
     redirect.searchParams.set(REQUEST_ID_PARAM, requestId)
 
     savePending({
       id: requestId,
       walletId: this.wallet.id,
       method,
-      returnTo: window.location.href,
+      returnTo: host.location.href,
     })
 
     const data = encodeRequest({ ...payload, redirect: redirect.toString() })
@@ -176,7 +188,7 @@ export class DeeplinkWalletAdapter {
       // iOS drops universal links from navigations it cannot attribute to a
       // user gesture, and an await before this point loses that attribution.
       try {
-        window.location.href = target
+        host.location.href = target
       } catch (error) {
         reject(error instanceof Error ? error : new Error(String(error)))
       }
