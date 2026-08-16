@@ -55,7 +55,9 @@ interface ApprovedPayload {
   approved: boolean
   data?: string
   error?: string
-  code?: string
+  /** The account the wallet acted as. See `followAccount`. */
+  address?: string
+  publicKey?: string
 }
 
 interface ConnectResponseEnvelope {
@@ -63,22 +65,7 @@ interface ConnectResponseEnvelope {
   walletEncryptionPublicKey: string
   data?: string
   error?: string
-  code?: string
 }
-
-/**
- * The grant belongs to a wallet that is no longer active in the app.
- *
- * An app has no channel back into a browser tab, so a wallet switch cannot be
- * pushed here the way the extension pushes `disconnect`. It arrives instead on
- * the next request, as this code. The session it names is dead: keeping it
- * would leave the page showing a connected address the wallet will not sign
- * for.
- *
- * Older wallet builds send prose with no code. Nothing can be done about those
- * beyond what already happens, so they keep falling through as a plain failure.
- */
-const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
 
 /**
  * A mobile wallet reachable only by leaving the page.
@@ -233,10 +220,7 @@ export class DeeplinkWalletAdapter {
     const { encoded, pending } = taken
     if (pending.method === 'connect') {
       const envelope = decodeResponse<ConnectResponseEnvelope>(encoded)
-      if (!envelope.approved) {
-        if (envelope.code === ACCOUNT_CHANGED) this.dropDeadSession()
-        return { method: 'connect', result: null }
-      }
+      if (!envelope.approved) return { method: 'connect', result: null }
       const session = this.session
       if (!session) return null
 
@@ -254,8 +238,8 @@ export class DeeplinkWalletAdapter {
     }
 
     const envelope = decodeResponse<ApprovedPayload>(encoded)
+    this.followAccount(envelope)
     if (!envelope.approved || !envelope.data) {
-      if (envelope.code === ACCOUNT_CHANGED) this.dropDeadSession()
       return { method: pending.method, result: null }
     }
     const session = this.session
@@ -267,16 +251,26 @@ export class DeeplinkWalletAdapter {
   // MARK: events
 
   /**
-   * Forget a session the wallet no longer honours.
+   * Follow an account switch made in the wallet app.
    *
-   * The same teardown as an explicit disconnect, for the same reason: the
-   * session key is useless once the wallet has stopped answering to it, and a
-   * page left holding one shows an address it cannot transact with. The
-   * `emitChange` is what actually updates the UI, since the connect modal is
-   * driven by the standard change event rather than by the response.
+   * A grant moves to whichever account the user selects there, so a response
+   * can come back from a different account than the one that connected. An app
+   * cannot reach into a browser tab to announce that, so every response states
+   * the account it acted as and the session is corrected here.
+   *
+   * Without this the page keeps displaying the address it saw at connect while
+   * the wallet signs as another one, which is worse than showing nothing: the
+   * user reads one account and transacts from a different one.
+   *
+   * Address and key move together. Half an identity would fail verification in
+   * a way that reads as a bad signature rather than a stale session.
    */
-  private dropDeadSession(): void {
-    clearSession()
+  private followAccount(envelope: { address?: string; publicKey?: string }): void {
+    const { address, publicKey } = envelope
+    if (!address || !publicKey) return
+    const session = this.session
+    if (!session?.account || session.account.address === address) return
+    saveSession({ ...session, account: { ...session.account, address, publicKey } })
     this.emitChange()
   }
 
