@@ -55,6 +55,7 @@ interface ApprovedPayload {
   approved: boolean
   data?: string
   error?: string
+  code?: string
 }
 
 interface ConnectResponseEnvelope {
@@ -62,7 +63,22 @@ interface ConnectResponseEnvelope {
   walletEncryptionPublicKey: string
   data?: string
   error?: string
+  code?: string
 }
+
+/**
+ * The grant belongs to a wallet that is no longer active in the app.
+ *
+ * An app has no channel back into a browser tab, so a wallet switch cannot be
+ * pushed here the way the extension pushes `disconnect`. It arrives instead on
+ * the next request, as this code. The session it names is dead: keeping it
+ * would leave the page showing a connected address the wallet will not sign
+ * for.
+ *
+ * Older wallet builds send prose with no code. Nothing can be done about those
+ * beyond what already happens, so they keep falling through as a plain failure.
+ */
+const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
 
 /**
  * A mobile wallet reachable only by leaving the page.
@@ -217,7 +233,10 @@ export class DeeplinkWalletAdapter {
     const { encoded, pending } = taken
     if (pending.method === 'connect') {
       const envelope = decodeResponse<ConnectResponseEnvelope>(encoded)
-      if (!envelope.approved) return { method: 'connect', result: null }
+      if (!envelope.approved) {
+        if (envelope.code === ACCOUNT_CHANGED) this.dropDeadSession()
+        return { method: 'connect', result: null }
+      }
       const session = this.session
       if (!session) return null
 
@@ -236,6 +255,7 @@ export class DeeplinkWalletAdapter {
 
     const envelope = decodeResponse<ApprovedPayload>(encoded)
     if (!envelope.approved || !envelope.data) {
+      if (envelope.code === ACCOUNT_CHANGED) this.dropDeadSession()
       return { method: pending.method, result: null }
     }
     const session = this.session
@@ -245,6 +265,20 @@ export class DeeplinkWalletAdapter {
   }
 
   // MARK: events
+
+  /**
+   * Forget a session the wallet no longer honours.
+   *
+   * The same teardown as an explicit disconnect, for the same reason: the
+   * session key is useless once the wallet has stopped answering to it, and a
+   * page left holding one shows an address it cannot transact with. The
+   * `emitChange` is what actually updates the UI, since the connect modal is
+   * driven by the standard change event rather than by the response.
+   */
+  private dropDeadSession(): void {
+    clearSession()
+    this.emitChange()
+  }
 
   private emitChange(): void {
     const info = this.accountInfo()
