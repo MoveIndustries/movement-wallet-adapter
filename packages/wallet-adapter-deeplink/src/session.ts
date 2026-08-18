@@ -60,6 +60,12 @@ export interface StoredSession {
   publicKeyHex: string
   /** The wallet's X25519 public key, hex. Absent until connect returns. */
   walletPublicKeyHex?: string
+  /**
+   * The wallet key of a session dropped on an account switch, kept so the
+   * next connect can prove prior possession of the channel (the reconnect
+   * proof). Never used to seal requests; spent by the next connect response.
+   */
+  previousWalletPublicKeyHex?: string
   account?: ConnectData
 }
 

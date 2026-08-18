@@ -129,6 +129,17 @@ export class DeeplinkWalletAdapter {
   lastIgnoredResponse: string | null = null
 
   /**
+   * Why the session was dropped without the user asking, when it was.
+   *
+   * 'account-changed' means the wallet switched to an account that never
+   * approved this dApp. A consuming app should say so and offer to connect as
+   * the new account, instead of presenting the cold-start connect state; the
+   * interrupted action can be retried once that connect completes. Cleared by
+   * the next connect response and by an explicit disconnect.
+   */
+  disconnectReason: 'account-changed' | null = null
+
+  /**
    * The response consumed on this page load, kept for the host app.
    *
    * Consumption is destructive (the URL parameters and the pending record are
@@ -215,7 +226,17 @@ export class DeeplinkWalletAdapter {
    * does not proceed as though the call had returned. The real answer arrives
    * in a later page load, through `consumeResponse`.
    */
-  private navigate(method: Method, payload: Record<string, unknown>): Promise<never> {
+  private navigate(
+    method: Method,
+    payload: Record<string, unknown>,
+    /**
+     * Prior session key for the reconnect proof. When set, the request gains
+     * `proof`: its own redirect sealed under this key, proving the sender held
+     * the previous session so the wallet may answer the connect silently. The
+     * seal binds the redirect, so the proof cannot be lifted onto another one.
+     */
+    proofKey?: Uint8Array,
+  ): Promise<never> {
     if (typeof window === 'undefined') {
       return Promise.reject(new Error('Deeplink wallets require a browser'))
     }
@@ -241,7 +262,11 @@ export class DeeplinkWalletAdapter {
       returnTo: host.location.href,
     })
 
-    const data = encodeRequest({ ...payload, redirect: redirect.toString() })
+    const data = encodeRequest({
+      ...payload,
+      redirect: redirect.toString(),
+      ...(proofKey ? { proof: seal({ redirect: redirect.toString() }, proofKey) } : {}),
+    })
     const target = `${this.wallet.baseUrl}${method}?data=${encodeURIComponent(data)}`
 
     return new Promise<never>((_resolve, reject) => {
@@ -308,11 +333,14 @@ export class DeeplinkWalletAdapter {
       const account = envelope.data ? open<ConnectData>(envelope.data, key) : null
       if (!account) return { method: 'connect', result: null }
 
+      // The reconnect proof's key is spent: the new channel replaces it.
+      const { previousWalletPublicKeyHex: _spent, ...current } = session
       saveSession({
-        ...session,
+        ...current,
         walletPublicKeyHex: envelope.walletEncryptionPublicKey,
         account,
       })
+      this.disconnectReason = null
       this.emitChange()
       return { method: 'connect', result: account }
     }
@@ -380,10 +408,16 @@ export class DeeplinkWalletAdapter {
         walletId: session.walletId,
         secretKeyHex: session.secretKeyHex,
         publicKeyHex: session.publicKeyHex,
+        // Kept for the reconnect proof: the next connect seals its redirect
+        // under this key to prove prior possession of the channel, which is
+        // what lets the wallet answer it silently.
+        previousWalletPublicKeyHex:
+          session.walletPublicKeyHex ?? session.previousWalletPublicKeyHex,
       })
     } else {
       clearSession()
     }
+    this.disconnectReason = 'account-changed'
     this.emitChange()
   }
 
@@ -443,11 +477,16 @@ export class DeeplinkWalletAdapter {
         // a switch back to a previously approved account could never be served
         // silently.
         const session = this.session ?? beginSession(this.wallet.id)
-        return this.navigate('connect', {
-          appName: documentTitle(),
-          appUrl: originOf(),
-          dappEncryptionPublicKey: session.publicKeyHex,
-        })
+        const previous = session.previousWalletPublicKeyHex
+        return this.navigate(
+          'connect',
+          {
+            appName: documentTitle(),
+            appUrl: originOf(),
+            dappEncryptionPublicKey: session.publicKeyHex,
+          },
+          previous ? sharedKey(secretKeyOf(session), previous) : undefined,
+        )
       },
     } as unknown as MovementConnectFeature['movement:connect'],
 
@@ -465,6 +504,7 @@ export class DeeplinkWalletAdapter {
         // permission: a request from us would need our session key, which is
         // gone.
         clearSession()
+        this.disconnectReason = null
         this.emitChange()
       },
     } as unknown as MovementDisconnectFeature['movement:disconnect'],
