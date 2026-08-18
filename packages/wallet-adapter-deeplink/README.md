@@ -70,7 +70,11 @@ looks old rather than broken.
 3. The wallet answers by opening the dApp's redirect URL with the sealed
    response in the query string.
 4. The page reloads and consumes the response, which `registerDeeplinkWallets`
-   does before any application code runs.
+   does before any application code runs. Consumption is destructive, so the
+   result of the round trip (the connect account, a signature, a transaction
+   hash) is kept on the adapter's `lastConsumedResponse` for the host app to
+   read after registration: the promise that made the request settled in a
+   page that no longer exists, and this field is where its answer lands.
 
 Each request carries an id. `takeResponseFromUrl` strips both parameters from
 the URL whether or not they match the request in flight, so a spent response

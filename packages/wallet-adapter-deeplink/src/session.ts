@@ -154,7 +154,7 @@ export function newRequestId(): string {
 
 /**
  * Pulls a wallet response off the current URL, if one is there and it matches
- * the request we sent.
+ * the request we sent, on behalf of `walletId`.
  *
  * Strips both parameters from the address bar afterwards via `replaceState`, so
  * a reload or a shared link does not carry a spent response.
@@ -163,7 +163,7 @@ export type TakenResponse =
   | { ok: true; encoded: string; pending: PendingRequest }
   | { ok: false; reason: string }
 
-export function takeResponseFromUrl(): TakenResponse | null {
+export function takeResponseFromUrl(walletId: string): TakenResponse | null {
   // The response lands on whichever document made the request, which is the
   // top-level one whenever we are framed.
   const host = hostWindow()
@@ -174,6 +174,10 @@ export function takeResponseFromUrl(): TakenResponse | null {
   if (!encoded) return null
 
   const pending = loadPending()
+  // A live response addressed to another wallet is left untouched, URL and
+  // pending record both: adapters take turns calling this, and consuming here
+  // would destroy the response before its owner's turn came.
+  if (pending && pending.id === requestId && pending.walletId !== walletId) return null
   // Consume the parameters regardless of whether they match, so a stale one
   // cannot sit in the URL and re-fire on every subsequent request.
   url.searchParams.delete(RESPONSE_PARAM)

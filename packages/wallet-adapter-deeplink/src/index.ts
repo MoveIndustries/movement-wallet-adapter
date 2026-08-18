@@ -40,6 +40,12 @@ export interface RegisterOptions {
  *
  * Returns the adapters that were registered, empty when the environment is not
  * one where deeplinks work.
+ *
+ * Registration also consumes any wallet response sitting on the URL, and
+ * consumption is destructive, so the host app reads what came back from the
+ * adapter's `lastConsumedResponse` afterwards. The promise that made the
+ * request settled in a page that no longer exists; that field is where a
+ * signature or transaction hash actually arrives.
  */
 export function registerDeeplinkWallets(options: RegisterOptions = {}): DeeplinkWalletAdapter[] {
   if (registered) return registered
@@ -50,7 +56,8 @@ export function registerDeeplinkWallets(options: RegisterOptions = {}): Deeplink
     registerWallet(adapter as never)
     // The page receiving a wallet's answer is a fresh load of the page that
     // asked, so the response is sitting in the URL right now, before any app
-    // code has had a chance to ask for it.
+    // code has had a chance to ask for it. What it was is kept on the
+    // adapter's `lastConsumedResponse`.
     adapter.consumeResponse()
   }
 

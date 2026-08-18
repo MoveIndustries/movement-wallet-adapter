@@ -1,5 +1,4 @@
 import type {
-  AccountInfo,
   MovementConnectFeature,
   MovementDisconnectFeature,
   MovementFeatures,
@@ -11,13 +10,24 @@ import type {
   MovementOnNetworkChangeInput,
   MovementSignAndSubmitTransactionFeature,
   MovementSignMessageFeature,
-  MovementSignTransactionFeatureV1_1,
+  MovementSignTransactionFeatureV1_0,
   NetworkInfo,
   UserResponse,
 } from '@moveindustries/wallet-standard'
-import { MOVEMENT_TESTNET_CHAIN, UserResponseStatus } from '@moveindustries/wallet-standard'
+import {
+  AccountInfo,
+  MOVEMENT_TESTNET_CHAIN,
+  UserResponseStatus,
+} from '@moveindustries/wallet-standard'
 import type { StandardEventsFeature, StandardEventsListeners } from '@wallet-standard/core'
-import { AccountAddress, Hex } from '@moveindustries/ts-sdk'
+import type { AnyRawTransaction } from '@moveindustries/ts-sdk'
+import {
+  AccountAddress,
+  AnyPublicKey,
+  Deserializer,
+  Ed25519PublicKey,
+  Hex,
+} from '@moveindustries/ts-sdk'
 import {
   decodeResponse,
   open,
@@ -118,6 +128,17 @@ export class DeeplinkWalletAdapter {
   /** Why the last response was dropped, if one was. Diagnostics only. */
   lastIgnoredResponse: string | null = null
 
+  /**
+   * The response consumed on this page load, kept for the host app.
+   *
+   * Consumption is destructive (the URL parameters and the pending record are
+   * spent), and registration consumes before any app code runs, so without
+   * this the result of an approved sign was decrypted once and lost. The
+   * promise that made the request settled in a page that no longer exists;
+   * this is where its answer lands instead.
+   */
+  lastConsumedResponse: { method: Method; result: unknown } | null = null
+
   constructor(wallet: DeeplinkWallet) {
     this.wallet = wallet
     this.id = wallet.id
@@ -149,13 +170,34 @@ export class DeeplinkWalletAdapter {
     return this.supportedMethods.includes(method)
   }
 
+  /**
+   * A real `AccountInfo`, not a shaped literal: wallet-adapter-core stores this
+   * object as-is and `signMessageAndVerify` calls `verifySignature` on its
+   * `publicKey`, which raw bytes do not have. The connect payload's key is hex,
+   * either a bare 32-byte Ed25519 key or a BCS `AnyPublicKey` (the canonical
+   * encoding non-Ed25519 accounts use).
+   *
+   * Null rather than a throw on a malformed stored key: this runs from
+   * registration-time paths, where a throw would stop every adapter from
+   * registering.
+   */
   private accountInfo(): AccountInfo | null {
     const account = this.account
     if (!account) return null
-    return {
-      address: AccountAddress.fromString(account.address),
-      publicKey: Hex.fromHexString(account.publicKey).toUint8Array(),
-    } as unknown as AccountInfo
+    try {
+      const bytes = Hex.fromHexString(account.publicKey).toUint8Array()
+      const publicKey =
+        bytes.length === 32
+          ? new Ed25519PublicKey(bytes)
+          : AnyPublicKey.deserialize(new Deserializer(bytes))
+      return new AccountInfo({
+        address: AccountAddress.fromString(account.address),
+        publicKey,
+      })
+    } catch (error) {
+      console.warn(`[deeplink] stored account is unreadable: ${messageOf(error)}`)
+      return null
+    }
   }
 
   get accounts(): AccountInfo[] {
@@ -222,7 +264,10 @@ export class DeeplinkWalletAdapter {
    * can react; returns null when there is nothing for this wallet.
    */
   consumeResponse(): { method: Method; result: unknown } | null {
-    const taken = takeResponseFromUrl()
+    // Addressed by wallet id inside the take, before anything is consumed: a
+    // response for another registered wallet must survive for that adapter's
+    // own consumeResponse call.
+    const taken = takeResponseFromUrl(this.wallet.id)
     if (!taken) return null
     if (!taken.ok) {
       // Loud on purpose. A response that arrives but cannot be matched is
@@ -231,9 +276,28 @@ export class DeeplinkWalletAdapter {
       this.lastIgnoredResponse = taken.reason
       return null
     }
-    if (taken.pending.walletId !== this.wallet.id) return null
 
-    const { encoded, pending } = taken
+    // A response the wallet produced can still be unreadable here: truncated
+    // in transit by a messaging app, or sealed for a session this page has
+    // since replaced. That is a lost response, not a broken page, and it must
+    // not throw out of registration and stop every adapter from registering.
+    let consumed: { method: Method; result: unknown } | null
+    try {
+      consumed = this.applyResponse(taken.encoded, taken.pending)
+    } catch (error) {
+      const reason = `wallet response could not be read: ${messageOf(error)}`
+      console.warn(`[deeplink] ${reason}`)
+      this.lastIgnoredResponse = reason
+      return null
+    }
+    if (consumed) this.lastConsumedResponse = consumed
+    return consumed
+  }
+
+  private applyResponse(
+    encoded: string,
+    pending: { method: Method },
+  ): { method: Method; result: unknown } | null {
     if (pending.method === 'connect') {
       const envelope = decodeResponse<ConnectResponseEnvelope>(encoded)
       if (!envelope.approved) return { method: 'connect', result: null }
@@ -434,8 +498,14 @@ export class DeeplinkWalletAdapter {
     } as unknown as MovementSignMessageFeature['movement:signMessage'],
 
     'movement:signTransaction': {
-      version: '1.1.0',
-      signTransaction: async (input: { rawTransaction: { bcsToBytes(): Uint8Array } }) => {
+      // 1.0 deliberately. The 1.1 input shape hands the WALLET a payload to
+      // build the transaction from, but this transport signs exactly the BCS
+      // bytes it is given, so the caller has to build them: under 1.1,
+      // wallet-adapter-core passed payload input here unbuilt and
+      // `rawTransaction` was undefined. Under 1.0 the core builds the
+      // transaction itself and passes it whole.
+      version: '1.0.0',
+      signTransaction: async (transaction: AnyRawTransaction, asFeePayer?: boolean) => {
         const { session, key } = this.requireSession()
         if (!this.supports('sign_transaction')) {
           // Discovery exists precisely so this fails here, in the page, rather
@@ -444,29 +514,54 @@ export class DeeplinkWalletAdapter {
             'The installed wallet version cannot sign without submitting. Update it and try again.',
           )
         }
-        const bytes = input.rawTransaction.bcsToBytes()
+        if (asFeePayer) {
+          // A fee payer signs a different message than the sender; the wire
+          // carries raw-transaction bytes only, so signing them here would
+          // produce a valid-looking authenticator for the wrong role.
+          throw new Error('Fee-payer signing is not supported over the deeplink transport.')
+        }
+        const bytes = transaction.rawTransaction.bcsToBytes()
         return this.navigate('sign_transaction', {
           dappEncryptionPublicKey: session.publicKeyHex,
           payload: seal({ transaction: base64Encode(bytes) }, key),
         })
       },
-    } as unknown as MovementSignTransactionFeatureV1_1['movement:signTransaction'],
+    } as unknown as MovementSignTransactionFeatureV1_0['movement:signTransaction'],
 
     'movement:signAndSubmitTransaction': {
       version: '1.1.0',
       signAndSubmitTransaction: async (input: {
-        payload: { function: string; typeArguments?: string[]; functionArguments?: unknown[] }
+        payload: {
+          function?: string
+          typeArguments?: string[]
+          functionArguments?: unknown[]
+          multisigAddress?: unknown
+          bytecode?: unknown
+        }
       }) => {
         const { session, key } = this.requireSession()
+        const { payload } = input
+        // The wire's payload is an entry-function descriptor and nothing else.
+        // Script and multisig payloads cannot be expressed on it, and sealing
+        // a stripped version would submit a different transaction than the
+        // dApp built; refuse in the page instead.
+        if (payload.bytecode !== undefined || typeof payload.function !== 'string') {
+          throw new Error('Script payloads are not supported over the deeplink transport.')
+        }
+        if (payload.multisigAddress !== undefined) {
+          throw new Error(
+            'Multisig payloads are not supported over the deeplink transport. Build the transaction and use signTransaction instead.',
+          )
+        }
         return this.navigate('sign_and_submit', {
           dappEncryptionPublicKey: session.publicKeyHex,
           payload: seal(
             {
-              function: input.payload.function,
-              typeArguments: input.payload.typeArguments ?? [],
+              function: payload.function,
+              typeArguments: payload.typeArguments ?? [],
               // The wallet's native dialect requires string-encoded numbers;
               // a bare JSON number is rejected there.
-              arguments: (input.payload.functionArguments ?? []).map(stringifyArg),
+              arguments: (payload.functionArguments ?? []).map(stringifyArg),
             },
             key,
           ),
@@ -494,11 +589,27 @@ export class DeeplinkWalletAdapter {
   }
 }
 
-/** Numbers must reach the wallet as strings; nested vectors keep their shape. */
+/**
+ * Numbers must reach the wallet as strings, nested vectors keep their shape,
+ * and byte buffers become per-byte strings (a `vector<u8>` on the wire).
+ *
+ * Anything else object-shaped is refused here, in the page: JSON would turn an
+ * SDK class instance or a typed buffer into index-keyed garbage the wallet
+ * rejects only after the user was already sent out to the app.
+ */
 function stringifyArg(value: unknown): unknown {
+  if (value instanceof Uint8Array) return Array.from(value, String)
+  if (value instanceof ArrayBuffer) return Array.from(new Uint8Array(value), String)
   if (Array.isArray(value)) return value.map(stringifyArg)
   if (typeof value === 'number' || typeof value === 'bigint') return value.toString()
-  return value
+  if (typeof value === 'string' || typeof value === 'boolean') return value
+  throw new Error(
+    'Unsupported transaction argument: pass plain values (strings, numbers, booleans, arrays, byte arrays), not SDK class instances.',
+  )
+}
+
+function messageOf(error: unknown): string {
+  return error instanceof Error ? error.message : String(error)
 }
 
 function documentTitle(): string {

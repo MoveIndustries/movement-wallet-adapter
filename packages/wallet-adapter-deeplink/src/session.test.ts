@@ -62,7 +62,7 @@ describe('taking a response off the URL', () => {
   })
 
   it('returns nothing when the URL carries no response', () => {
-    expect(takeResponseFromUrl()).toBeNull()
+    expect(takeResponseFromUrl('w')).toBeNull()
   })
 
   it('matches a response to the request that asked for it', () => {
@@ -70,7 +70,7 @@ describe('taking a response off the URL', () => {
     savePending({ id, walletId: 'w', method: 'connect', returnTo: 'https://dapp.example/app' })
     setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=${id}`)
 
-    const taken = takeResponseFromUrl()
+    const taken = takeResponseFromUrl('w')
     expect(taken?.ok).toBe(true)
     expect(taken?.ok && taken.encoded).toBe('abc')
     expect(taken?.ok && taken.pending.method).toBe('connect')
@@ -79,7 +79,7 @@ describe('taking a response off the URL', () => {
   it('ignores a response whose id does not match, and says why', () => {
     savePending({ id: 'expected', walletId: 'w', method: 'connect', returnTo: 'x' })
     setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=stale`)
-    const taken = takeResponseFromUrl()
+    const taken = takeResponseFromUrl('w')
     expect(taken?.ok).toBe(false)
     expect(taken?.ok === false && taken.reason).toMatch(/older request/)
   })
@@ -88,7 +88,7 @@ describe('taking a response off the URL', () => {
     // The shape of the new-tab failure: sessionStorage would have lost the
     // pending request here, and the response would vanish without a word.
     setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=x`)
-    const taken = takeResponseFromUrl()
+    const taken = takeResponseFromUrl('w')
     expect(taken?.ok).toBe(false)
     expect(taken?.ok === false && taken.reason).toMatch(/no pending request/)
   })
@@ -105,7 +105,7 @@ describe('taking a response off the URL', () => {
     savePending({ id, walletId: 'w', method: 'connect', returnTo: 'x' })
     setUrl(`https://dapp.example/app?keep=1&${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=${id}`)
 
-    takeResponseFromUrl()
+    takeResponseFromUrl('w')
 
     const url = new URL(window.location.href)
     expect(url.searchParams.get(RESPONSE_PARAM)).toBeNull()
@@ -116,8 +116,21 @@ describe('taking a response off the URL', () => {
 
   it('consumes a stale response instead of leaving it to re-fire', () => {
     setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=orphan`)
-    expect(takeResponseFromUrl()?.ok).toBe(false)
+    expect(takeResponseFromUrl('w')?.ok).toBe(false)
     expect(new URL(window.location.href).searchParams.get(RESPONSE_PARAM)).toBeNull()
+  })
+
+  it("leaves another wallet's live response for its own adapter", () => {
+    // Adapters take turns consuming; the first one must not destroy a
+    // response addressed to a later one.
+    const id = newRequestId()
+    savePending({ id, walletId: 'other', method: 'connect', returnTo: 'x' })
+    setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=${id}`)
+
+    expect(takeResponseFromUrl('w')).toBeNull()
+    expect(new URL(window.location.href).searchParams.get(RESPONSE_PARAM)).toBe('abc')
+    expect(loadPending()?.id).toBe(id)
+    expect(takeResponseFromUrl('other')?.ok).toBe(true)
   })
 
   it('clears the pending request once its response is taken', () => {
@@ -125,7 +138,7 @@ describe('taking a response off the URL', () => {
     savePending({ id, walletId: 'w', method: 'sign_message', returnTo: 'x' })
     setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=abc&${REQUEST_ID_PARAM}=${id}`)
 
-    takeResponseFromUrl()
+    takeResponseFromUrl('w')
 
     expect(loadPending()).toBeNull()
   })
@@ -179,7 +192,7 @@ describe('framed hosts', () => {
       },
     })
 
-    const taken = takeResponseFromUrl()
+    const taken = takeResponseFromUrl('w')
 
     expect(taken?.ok).toBe(true)
     // Cleaned up on the top document, so a reload cannot re-fire it.
@@ -193,6 +206,6 @@ describe('framed hosts', () => {
         throw new Error('cross-origin')
       },
     })
-    expect(takeResponseFromUrl()).toBeNull()
+    expect(takeResponseFromUrl('w')).toBeNull()
   })
 })
