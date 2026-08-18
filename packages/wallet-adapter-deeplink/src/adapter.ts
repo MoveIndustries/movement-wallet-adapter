@@ -50,14 +50,19 @@ import type { DeeplinkWallet } from './wallets.js'
  */
 const LEGACY_METHODS: Method[] = ['connect', 'disconnect', 'sign_and_submit', 'sign_message']
 
-/** Envelope the wallet returns for approvals other than connect. */
+/**
+ * Envelope the wallet returns for approvals other than connect.
+ *
+ * Plaintext, and treated as such: anyone can forge one into a return URL, so
+ * nothing here may change what the page believes about its identity. The
+ * account the wallet acted as travels inside the sealed `data`, where the
+ * session key authenticates it — see `followAccount`.
+ */
 interface ApprovedPayload {
   approved: boolean
   data?: string
   error?: string
-  /** The account the wallet acted as. See `followAccount`. */
-  address?: string
-  publicKey?: string
+  code?: string
 }
 
 interface ConnectResponseEnvelope {
@@ -66,6 +71,17 @@ interface ConnectResponseEnvelope {
   data?: string
   error?: string
 }
+
+/**
+ * The active account in the wallet app never approved this dApp.
+ *
+ * An app has no channel back into a browser tab, so a wallet switch cannot be
+ * pushed here the way the extension pushes `disconnect`. It arrives instead on
+ * the next request, as this code. A switch to an account that DID approve this
+ * dApp never produces it: that request is served silently as the new account,
+ * disclosed inside the sealed result (extension parity).
+ */
+const ACCOUNT_CHANGED = 'ACCOUNT_CHANGED'
 
 /**
  * A mobile wallet reachable only by leaving the page.
@@ -238,14 +254,18 @@ export class DeeplinkWalletAdapter {
     }
 
     const envelope = decodeResponse<ApprovedPayload>(encoded)
-    this.followAccount(envelope)
     if (!envelope.approved || !envelope.data) {
+      if (envelope.code === ACCOUNT_CHANGED) this.dropDeadSession()
       return { method: pending.method, result: null }
     }
     const session = this.session
     if (!session?.walletPublicKeyHex) return null
     const key = sharedKey(secretKeyOf(session), session.walletPublicKeyHex)
-    return { method: pending.method, result: open(envelope.data, key) }
+    const result = open<{ address?: string; publicKey?: string }>(envelope.data, key)
+    // Only after the AEAD open: identity read from the plaintext envelope
+    // could be forged into a return URL by anyone holding the request id.
+    this.followAccount(result)
+    return { method: pending.method, result }
   }
 
   // MARK: events
@@ -253,24 +273,53 @@ export class DeeplinkWalletAdapter {
   /**
    * Follow an account switch made in the wallet app.
    *
-   * A grant moves to whichever account the user selects there, so a response
-   * can come back from a different account than the one that connected. An app
-   * cannot reach into a browser tab to announce that, so every response states
-   * the account it acted as and the session is corrected here.
+   * A switch to an account that also approved this dApp is served silently as
+   * that account (extension parity), so a response can come back from a
+   * different account than the one that connected. An app cannot reach into a
+   * browser tab to announce that, so every sealed result states the account it
+   * was produced as and the session is corrected here.
    *
    * Without this the page keeps displaying the address it saw at connect while
    * the wallet signs as another one, which is worse than showing nothing: the
    * user reads one account and transacts from a different one.
    *
-   * Address and key move together. Half an identity would fail verification in
-   * a way that reads as a bad signature rather than a stale session.
+   * The identity comes from inside the AEAD, never from the plaintext
+   * envelope, so only the wallet can assert it. Address and key move together:
+   * half an identity would fail verification in a way that reads as a bad
+   * signature rather than a stale session.
    */
-  private followAccount(envelope: { address?: string; publicKey?: string }): void {
-    const { address, publicKey } = envelope
+  private followAccount(result: { address?: string; publicKey?: string }): void {
+    const { address, publicKey } = result
     if (!address || !publicKey) return
     const session = this.session
     if (!session?.account || session.account.address === address) return
     saveSession({ ...session, account: { ...session.account, address, publicKey } })
+    this.emitChange()
+  }
+
+  /**
+   * Forget a session the wallet has stopped honouring.
+   *
+   * ACCOUNT_CHANGED means the active account never approved this dApp, so
+   * nothing will be signed under this session until the user reconnects. The
+   * page keypair is kept: it is the identity the wallet's per-account grants
+   * are keyed by, and reconnecting under it is what lets a later switch back
+   * to a previously approved account be served silently instead of demanding
+   * another reconnect. The `emitChange` is what actually updates the UI, since
+   * the connect modal is driven by the standard change event rather than by
+   * the response.
+   */
+  private dropDeadSession(): void {
+    const session = this.session
+    if (session) {
+      saveSession({
+        walletId: session.walletId,
+        secretKeyHex: session.secretKeyHex,
+        publicKeyHex: session.publicKeyHex,
+      })
+    } else {
+      clearSession()
+    }
     this.emitChange()
   }
 
@@ -324,7 +373,12 @@ export class DeeplinkWalletAdapter {
             args: this.accountInfo(),
           } as unknown as UserResponse<never>
         }
-        const session = beginSession(this.wallet.id)
+        // Reuse the stored keypair when one exists: the page's key is its
+        // identity to the wallet, and per-account grants are keyed by it. A
+        // fresh key on every connect would make each reconnect a stranger, and
+        // a switch back to a previously approved account could never be served
+        // silently.
+        const session = this.session ?? beginSession(this.wallet.id)
         return this.navigate('connect', {
           appName: documentTitle(),
           appUrl: originOf(),
