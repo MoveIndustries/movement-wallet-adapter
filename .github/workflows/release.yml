@@ -42,7 +42,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Test wallet adapters
-        run: pnpm run test --filter=@moveindustries/wallet-adapter-keyless --filter=@moveindustries/wallet-adapter-passkey
+        run: pnpm run test --filter=@moveindustries/wallet-adapter-keyless --filter=@moveindustries/wallet-adapter-passkey --filter=@moveindustries/wallet-adapter-deeplink
 
       - name: Build global project
         env:

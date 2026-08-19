@@ -1,0 +1,13 @@
+/**
+ * Motion Wallet's logomark, inlined.
+ *
+ * The wallet-standard `icon` field must be a data URI: the connect modal
+ * renders it through an `<img>`, so a remote URL would leak that the modal was
+ * opened and leave a broken tile whenever the network is slow.
+ *
+ * Traced from `motion_wallet_Logomark.svg` in the extension repo, with the
+ * fill made explicit. The source has no fill, which paints black — invisible
+ * against the modal's dark wallet cards.
+ */
+export const MOTION_ICON_DATA_URI =
+  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cG9seWdvbiBmaWxsPSIjZmZmZmZmIiBwb2ludHM9IjQ5OC44NCwxNzQuODQgMzgzLjc5LDE3NC44NCAzNjEuOSwyMDAuOTkgNDEwLjk1LDIwMC45OSAzNjIuODcsMjU4LjI5IDMzNi4wNiwyNTguMjkgMjczLjY3LDMzMy42NSAyNzMuNywzMzMuNjUgMjcyLjI1LDMzNS40MSAzNjQuNjUsMzM1LjQxIDQ5Ny40MiwxNzYuNTkgNDk3LjM4LDE3Ni41OSIvPjxwb2x5Z29uIGZpbGw9IiNmZmZmZmYiIHBvaW50cz0iMzM5LjkxLDIyNy4xNSAzNTAuODgsMjE0LjA3IDM1MC44NiwyMTQuMDcgMzYxLjg0LDIwMC45OSAzMTQuMDcsMjAwLjk5IDMxNC4wOCwyMDAuOTcgMzAwLjA5LDIwMC45NyAzMDAuMDgsMjAwLjk5IDI1OC42OSwyMDAuOTkgMjQ3LjcyLDIxNC4wNyAyMzYuNzQsMjI3LjE1IDE1OC42NiwyMjcuMTUgMTE0LjYzLDI3OS42MiA2MS4zMiwyNzkuNjIgMTcuMywzMzIuMDggMTcuMzcsMzMyLjA4IDE0LjU4LDMzNS40MSA5Mi44NCwzMzUuNDEgMTM2Ljg2LDI4Mi45NCAxMzYuNzksMjgyLjk0IDEzOS41OCwyNzkuNjIgMTkyLjg5LDI3OS42MiAyMzYuOTIsMjI3LjE1IDI4NS44MSwyMjcuMTUgMjg1LjgyLDIyNy4xNCAyODUuOTksMjI3LjE0IDI4NS45OCwyMjcuMTUgMjQyLjEyLDI3OS40MiAyMDcuMzcsMjc5LjQyIDE2MC4wNSwzMzUuNDEgMTY2LjA0LDMzNS40MSAyMTkuNDIsMzM1LjQxIDIyNS40LDMzNS40MSAyMjYuMTcsMzM0LjUgMjI2LjIsMzM0LjUgMjYxLjQxLDI5Mi41NCAyODUuMDQsMjkyLjU0Ii8+PC9zdmc+' as const
