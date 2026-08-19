@@ -54,7 +54,10 @@ export const DEFAULT_WALLETS: DeeplinkWallet[] = [MOTION_WALLET]
 export function isMobileBrowser(): boolean {
   if (typeof navigator === 'undefined') return false
   const ua = navigator.userAgent || ''
-  if (/Android|iPhone|iPod/i.test(ua)) return true
+  // Literal "iPad" still appears in in-app WebViews and in Safari when the
+  // user requests the mobile site; desktop-mode iPad Safari says Macintosh
+  // and is caught below.
+  if (/Android|iPhone|iPad|iPod/i.test(ua)) return true
   // iPadOS reports as a Mac; the touch points are what give it away.
   return /Macintosh/i.test(ua) && typeof document !== 'undefined' && navigator.maxTouchPoints > 1
 }

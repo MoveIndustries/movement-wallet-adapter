@@ -37,7 +37,7 @@ describe('session storage', () => {
     const session = beginSession('movement-mobile-deeplink')
     expect(session.publicKeyHex).toMatch(/^[0-9a-f]{64}$/)
     expect(secretKeyOf(session)).toHaveLength(32)
-    expect(loadSession()?.walletId).toBe('movement-mobile-deeplink')
+    expect(loadSession('movement-mobile-deeplink')?.walletId).toBe('movement-mobile-deeplink')
   })
 
   it('rotates the keypair when a session is restarted', () => {
@@ -49,9 +49,48 @@ describe('session storage', () => {
   it('clears the pending request along with the session', () => {
     beginSession('w')
     savePending({ id: 'a', walletId: 'w', method: 'connect', returnTo: 'https://dapp.example/app' })
-    clearSession()
-    expect(loadSession()).toBeNull()
+    clearSession('w')
+    expect(loadSession('w')).toBeNull()
     expect(loadPending()).toBeNull()
+  })
+
+  it("keeps each wallet's session in its own slot", () => {
+    // A single shared slot let beginSession(B) destroy wallet A's secret key.
+    const a = beginSession('wallet-a')
+    beginSession('wallet-b')
+    expect(loadSession('wallet-a')?.publicKeyHex).toBe(a.publicKeyHex)
+    clearSession('wallet-b')
+    expect(loadSession('wallet-a')?.publicKeyHex).toBe(a.publicKeyHex)
+    expect(loadSession('wallet-b')).toBeNull()
+  })
+
+  it("leaves another wallet's pending request alone on clear", () => {
+    savePending({ id: 'a', walletId: 'other', method: 'sign_message', returnTo: 'x' })
+    beginSession('w')
+    clearSession('w')
+    expect(loadPending()?.walletId).toBe('other')
+  })
+
+  it('migrates a session stored before slots were keyed by wallet', () => {
+    const legacy = {
+      walletId: 'w',
+      secretKeyHex: 'aa'.repeat(32),
+      publicKeyHex: 'bb'.repeat(32),
+    }
+    localStorage.setItem('movement.deeplink.session.v1', JSON.stringify(legacy))
+    expect(loadSession('w')?.publicKeyHex).toBe(legacy.publicKeyHex)
+    // Moved, not copied: the shared slot is gone afterwards.
+    expect(localStorage.getItem('movement.deeplink.session.v1')).toBeNull()
+    expect(localStorage.getItem('movement.deeplink.session.v1.w')).not.toBeNull()
+  })
+
+  it("does not migrate another wallet's legacy session", () => {
+    localStorage.setItem(
+      'movement.deeplink.session.v1',
+      JSON.stringify({ walletId: 'other', secretKeyHex: 'aa', publicKeyHex: 'bb' }),
+    )
+    expect(loadSession('w')).toBeNull()
+    expect(localStorage.getItem('movement.deeplink.session.v1')).not.toBeNull()
   })
 })
 
@@ -112,6 +151,20 @@ describe('taking a response off the URL', () => {
     expect(url.searchParams.get(REQUEST_ID_PARAM)).toBeNull()
     // Unrelated query state belongs to the host app and must survive.
     expect(url.searchParams.get('keep')).toBe('1')
+  })
+
+  it('consumes an empty response value and says why', () => {
+    // `?response=` with no value used to return before the URL was stripped
+    // or a reason recorded — the silent-drop class this module documents.
+    const id = newRequestId()
+    savePending({ id, walletId: 'w', method: 'connect', returnTo: 'x' })
+    setUrl(`https://dapp.example/app?${RESPONSE_PARAM}=&${REQUEST_ID_PARAM}=${id}`)
+
+    const taken = takeResponseFromUrl('w')
+
+    expect(taken?.ok).toBe(false)
+    expect(taken?.ok === false && taken.reason).toMatch(/empty/)
+    expect(new URL(window.location.href).searchParams.get(RESPONSE_PARAM)).toBeNull()
   })
 
   it('consumes a stale response instead of leaving it to re-fire', () => {

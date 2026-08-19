@@ -84,6 +84,42 @@ a typed reason on `adapter.lastIgnoredResponse` rather than failing silently.
 The session lives in `localStorage`, not `sessionStorage`: the wallet often
 returns into a **new tab**, and a per-tab store would drop a valid response.
 
+### Reconnecting after the round trip
+
+The page that receives an approved connect is not connected in
+wallet-adapter-core's eyes: core's connected state was in-memory only, and the
+page that held it unloaded. The adapter bridges this by writing core's `MovementWalletName`
+localStorage key when it consumes an approved connect, so a host using
+`autoConnect` resumes the session with no user action — the adapter serves that
+reconnect from its stored session without leaving the page. A host not using
+`autoConnect` should call `connect()` again after seeing
+`lastConsumedResponse?.method === 'connect'`; the same stored session serves it
+instantly.
+
+A hand-off that never happens cannot settle by page unload, so `connect()` (and
+every signing call) also rejects on its own: after ~30 seconds if the page
+never lost visibility (the user dismissed the "Open in …?" sheet), or shortly
+after the page becomes visible again without a response arriving (the user came
+back by switching apps). Core's `connecting`/`isLoading` state recovers instead
+of staying set forever.
+
+### Inputs the wire cannot carry
+
+The wire format is fixed by the installed wallet app, so inputs it cannot
+express are **refused in the page**, before the user is sent anywhere, rather
+than silently narrowed:
+
+- `signAndSubmitTransaction` with `gasUnitPrice`/`maxGasAmount` (the wallet
+  estimates gas itself), or with script/multisig payloads.
+- `signMessage` with the `address`/`application`/`chainId` binding flags — a
+  signature produced without a requested binding would look valid while
+  carrying none of the anti-replay the dApp asked for.
+- `signTransaction` as a fee payer.
+
+SDK argument classes (`AccountAddress`, `U64`, `Bool`, `MoveString`,
+`MoveVector`, …) in `functionArguments` are unwrapped and sent, matching what
+extension adapters accept.
+
 ## Two things to know before integrating
 
 **Connect is trust on first use.** The dApp learns the wallet's X25519 public
@@ -133,7 +169,7 @@ the wallet is the symptom of verification not being in place.
 | Export | Purpose |
 | --- | --- |
 | `registerDeeplinkWallets(options?)` | Registers the wallets, when the environment can reach one. Returns the adapters, empty otherwise. |
-| `DeeplinkWalletAdapter` | The wallet-standard adapter. `supports(method)`, `supportedMethods`, `lastIgnoredResponse`. |
+| `DeeplinkWalletAdapter` | The wallet-standard adapter. `supports(method)`, `supportedMethods`, `lastConsumedResponse`, `lastIgnoredResponse`, `disconnectReason`. |
 | `DEFAULT_WALLETS`, `MOTION_WALLET` | The built-in wallet table, and the single entry in it. |
 | `isMobileBrowser()` | Whether a deeplink can go anywhere from here. Detects a phone, not a wallet. |
 | `DeeplinkWallet`, `ConnectData`, `Method` | Types. |

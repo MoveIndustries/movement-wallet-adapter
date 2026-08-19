@@ -161,8 +161,7 @@ export class DeeplinkWalletAdapter {
   // MARK: session
 
   private get session(): StoredSession | null {
-    const s = loadSession()
-    return s && s.walletId === this.wallet.id ? s : null
+    return loadSession(this.wallet.id)
   }
 
   private get account(): ConnectData | null {
@@ -270,13 +269,40 @@ export class DeeplinkWalletAdapter {
     const target = `${this.wallet.baseUrl}${method}?data=${encodeURIComponent(data)}`
 
     return new Promise<never>((_resolve, reject) => {
+      // The promise settles by page unload when the handoff works. When it
+      // does not — the user cancels the "Open in …?" sheet, or comes back to
+      // this same document without a response — nothing would ever settle it,
+      // and wallet-adapter-core would report `connecting` forever. Two exits
+      // cover those cases; a real response always arrives as a new page load,
+      // which makes both moot.
+      const fail = (message: string) => {
+        clearTimeout(handoffTimer)
+        document.removeEventListener('visibilitychange', onVisibility)
+        reject(new Error(message))
+      }
+      let leftPage = document.visibilityState === 'hidden'
+      const onVisibility = () => {
+        if (document.visibilityState === 'hidden') {
+          leftPage = true
+          clearTimeout(handoffTimer)
+          return
+        }
+        // Back without a navigation. The grace period lets a same-tab return
+        // that IS carrying a response win by unloading this document first.
+        if (leftPage) setTimeout(() => fail('Returned from the wallet without a response.'), 2000)
+      }
+      document.addEventListener('visibilitychange', onVisibility)
+      // Still visible after this long means the handoff never happened.
+      const handoffTimer = setTimeout(() => {
+        if (!leftPage) fail('The wallet app did not open.')
+      }, 30_000)
       // Assigning `location` synchronously inside the click handler matters:
       // iOS drops universal links from navigations it cannot attribute to a
       // user gesture, and an await before this point loses that attribution.
       try {
         host.location.href = target
       } catch (error) {
-        reject(error instanceof Error ? error : new Error(String(error)))
+        fail(messageOf(error))
       }
     })
   }
@@ -327,7 +353,12 @@ export class DeeplinkWalletAdapter {
       const envelope = decodeResponse<ConnectResponseEnvelope>(encoded)
       if (!envelope.approved) return { method: 'connect', result: null }
       const session = this.session
-      if (!session) return null
+      if (!session) {
+        // The response was consumed either way, so leaving no trace here is
+        // the silent-drop class this file exists to avoid.
+        this.lastIgnoredResponse = 'connect response arrived with no session in storage'
+        return null
+      }
 
       const key = sharedKey(secretKeyOf(session), envelope.walletEncryptionPublicKey)
       const account = envelope.data ? open<ConnectData>(envelope.data, key) : null
@@ -340,6 +371,11 @@ export class DeeplinkWalletAdapter {
         walletPublicKeyHex: envelope.walletEncryptionPublicKey,
         account,
       })
+      // The connect promise settled by page unload, so wallet-adapter-core
+      // never reached its own setLocalStorage — the write that makes
+      // autoConnect work. Written here instead, under core's key, so the host
+      // page that receives this response reconnects without user action.
+      rememberWalletNameForAutoConnect(this.wallet.name)
       this.disconnectReason = null
       this.emitChange()
       return { method: 'connect', result: account }
@@ -347,11 +383,24 @@ export class DeeplinkWalletAdapter {
 
     const envelope = decodeResponse<ApprovedPayload>(encoded)
     if (!envelope.approved || !envelope.data) {
-      if (envelope.code === ACCOUNT_CHANGED) this.dropDeadSession()
+      // The code is plaintext and therefore forgeable by anyone holding the
+      // request id (it reaches the wallet's web server whenever the app is
+      // not installed to intercept the link). Honouring it only for an
+      // established channel closes the widest leak — the connect that ran
+      // against the fallback page — and the drop itself stays recoverable:
+      // the keypair survives (see dropDeadSession), so the worst a forgery
+      // achieves is a reconnect prompt. The full fix is the wallet sealing
+      // the reason, which needs a wallet-app change.
+      if (envelope.code === ACCOUNT_CHANGED && this.session?.walletPublicKeyHex) {
+        this.dropDeadSession()
+      }
       return { method: pending.method, result: null }
     }
     const session = this.session
-    if (!session?.walletPublicKeyHex) return null
+    if (!session?.walletPublicKeyHex) {
+      this.lastIgnoredResponse = `${pending.method} response arrived but no connected session holds its key`
+      return null
+    }
     const key = sharedKey(secretKeyOf(session), session.walletPublicKeyHex)
     const result = open<{ address?: string; publicKey?: string }>(envelope.data, key)
     // Only after the AEAD open: identity read from the plaintext envelope
@@ -415,7 +464,7 @@ export class DeeplinkWalletAdapter {
           session.walletPublicKeyHex ?? session.previousWalletPublicKeyHex,
       })
     } else {
-      clearSession()
+      clearSession(this.wallet.id)
     }
     this.disconnectReason = 'account-changed'
     this.emitChange()
@@ -464,12 +513,29 @@ export class DeeplinkWalletAdapter {
       connect: async () => {
         // An already-live session skips the round trip: re-connecting would
         // rotate our keypair and orphan the wallet's stored session.
-        const existing = this.account
-        if (existing) {
-          return {
-            status: UserResponseStatus.APPROVED,
-            args: this.accountInfo(),
-          } as unknown as UserResponse<never>
+        if (this.account) {
+          const info = this.accountInfo()
+          if (info) {
+            return {
+              status: UserResponseStatus.APPROVED,
+              args: info,
+            } as unknown as UserResponse<never>
+          }
+          // The stored account is unreadable. Approving with no account would
+          // strand the core in a connected-but-accountless state it can never
+          // leave (retrying connect lands back here). Shed the broken account
+          // and fall through to a real connect; the keypair and channel key
+          // survive so the wallet can serve it silently via the proof.
+          const broken = this.session
+          if (broken) {
+            saveSession({
+              walletId: broken.walletId,
+              secretKeyHex: broken.secretKeyHex,
+              publicKeyHex: broken.publicKeyHex,
+              previousWalletPublicKeyHex:
+                broken.walletPublicKeyHex ?? broken.previousWalletPublicKeyHex,
+            })
+          }
         }
         // Reuse the stored keypair when one exists: the page's key is its
         // identity to the wallet, and per-account grants are keyed by it. A
@@ -503,7 +569,7 @@ export class DeeplinkWalletAdapter {
         // revokes it there. That is a stale entry in a list, not a live
         // permission: a request from us would need our session key, which is
         // gone.
-        clearSession()
+        clearSession(this.wallet.id)
         this.disconnectReason = null
         this.emitChange()
       },
@@ -528,7 +594,22 @@ export class DeeplinkWalletAdapter {
 
     'movement:signMessage': {
       version: '1.0.0',
-      signMessage: async (input: { message: string; nonce: string }) => {
+      signMessage: async (input: {
+        message: string
+        nonce: string
+        address?: boolean
+        application?: boolean
+        chainId?: boolean
+      }) => {
+        // The wire seals {message, nonce} and nothing else. Signing without a
+        // binding the dApp asked for would hand it a signature whose
+        // anti-replay properties it believes in but does not have — refuse in
+        // the page, like every other input the wire cannot express.
+        if (input.address || input.application || input.chainId) {
+          throw new Error(
+            'Message binding flags (address, application, chainId) are not supported over the deeplink transport. Include that data in the message itself, or sign without the flags.',
+          )
+        }
         const { session, key } = this.requireSession()
         return this.navigate('sign_message', {
           dappEncryptionPublicKey: session.publicKeyHex,
@@ -578,9 +659,20 @@ export class DeeplinkWalletAdapter {
           multisigAddress?: unknown
           bytecode?: unknown
         }
+        gasUnitPrice?: number
+        maxGasAmount?: number
       }) => {
         const { session, key } = this.requireSession()
         const { payload } = input
+        // The wire carries the entry-function descriptor and nothing about
+        // gas; the wallet estimates it. Submitting with different gas
+        // settings than the dApp specified would be a silent change to the
+        // transaction — refuse in the page instead.
+        if (input.gasUnitPrice !== undefined || input.maxGasAmount !== undefined) {
+          throw new Error(
+            'Custom gas settings (gasUnitPrice, maxGasAmount) are not supported over the deeplink transport; the wallet estimates gas itself. Omit them, or build the transaction and use signTransaction.',
+          )
+        }
         // The wire's payload is an entry-function descriptor and nothing else.
         // Script and multisig payloads cannot be expressed on it, and sealing
         // a stripped version would submit a different transaction than the
@@ -633,23 +725,72 @@ export class DeeplinkWalletAdapter {
  * Numbers must reach the wallet as strings, nested vectors keep their shape,
  * and byte buffers become per-byte strings (a `vector<u8>` on the wire).
  *
- * Anything else object-shaped is refused here, in the page: JSON would turn an
- * SDK class instance or a typed buffer into index-keyed garbage the wallet
- * rejects only after the user was already sent out to the app.
+ * The SDK's argument classes are unwrapped rather than refused — extension
+ * adapters accept them, so dApps pass them without thinking about the
+ * transport. `AccountAddress` prints canonically; the primitive wrappers
+ * (U8…U256, Bool, MoveString) expose their value on `.value` and vectors on
+ * `.values`, which is matched structurally to avoid importing every class.
+ *
+ * Anything else object-shaped is refused here, in the page: JSON would turn it
+ * into index-keyed garbage the wallet rejects only after the user was already
+ * sent out to the app.
  */
 function stringifyArg(value: unknown): unknown {
   if (value instanceof Uint8Array) return Array.from(value, String)
   if (value instanceof ArrayBuffer) return Array.from(new Uint8Array(value), String)
   if (Array.isArray(value)) return value.map(stringifyArg)
+  // instanceof plus a structural fallback: a dApp holding a second physical
+  // copy of the SDK (pnpm keys them by peers) passes an AccountAddress this
+  // module's class cannot recognise. toStringLong is unique to it.
+  if (
+    value instanceof AccountAddress ||
+    (value !== null &&
+      typeof value === 'object' &&
+      typeof (value as { toStringLong?: unknown }).toStringLong === 'function')
+  ) {
+    return String(value)
+  }
   if (typeof value === 'number' || typeof value === 'bigint') return value.toString()
   if (typeof value === 'string' || typeof value === 'boolean') return value
+  if (value !== null && typeof value === 'object') {
+    if ('values' in value && Array.isArray((value as { values: unknown }).values)) {
+      return (value as { values: unknown[] }).values.map(stringifyArg)
+    }
+    if ('value' in value) {
+      const inner = (value as { value: unknown }).value
+      if (
+        typeof inner === 'string' ||
+        typeof inner === 'number' ||
+        typeof inner === 'bigint' ||
+        typeof inner === 'boolean'
+      ) {
+        return stringifyArg(inner)
+      }
+    }
+  }
   throw new Error(
-    'Unsupported transaction argument: pass plain values (strings, numbers, booleans, arrays, byte arrays), not SDK class instances.',
+    'Unsupported transaction argument: pass plain values (strings, numbers, booleans, arrays, byte arrays) or SDK argument types (AccountAddress, U64, Bool, MoveString, MoveVector).',
   )
 }
 
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : String(error)
+}
+
+/**
+ * wallet-adapter-core's autoConnect key, written directly because core's own
+ * write (`setLocalStorage` in `connectWallet`) sits after an await on the
+ * connect feature — a point this transport reaches only by unloading the page.
+ * A deliberate seam with core: the key name is core's public localStorage
+ * contract, and this is the only place outside core that touches it.
+ */
+function rememberWalletNameForAutoConnect(walletName: string): void {
+  try {
+    localStorage.setItem('MovementWalletName', walletName)
+  } catch {
+    // Storage can be blocked in embedded browsers; autoConnect just won't
+    // trigger, which is the pre-existing behaviour.
+  }
 }
 
 function documentTitle(): string {

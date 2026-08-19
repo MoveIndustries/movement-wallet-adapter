@@ -20,8 +20,19 @@ import { generateKeyPair } from './protocol.js'
  * matters more than it otherwise would.
  */
 
-const STORAGE_KEY = 'movement.deeplink.session.v1'
+/**
+ * Sessions are keyed by wallet id. A single shared slot would let
+ * `beginSession(B)` silently destroy wallet A's secret key — reachable as soon
+ * as `options.wallets` registers a second wallet. The unsuffixed v1 key is the
+ * old shared slot; `loadSession` migrates it so existing sessions survive.
+ */
+const STORAGE_KEY_PREFIX = 'movement.deeplink.session.v1'
+const LEGACY_STORAGE_KEY = STORAGE_KEY_PREFIX
 const PENDING_KEY = 'movement.deeplink.pending.v1'
+
+function storageKeyFor(walletId: string): string {
+  return `${STORAGE_KEY_PREFIX}.${walletId}`
+}
 
 /** Query parameters the wallet appends when it returns. */
 export const RESPONSE_PARAM = 'response'
@@ -105,17 +116,30 @@ function remove(key: string): void {
   storage()?.removeItem(key)
 }
 
-export function loadSession(): StoredSession | null {
-  return read<StoredSession>(STORAGE_KEY)
+export function loadSession(walletId: string): StoredSession | null {
+  const keyed = read<StoredSession>(storageKeyFor(walletId))
+  if (keyed) return keyed
+  // A session written before storage was keyed by wallet id. Move it to its
+  // own slot; a legacy session belonging to another wallet is left alone.
+  const legacy = read<StoredSession>(LEGACY_STORAGE_KEY)
+  if (legacy?.walletId !== walletId) return null
+  write(storageKeyFor(walletId), legacy)
+  remove(LEGACY_STORAGE_KEY)
+  return legacy
 }
 
 export function saveSession(session: StoredSession): void {
-  write(STORAGE_KEY, session)
+  write(storageKeyFor(session.walletId), session)
 }
 
-export function clearSession(): void {
-  remove(STORAGE_KEY)
-  remove(PENDING_KEY)
+export function clearSession(walletId: string): void {
+  remove(storageKeyFor(walletId))
+  if (read<StoredSession>(LEGACY_STORAGE_KEY)?.walletId === walletId) {
+    remove(LEGACY_STORAGE_KEY)
+  }
+  // Only this wallet's in-flight request; another adapter's pending round trip
+  // must survive a disconnect here.
+  if (loadPending()?.walletId === walletId) remove(PENDING_KEY)
 }
 
 /** Starts a session with a fresh keypair, discarding any previous one. */
@@ -177,7 +201,7 @@ export function takeResponseFromUrl(walletId: string): TakenResponse | null {
   const url = new URL(host.location.href)
   const encoded = url.searchParams.get(RESPONSE_PARAM)
   const requestId = url.searchParams.get(REQUEST_ID_PARAM)
-  if (!encoded) return null
+  if (encoded === null) return null
 
   const pending = loadPending()
   // A live response addressed to another wallet is left untouched, URL and
@@ -193,6 +217,7 @@ export function takeResponseFromUrl(walletId: string): TakenResponse | null {
   // Each mismatch gets its own reason. Dropping a response silently is what
   // made this class of bug expensive to diagnose: the user approves, comes
   // back, and the page simply looks like nothing happened.
+  if (encoded === '') return { ok: false, reason: 'response parameter was empty' }
   if (!requestId) return { ok: false, reason: 'response carried no request id' }
   if (!pending) return { ok: false, reason: 'no pending request found in storage' }
   if (pending.id !== requestId) {
