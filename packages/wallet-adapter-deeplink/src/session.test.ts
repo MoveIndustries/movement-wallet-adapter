@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   beginSession,
+  buildRedirectUrl,
   clearSession,
   loadPending,
   loadSession,
@@ -113,6 +114,23 @@ describe('taking a response off the URL', () => {
     expect(taken?.ok).toBe(true)
     expect(taken?.ok && taken.encoded).toBe('abc')
     expect(taken?.ok && taken.pending.method).toBe('connect')
+  })
+
+  it('reads the newest response when stale ones survived on the URL', () => {
+    // The strip in this module runs before the host framework hydrates, and a
+    // framework restoring its own URL afterwards resurrects spent responses.
+    // The wallet appends its answer, so the live one is always last.
+    const id = newRequestId()
+    savePending({ id, walletId: 'w', method: 'connect', returnTo: 'https://dapp.example/app' })
+    setUrl(
+      `https://dapp.example/app?${RESPONSE_PARAM}=stale1&${RESPONSE_PARAM}=stale2&${REQUEST_ID_PARAM}=${id}&${RESPONSE_PARAM}=live`,
+    )
+
+    const taken = takeResponseFromUrl('w')
+    expect(taken?.ok).toBe(true)
+    expect(taken?.ok && taken.encoded).toBe('live')
+    // Every copy is spent now, stale ones included.
+    expect(new URL(window.location.href).searchParams.getAll(RESPONSE_PARAM)).toEqual([])
   })
 
   it('ignores a response whose id does not match, and says why', () => {
@@ -260,5 +278,23 @@ describe('framed hosts', () => {
       },
     })
     expect(takeResponseFromUrl('w')).toBeNull()
+  })
+})
+
+describe('building the redirect URL', () => {
+  it('sets the request id and keeps the host app query state', () => {
+    const redirect = new URL(buildRedirectUrl('https://dapp.example/app?keep=1', 'id1'))
+    expect(redirect.searchParams.get(REQUEST_ID_PARAM)).toBe('id1')
+    expect(redirect.searchParams.get('keep')).toBe('1')
+  })
+
+  it('strips surviving responses so they cannot compound', () => {
+    // The wallet appends its answer to this URL, so a spent response that a
+    // host framework resurrected would otherwise return once per round trip,
+    // forever, with the oldest in front.
+    const href = `https://dapp.example/app?${RESPONSE_PARAM}=stale&${REQUEST_ID_PARAM}=old&${RESPONSE_PARAM}=staler`
+    const redirect = new URL(buildRedirectUrl(href, 'fresh'))
+    expect(redirect.searchParams.getAll(RESPONSE_PARAM)).toEqual([])
+    expect(redirect.searchParams.get(REQUEST_ID_PARAM)).toBe('fresh')
   })
 })

@@ -40,6 +40,7 @@ import {
 } from './protocol.js'
 import {
   beginSession,
+  buildRedirectUrl,
   clearSession,
   loadSession,
   newRequestId,
@@ -48,7 +49,6 @@ import {
   secretKeyOf,
   takeResponseFromUrl,
   hostWindow,
-  REQUEST_ID_PARAM,
   type StoredSession,
 } from './session.js'
 import type { DeeplinkWallet } from './wallets.js'
@@ -251,8 +251,7 @@ export class DeeplinkWalletAdapter {
       )
     }
     const requestId = newRequestId()
-    const redirect = new URL(host.location.href)
-    redirect.searchParams.set(REQUEST_ID_PARAM, requestId)
+    const redirect = buildRedirectUrl(host.location.href, requestId)
 
     savePending({
       id: requestId,
@@ -263,8 +262,8 @@ export class DeeplinkWalletAdapter {
 
     const data = encodeRequest({
       ...payload,
-      redirect: redirect.toString(),
-      ...(proofKey ? { proof: seal({ redirect: redirect.toString() }, proofKey) } : {}),
+      redirect,
+      ...(proofKey ? { proof: seal({ redirect }, proofKey) } : {}),
     })
     const target = `${this.wallet.baseUrl}${method}?data=${encodeURIComponent(data)}`
 
