@@ -183,6 +183,21 @@ export function newRequestId(): string {
 }
 
 /**
+ * The URL a request asks the wallet to return to.
+ *
+ * Built from the page's own URL, scrubbed of any earlier response: the cleanup
+ * in `takeResponseFromUrl` can be reverted by a host framework that restores
+ * its own URL after hydration, and the wallet appends its answer to this URL,
+ * so a response left in place would come back again and compound.
+ */
+export function buildRedirectUrl(href: string, requestId: string): string {
+  const url = new URL(href)
+  url.searchParams.delete(RESPONSE_PARAM)
+  url.searchParams.set(REQUEST_ID_PARAM, requestId)
+  return url.toString()
+}
+
+/**
  * Pulls a wallet response off the current URL, if one is there and it matches
  * the request we sent, on behalf of `walletId`.
  *
@@ -199,7 +214,10 @@ export function takeResponseFromUrl(walletId: string): TakenResponse | null {
   const host = hostWindow()
   if (!host) return null
   const url = new URL(host.location.href)
-  const encoded = url.searchParams.get(RESPONSE_PARAM)
+  // The wallet appends its response, so when stale ones survived a reverted
+  // cleanup (a host framework restoring its own URL after hydration), the
+  // live answer is the last parameter, not the first.
+  const encoded = url.searchParams.getAll(RESPONSE_PARAM).at(-1) ?? null
   const requestId = url.searchParams.get(REQUEST_ID_PARAM)
   if (encoded === null) return null
 
