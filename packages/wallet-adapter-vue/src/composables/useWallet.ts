@@ -15,6 +15,12 @@ import {
   AvailableWallets,
   WalletCore,
   WalletCoreEvents,
+  ConfidentialBalance,
+  ConfidentialTransferInput,
+  ConfidentialWriteOptions,
+  ConfidentialWriteResult,
+  PublishedVaultEnvelopeKey,
+  VaultEnvelopeRecipient,
 } from "@moveindustries/wallet-adapter-core";
 import {
   ref,
@@ -52,6 +58,36 @@ export interface WalletContextState {
   signMessage(message: MovementSignMessageInput): Promise<MovementSignMessageOutput>;
   signMessageAndVerify(message: MovementSignMessageInput): Promise<boolean>;
   changeNetwork(network: Network): Promise<MovementChangeNetworkOutput>;
+  supportsConfidentialAssets(): boolean;
+  confidentialGetBalances(tokens: string[]): Promise<{ balances: ConfidentialBalance[] }>;
+  confidentialIsRegistered(input: { token: string }): Promise<{ registered: boolean }>;
+  confidentialGetEncryptionKey(input: {
+    token: string;
+  }): Promise<{ encryptionKey: string | null }>;
+  confidentialGetGlobalAuditor(): Promise<{ auditorEncryptionKey?: string }>;
+  confidentialGetAuditor(input: { token: string }): Promise<{ auditorEncryptionKey?: string }>;
+  confidentialTransfer(input: ConfidentialTransferInput): Promise<ConfidentialWriteResult>;
+  confidentialRegister(
+    input: { token: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialDeposit(
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialWithdraw(
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialRolloverPending(
+    input: { token: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialPublishVaultEnvelopeKey(): Promise<PublishedVaultEnvelopeKey>;
+  confidentialSealVaultDk(input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }): Promise<{ envelopeHex: string }>;
+  confidentialOpenVaultDk(input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }): Promise<{ ok: boolean }>;
 }
 
 export interface MovementWalletProviderProps {
@@ -201,6 +237,139 @@ export function useWallet(
   const changeNetwork = async (network: Network) => {
     try {
       return await walletCoreInstance.changeNetwork(network);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const supportsConfidentialAssets = (): boolean => {
+    return walletCoreInstance?.supportsConfidentialAssets() ?? false;
+  };
+
+  const confidentialGetBalances = async (tokens: string[]) => {
+    try {
+      return await walletCoreInstance.confidentialGetBalances(tokens);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialIsRegistered = async (input: { token: string }) => {
+    try {
+      return await walletCoreInstance.confidentialIsRegistered(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetEncryptionKey = async (input: { token: string }) => {
+    try {
+      return await walletCoreInstance.confidentialGetEncryptionKey(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetGlobalAuditor = async () => {
+    try {
+      return await walletCoreInstance.confidentialGetGlobalAuditor();
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialGetAuditor = async (input: { token: string }) => {
+    try {
+      return await walletCoreInstance.confidentialGetAuditor(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialTransfer = async (input: ConfidentialTransferInput) => {
+    try {
+      return await walletCoreInstance.confidentialTransfer(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialRegister = async (input: { token: string } & ConfidentialWriteOptions) => {
+    try {
+      return await walletCoreInstance.confidentialRegister(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialDeposit = async (
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ) => {
+    try {
+      return await walletCoreInstance.confidentialDeposit(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialWithdraw = async (
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ) => {
+    try {
+      return await walletCoreInstance.confidentialWithdraw(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialRolloverPending = async (
+    input: { token: string } & ConfidentialWriteOptions,
+  ) => {
+    try {
+      return await walletCoreInstance.confidentialRolloverPending(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialPublishVaultEnvelopeKey = async () => {
+    try {
+      return await walletCoreInstance.confidentialPublishVaultEnvelopeKey();
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialSealVaultDk = async (input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }) => {
+    try {
+      return await walletCoreInstance.confidentialSealVaultDk(input);
+    } catch (error: any) {
+      if (onError) onError(error);
+      return Promise.reject(error);
+    }
+  };
+
+  const confidentialOpenVaultDk = async (input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }) => {
+    try {
+      return await walletCoreInstance.confidentialOpenVaultDk(input);
     } catch (error: any) {
       if (onError) onError(error);
       return Promise.reject(error);
@@ -393,5 +562,19 @@ export function useWallet(
     signMessage,
     signMessageAndVerify,
     changeNetwork,
+    supportsConfidentialAssets,
+    confidentialGetBalances,
+    confidentialIsRegistered,
+    confidentialGetEncryptionKey,
+    confidentialGetGlobalAuditor,
+    confidentialGetAuditor,
+    confidentialTransfer,
+    confidentialRegister,
+    confidentialDeposit,
+    confidentialWithdraw,
+    confidentialRolloverPending,
+    confidentialPublishVaultEnvelopeKey,
+    confidentialSealVaultDk,
+    confidentialOpenVaultDk,
   };
 }

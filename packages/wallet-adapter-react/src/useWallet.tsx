@@ -16,6 +16,12 @@ import {
   InputSubmitTransactionData,
   MovementSignInInput,
   MovementSignInOutput,
+  ConfidentialBalance,
+  ConfidentialTransferInput,
+  ConfidentialWriteOptions,
+  ConfidentialWriteResult,
+  PublishedVaultEnvelopeKey,
+  VaultEnvelopeRecipient,
 } from "@moveindustries/wallet-adapter-core";
 
 export interface WalletContextState {
@@ -46,6 +52,36 @@ export interface WalletContextState {
     transaction: InputSubmitTransactionData,
   ): Promise<PendingTransactionResponse>;
   refetchMnsName(): Promise<void>;
+  supportsConfidentialAssets(): boolean;
+  confidentialGetBalances(tokens: string[]): Promise<{ balances: ConfidentialBalance[] }>;
+  confidentialIsRegistered(input: { token: string }): Promise<{ registered: boolean }>;
+  confidentialGetEncryptionKey(input: {
+    token: string;
+  }): Promise<{ encryptionKey: string | null }>;
+  confidentialGetGlobalAuditor(): Promise<{ auditorEncryptionKey?: string }>;
+  confidentialGetAuditor(input: { token: string }): Promise<{ auditorEncryptionKey?: string }>;
+  confidentialTransfer(input: ConfidentialTransferInput): Promise<ConfidentialWriteResult>;
+  confidentialRegister(
+    input: { token: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialDeposit(
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialWithdraw(
+    input: { token: string; amount: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialRolloverPending(
+    input: { token: string } & ConfidentialWriteOptions,
+  ): Promise<ConfidentialWriteResult>;
+  confidentialPublishVaultEnvelopeKey(): Promise<PublishedVaultEnvelopeKey>;
+  confidentialSealVaultDk(input: {
+    multisigAddress: string;
+    recipients: VaultEnvelopeRecipient[];
+  }): Promise<{ envelopeHex: string }>;
+  confidentialOpenVaultDk(input: {
+    multisigAddress: string;
+    envelopeHex: string;
+  }): Promise<{ ok: boolean }>;
   wallet: AdapterWallet | null;
   wallets: ReadonlyArray<AdapterWallet>;
   notDetectedWallets: ReadonlyArray<AdapterNotDetectedWallet>;
