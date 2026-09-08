@@ -40,7 +40,7 @@
   "dependencies": {
     "gh-pages": "^6.3.0"
   },
-  "packageManager": "pnpm@9.15.5",
+  "packageManager": "pnpm@10.33.0",
   "pnpm": {
     "overrides": {
       "@moveindustries/wallet-standard": "^0.6.0",
