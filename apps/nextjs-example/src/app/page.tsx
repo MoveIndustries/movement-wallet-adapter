@@ -1,5 +1,8 @@
 "use client";
 
+// antd v5 renders static methods such as message.success with the legacy
+// ReactDOM.render API, which React 19 removed. This patch must load before antd.
+import "@ant-design/v5-patch-for-react-19";
 import { useAutoConnect } from "@/components/AutoConnectProvider";
 import { DisplayValue, LabelValueGrid } from "@/components/LabelValueGrid";
 import { ThemeToggle } from "@/components/ThemeToggle";

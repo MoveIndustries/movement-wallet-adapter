@@ -45,10 +45,10 @@
   },
   "devDependencies": {
     "@moveindustries/wallet-adapter-tsconfig": "workspace:*",
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "eslint": "^8.57.1",
-    "tsup": "^8.4.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.8.3"
   },
   "dependencies": {
