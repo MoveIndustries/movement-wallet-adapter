@@ -247,6 +247,29 @@ describe('consuming responses', () => {
     expect(localStorage.getItem('MovementWalletName')).toBe(WALLET.name)
   })
 
+  it('carries a rejection reason for the host app to display', () => {
+    // The wallet refuses before approval (a failed simulation, say) and puts
+    // why in the plaintext envelope. Without this the page shows nothing and
+    // the refusal is indistinguishable from never having come back.
+    saveSession({
+      walletId: WALLET.id,
+      secretKeyHex: bytesToHex(dapp.secretKey),
+      publicKeyHex: dapp.publicKeyHex,
+    })
+    respondWith('sign_message', {
+      approved: false,
+      error: 'Transaction would fail: insufficient balance',
+    })
+
+    const adapter = new DeeplinkWalletAdapter(WALLET)
+    adapter.consumeResponse()
+
+    expect(adapter.lastConsumedResponse?.result).toBeNull()
+    expect(adapter.lastConsumedResponse?.error).toBe(
+      'Transaction would fail: insufficient balance',
+    )
+  })
+
   it('ignores a forged ACCOUNT_CHANGED when no channel was established', () => {
     // The envelope is plaintext: anyone holding the request id could send
     // this. Without an established channel there is nothing it may drop.

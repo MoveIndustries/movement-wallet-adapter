@@ -40,6 +40,7 @@ import {
 } from './protocol.js'
 import {
   beginSession,
+  buildRedirectUrl,
   clearSession,
   loadSession,
   newRequestId,
@@ -48,7 +49,6 @@ import {
   secretKeyOf,
   takeResponseFromUrl,
   hostWindow,
-  REQUEST_ID_PARAM,
   type StoredSession,
 } from './session.js'
 import type { DeeplinkWallet } from './wallets.js'
@@ -148,7 +148,7 @@ export class DeeplinkWalletAdapter {
    * promise that made the request settled in a page that no longer exists;
    * this is where its answer lands instead.
    */
-  lastConsumedResponse: { method: Method; result: unknown } | null = null
+  lastConsumedResponse: { method: Method; result: unknown; error?: string } | null = null
 
   constructor(wallet: DeeplinkWallet) {
     this.wallet = wallet
@@ -251,8 +251,7 @@ export class DeeplinkWalletAdapter {
       )
     }
     const requestId = newRequestId()
-    const redirect = new URL(host.location.href)
-    redirect.searchParams.set(REQUEST_ID_PARAM, requestId)
+    const redirect = buildRedirectUrl(host.location.href, requestId)
 
     savePending({
       id: requestId,
@@ -263,8 +262,8 @@ export class DeeplinkWalletAdapter {
 
     const data = encodeRequest({
       ...payload,
-      redirect: redirect.toString(),
-      ...(proofKey ? { proof: seal({ redirect: redirect.toString() }, proofKey) } : {}),
+      redirect,
+      ...(proofKey ? { proof: seal({ redirect }, proofKey) } : {}),
     })
     const target = `${this.wallet.baseUrl}${method}?data=${encodeURIComponent(data)}`
 
@@ -314,7 +313,7 @@ export class DeeplinkWalletAdapter {
    * fresh load of the page that asked. Returns what it handled so a host app
    * can react; returns null when there is nothing for this wallet.
    */
-  consumeResponse(): { method: Method; result: unknown } | null {
+  consumeResponse(): { method: Method; result: unknown; error?: string } | null {
     // Addressed by wallet id inside the take, before anything is consumed: a
     // response for another registered wallet must survive for that adapter's
     // own consumeResponse call.
@@ -348,10 +347,10 @@ export class DeeplinkWalletAdapter {
   private applyResponse(
     encoded: string,
     pending: { method: Method },
-  ): { method: Method; result: unknown } | null {
+  ): { method: Method; result: unknown; error?: string } | null {
     if (pending.method === 'connect') {
       const envelope = decodeResponse<ConnectResponseEnvelope>(encoded)
-      if (!envelope.approved) return { method: 'connect', result: null }
+      if (!envelope.approved) return { method: 'connect', result: null, error: envelope.error }
       const session = this.session
       if (!session) {
         // The response was consumed either way, so leaving no trace here is
@@ -394,7 +393,10 @@ export class DeeplinkWalletAdapter {
       if (envelope.code === ACCOUNT_CHANGED && this.session?.walletPublicKeyHex) {
         this.dropDeadSession()
       }
-      return { method: pending.method, result: null }
+      // `error` travels in plaintext and is forgeable by anyone holding the
+      // request id, same as `code` above — so it is carried for DISPLAY only.
+      // A host app may show it to the user; it must never branch on it.
+      return { method: pending.method, result: null, error: envelope.error }
     }
     const session = this.session
     if (!session?.walletPublicKeyHex) {
